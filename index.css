@@ -13,10 +13,10 @@
 
 #content {
     position: relative;
-    left: 50em;
-    top: 20em;
-    bottom: 20em;
-    right: 20em;
+    left: 10em;
+    top: 5em;
+    bottom: 10em;
+    right: 5em;
     background-color: rgb(32,32,32);
     text-align: center;
 }
