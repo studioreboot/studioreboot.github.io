@@ -11,6 +11,8 @@ var tBiomes = [
 var seed = Date.now().toString();
 Math.seedrandom(seed);
 
+
+
 function nop () {
     return null;
 };
@@ -37,7 +39,7 @@ function hasStone (_nBiome) {
 
 function hasRivers (_nBiome) {
     return _nBiome != 3 && _nBiome != 5
-}
+};
 
 var items = {
     "no tea": {
@@ -404,15 +406,15 @@ var items = {
         "food": true,
         "desc": "Finger licking good."
     }
-}
+};
 
 var tAnimals = [
     "a pig", "a cow", "a sheep", "a chicken",
-]
+];
 
 var tMonsters = [
     "a creeper", "a skeleton", "a zombie", "a spider",
-]
+];
 
 var tRecipes = {
     "some planks": [ "some wood" ],
@@ -432,7 +434,7 @@ var tRecipes = {
     "a stone shovel": [ "some stone", "some sticks" ],
     "an iron shovel": [ "some iron", "some sticks" ],
     "a diamond shovel": [ "some diamond", "some sticks" ]
-}
+};
 
 var tGoWest = [
     "(life is peaceful there)",
@@ -477,19 +479,15 @@ var tDayCycle = [
 
 function getTimeOfDay () {
     return ((Math.floor(nTurn / 3) % tDayCycle.length)) + 1;
-}
+};
 
 function time () {
     return tDayCycle[getTimeOfDay()-1];
-}
-
-function compareObjects (obj1, obj2) {
-    return JSON.stringify(obj1) === JSON.stringify(obj2);
-}
+};
 
 function isSunny () {
     return getTimeOfDay() < 10;
-}
+};
 
 function getRoom (x, y, z, dontCreate) {
     if (isNil(tMap[`${x}|${y}|${z}`]) && !dontCreate) {
@@ -768,7 +766,7 @@ var tMatches = {
         "clear console"
     ],
     "state": [
-        "state ([a-zA-Z0-9]+)"
+        "sl ([a-zA-Z0-9\\s]+)"
     ]
 };
 
@@ -797,9 +795,18 @@ function doCommand (text) {
 
     if ((lastY < y && y === 0) || (lastY === 0 && y < lastY)) {
         if (playingAmbientTrack) {
-            playingAmbientTrack.fade(1, 0, 250);
+            playingAmbientTrack.fade(1, 0, 2500);
         }
+        
+        caveAmb.fade(1, 0, 2500);
+    } else if (lastY === 0 && y < lastY) {
+        if (!caveAmb.playing()) {
+            caveAmb.play();
+        }
+        caveAmb.fade(0, 1, 2500);
     }
+
+    
 };
 
 commands.state = function (which) {
@@ -837,20 +844,29 @@ commands.noinput = function () {
 };
 
 commands.badinput = function () {
-    print(choose(
-        "I don't understand.",
-        "I don't understand you.",
-        "You can't do that.",
-        "Nope.",
-        "Huh?",
-        "Say again?",
-        "That's crazy talk.",
-        "Speak clearly.",
-        "I'll think about it.",
-        "Let me get back to you on that one.",
-        "That doesn't make any sense.",
-        "What?"
-    ));
+    var dt = new Date();
+
+    if (dt.getMonth() === 4 && dt.getDate() === 1) {
+        print("I want you to taste my butt juice")
+    } else {
+        print(choose(
+            "I don't understand.",
+            "I don't understand you.",
+            "You can't do that.",
+            "Nope.",
+            "Huh?",
+            "Say again?",
+            "That's crazy talk.",
+            "Speak clearly.",
+            "I'll think about it.",
+            "Let me get back to you on that one.",
+            "That doesn't make any sense.",
+            "What?",
+            "I like little kids",
+            "What?!!! I'm 80 years old. I also have dementia. Also, I'm 80years old. Sorry what did you say? ",
+            "hold up mommy made lunch"
+        ));
+    }
 };
 
 commands.inventory = function () {
@@ -906,6 +922,7 @@ commands.look = function (target) {
                     tItem = inventory[sItem]
                 }
             }
+            
             if (!isNil(tItem)) {
                 print(tItem.desc || `You see nothing special about ${sItem}.`);
             } else {
@@ -919,7 +936,7 @@ commands.go = function (dir) {
     var room = getRoom(x, y, z);
     if (isNil(dir)) {
         print("Go where?");
-        return;
+        return null;
     }
 
     if (!isNil(nGoWest)) {
@@ -932,9 +949,9 @@ commands.go = function (dir) {
         }
     }
 
-    if (isNil(room.exits[dir])) {
+    if (!room.exits[dir]) {
         print("You can't go that way");
-        return;
+        return null;
     }
     
     switch (dir) {
@@ -955,6 +972,9 @@ commands.go = function (dir) {
             break;
         case "down":
             y--;
+            break;
+        case "home":
+            print("You don't have one.");
             break;
         default:
             commands.badinput();
@@ -1095,25 +1115,28 @@ commands.place = function (qItem) {
         return null;
     }
 
+    var room = getRoom(x, y, z);
     if (/[torch]+/gi.test(qItem)) {
-        var room = getRoom(x, y, z);
         if (inventory["some torches"] || inventory["a torch"]) {
             delete inventory["a torch"];
             room.items["a torch"] = items["a torch"];
             if (room.dark) {
                 print("The room lights up under the torchflame.");
                 room.dark = false;
+                return null;
             } else if (y === 0 && !isSunny()) {
-                print("The night gets a little brighter under the light.")
+                print("The night gets a little brighter under the light.");
+                return null;
             } else {
                 print("Placed torch.");
+                return null;
             }
         } else {
             print("You don't have any torches.");
+            return null;
         }
     }
 
-    var room = getRoom(x, y, z);
     var sItem = findItem(inventory, qItem);
     if (!isNil(sItem)) {
         var tItem = inventory[sItem];
@@ -1136,12 +1159,12 @@ commands.take = function (qItem) {
     }
 
     var room = getRoom(x, y, z);
-    var sItem = findItem(inventory, qItem);
+    var sItem = findItem(room.items, qItem);
     if (!isNil(sItem)) {
-        var tItem = inventory[sItem];
-        if (tItem.heavy) {
+        var tItem = room.items[sItem];
+        if (tItem.heavy === true) {
             print("You can't carry " + sItem + ", because it's too heavy.");
-        } else if (tItem.ore) {
+        } else if (tItem.ore === true) {
             print("You can't just take an ore without mining it!");
         } else {
             if (!tItem.infinite) {
@@ -1285,6 +1308,10 @@ commands.help = function () {
     print("To get around the world, type actions, and your adventure will")
     print("be read back to you. The actions available to you are go, look, inspect, inventory,");
     print("take, drop, place, punch, attack, mine, dig, craft, build, eat and exit.");
+    print("§0-------------------------------------------------------------------------------------");
+    print("If you would like to save, type §g'sl save'§w. To load, type §g'sl load'§w.");
+    print("If you would want to download a save file of your game, just add '§ilocal§w'");
+    print("to the end of the command.");
 }
 
 commands.craft = function (qItem) {
@@ -1492,12 +1519,25 @@ function howl (source) {
 }
 
 var ambTracks = {
-    spoop: howl("spoop.ogg")
+    spoop: howl("spoop.ogg"),
+    clank: howl("clank.ogg"),
+    jingle: howl("jingle.ogg"),
+    screech: howl("screech.ogg")
 };
 
 function randomAmbientTrack () {
+    var room = getRoom(x, y, z);
     if (y < 0 && room.dark && (irand(1, 6) == 1) && playingAmbientTrack) {
-        ambTracks.spoop.play();
+        var it = 100 - irand(1, 100);
+        if (it >= 75) {
+            play(ambTracks.screech);
+        } else if (it >= 50) {
+            play(ambTracks.jingle);
+        } else if (it >= 25) {
+            play(ambTracks.clank);
+        } else if (it >= 0) {
+            play(ambTracks.spoop);
+        }
     }
 };
 
@@ -1552,6 +1592,11 @@ function parseString (str) {
                     fonts.push(ptr);
                 case "5":
                     var it = document.createElement("i");
+                    ptr.appendChild(it);
+                    ptr = it;
+                    break;
+                case "6":
+                    var it = document.createElement("b");
                     ptr.appendChild(it);
                     ptr = it;
                     break;
@@ -1630,7 +1675,7 @@ function requestInput () {
         while (p.firstChild) {
             p.firstChild.remove();
         }
-        const parsed = parseString(`§y? §w${input}${isThereUnderscore ? "_" : ""}`);
+        const parsed = parseString(`§y§6? §w${input}${isThereUnderscore ? "_" : ""}`);
         for (let k = 0; k < parsed.length; k++) {
             const font = parsed[k];
             p.appendChild(font);
@@ -1680,11 +1725,16 @@ function requestInput () {
     });
 }
 
-tickEvents.push(function(){
+var caveAmb = howl("cave.ogg");
+caveAmb.volume(0);
+caveAmb.loop(true);
+
+
+setInterval(function(){
     if (irand(1, 50) <= 15 && bRunning === true) {
         randomAmbientTrack();
     }
-});
+}, 9000);
 
 doCommand("look");
 simulate();
@@ -1713,4 +1763,4 @@ function update () {
     }
 }
 
-setInterval(update, (1/24));
+setInterval(update, (1000/24));
