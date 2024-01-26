@@ -12419,6 +12419,7 @@ WorldMorph.prototype.initEventListeners = function () {
                 }
                 hand.processMouseDown(ev);
             } else {
+                ev.preventDefault();
                 hand.processTouchStart(ev)
             }
         },
@@ -12446,6 +12447,7 @@ WorldMorph.prototype.initEventListeners = function () {
             if (ev.pointerType === "mouse") {
                 hand.processMouseMove(ev);
             } else {
+                ev.preventDefault();
                 hand.processTouchMove(ev);
             }
         },
