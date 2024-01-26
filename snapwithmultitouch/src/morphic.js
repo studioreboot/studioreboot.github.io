@@ -11261,6 +11261,7 @@ HandMorph.prototype.init = function (aWorld) {
     this.contextMenuEnabled = false;
     this.touchStartPosition = null;
     this.inUse = false;
+    this.pointerId = null;
 
     // properties for caching dragged objects:
     this.cachedFullImage = null;
@@ -11503,41 +11504,36 @@ HandMorph.prototype.processMouseDown = function (event) {
     }
 };
 
-HandMorph.prototype.processTouchStart = function (event) {
+HandMorph.prototype.processTouchStart = function (event, touch) {
     MorphicPreferences.isTouchDevice = true;
     clearInterval(this.touchHoldTimeout);
-    if (event.touches.length === 1) {
-        this.touchStartPosition = new Point(
-            event.touches[0].pageX,
-            event.touches[0].pageY
-        );
-        this.touchHoldTimeout = setInterval( // simulate mouseRightClick
-            () => {
-                this.processMouseDown({button: 2});
-                this.processMouseUp({button: 2});
-                event.preventDefault();
-                clearInterval(this.touchHoldTimeout);
-            },
-            400
-        );
-        this.processMouseMove(event.touches[0]); // update my position
-        this.processMouseDown({button: 0});
-        event.preventDefault();
-    }
+    this.touchStartPosition = new Point(
+        touch.pageX,
+        touch.pageY
+    );
+    this.touchHoldTimeout = setInterval( // simulate mouseRightClick
+        () => {
+            this.processMouseDown({button: 2});
+            this.processMouseUp({button: 2});
+            event.preventDefault();
+            clearInterval(this.touchHoldTimeout);
+        },
+        400
+    );
+    this.processMouseMove(touch); // update my position
+    this.processMouseDown({button: 0});
+    event.preventDefault();
 };
 
-HandMorph.prototype.processTouchMove = function (event) {
-    var pos = new Point(event.touches[0].pageX, event.touches[0].pageY);
+HandMorph.prototype.processTouchMove = function (touch) {
+    var pos = new Point(touch.pageX, touch.pageY);
     MorphicPreferences.isTouchDevice = true;
     if (this.touchStartPosition.distanceTo(pos) <
             MorphicPreferences.grabThreshold) {
         return;
     }
-    if (event.touches.length === 1) {
-        var touch = event.touches[0];
-        this.processMouseMove(touch);
-        clearInterval(this.touchHoldTimeout);
-    }
+    this.processMouseMove(touch);
+    clearInterval(this.touchHoldTimeout);
 };
 
 HandMorph.prototype.processTouchEnd = function (event) {
@@ -12370,12 +12366,15 @@ WorldMorph.prototype.pointerWithId = function (pId) {
     return this.hands.find(v => v.pointerId === pId) || null;
 };
 
+WorldMorph.prototype.setActiveHand = function (aHand) {
+    this.hands.forEach(h => h.inUse = false);
+    aHand.inUse = true;
+};
+
 WorldMorph.prototype.freePointer = function (pId) {
-    if (pId === this.primaryPointer) return;
-    var hand = this.pointerWithId(pId);
+    var hand = this.hands.find(v => v.pointerId === pId);
     this.hands.splice(this.hands.indexOf(hand), 1);
-    this.worldCanvas.releasePointerCapture(pId);
-}
+};
 
 WorldMorph.prototype.initEventListeners = function () {
     var canvas = this.worldCanvas;
@@ -12386,111 +12385,7 @@ WorldMorph.prototype.initEventListeners = function () {
         this.changed();
     }
 
-    var primaryPointerMade = false;
-
     canvas.addEventListener(
-        "pointerdown",
-        (ev) => {
-            var hand;
-            if (!primaryPointerMade) {
-                this.hands[0].pointerId = ev.pointerId;
-                this.primaryPointer = ev.pointerId;
-                primaryPointerMade = true;
-                hand = this.hands[0];
-            } else {
-                hand = this.pointerWithId(ev.pointerId);
-                if (!hand) {
-                    hand = new HandMorph(this);
-                    hand.pointerId = ev.pointerId;
-                    this.hands.push(hand);
-                }
-            }
-
-            if (ev.pointerType === "mouse") {
-                ev.preventDefault();
-                this.keyboardHandler.world = this; // focus the current world
-                this.resetKeyboardHandler(true); // keep the handler's value
-                if (!this.onNextStep) {
-                    // horrible kludge to keep Safari from popping up
-                    // a overlay when right-clicking out of a focused
-                    // and edited text or string element
-                    this.keyboardHandler.blur();
-                    this.onNextStep = () => this.keyboardHandler.focus();
-                }
-                hand.processMouseDown(ev);
-            } else {
-                ev.preventDefault();
-                hand.processTouchStart(ev)
-            }
-        },
-        false
-    );
-
-    canvas.addEventListener(
-        "pointermove",
-        (ev) => {
-            var hand;
-            if (!primaryPointerMade) {
-                this.hands[0].pointerId = ev.pointerId;
-                this.primaryPointer = ev.pointerId;
-                primaryPointerMade = true;
-                hand = this.hands[0];
-            } else {
-                hand = this.pointerWithId(ev.pointerId);
-                if (!hand) {
-                    hand = new HandMorph(this);
-                    hand.pointerId = ev.pointerId;
-                    this.hands.push(hand);
-                }
-            }
-
-            if (ev.pointerType === "mouse") {
-                hand.processMouseMove(ev);
-            } else {
-                ev.preventDefault();
-                hand.processTouchMove(ev);
-            }
-        },
-        false
-    );
-
-    canvas.addEventListener(
-        "pointerup",
-        (ev) => {
-            var hand;
-            if (!primaryPointerMade) {
-                this.hands[0].pointerId = ev.pointerId;
-                this.primaryPointer = ev.pointerId;
-                primaryPointerMade = true;
-                hand = this.hands[0];
-            } else {
-                hand = this.pointerWithId(ev.pointerId);
-                if (!hand) {
-                    hand = new HandMorph(this);
-                    hand.pointerId = ev.pointerId;
-                    this.hands.push(hand);
-                }
-            }
-
-            if (ev.pointerType === "mouse") {
-                ev.preventDefault();
-                hand.processMouseUp(ev);
-            } else {
-                hand.processTouchEnd(ev);
-            }
-        },
-        false
-    )
-
-    canvas.addEventListener(
-        "pointercancel",
-        (ev) => {
-            this.freePointer(ev.pointerId);
-        },
-        false
-    )
-
-    /*canvas.addEventListener(
         "mousedown",
         event => {
             event.preventDefault();
@@ -12510,18 +12405,34 @@ WorldMorph.prototype.initEventListeners = function () {
 
     canvas.addEventListener(
         "touchstart",
-        event => this.hand.processTouchStart(event),
-        false
-    );*/
+        (event) => {
+            for (let i = 0; i < event.touches.length; i++) {
+                const touch = event.touches[i];
+                
+                /** @type {HandMorph} */
+                let hand = this.pointerWithId(touch.identifier);
 
-    /* canvas.addEventListener(
+                if (!hand) {
+                    hand = new HandMorph(this);
+                    hand.pointerId = touch.identifier;
+                    this.hands.push(hand);
+                    hand.processTouchStart()
+                }
+
+                hand.processTouchStart(touch);
+            }
+        },
+        false
+    );
+
+    canvas.addEventListener(
         "mouseup",
         event => {
             event.preventDefault();
             this.hand.processMouseUp(event);
         },
         false
-    ); */
+    );
 
     canvas.addEventListener(
         "dblclick",
@@ -12532,9 +12443,26 @@ WorldMorph.prototype.initEventListeners = function () {
         false
     );
 
-    /* canvas.addEventListener(
+    canvas.addEventListener(
         "touchend",
-        event => this.hand.processTouchEnd(event),
+        (event) => {
+            for (let i = 0; i < event.touches.length; i++) {
+                const touch = event.touches[i];
+                
+                /** @type {HandMorph} */
+                let hand = this.pointerWithId(touch.identifier);
+
+                if (!hand) {
+                    hand = new HandMorph(this);
+                    hand.pointerId = touch.identifier;
+                    this.hands.push(hand);
+                }
+
+                hand.processTouchEnd(touch);
+
+                this.freePointer(touch.identifier);
+            }
+        },
         false
     );
 
@@ -12546,9 +12474,24 @@ WorldMorph.prototype.initEventListeners = function () {
 
     canvas.addEventListener(
         "touchmove",
-        event => this.hand.processTouchMove(event),
+        (event) => {
+            for (let i = 0; i < event.touches.length; i++) {
+                const touch = event.touches[i];
+                
+                /** @type {HandMorph} */
+                let hand = this.pointerWithId(touch.identifier);
+
+                if (!hand) {
+                    hand = new HandMorph(this);
+                    hand.pointerId = touch.identifier;
+                    this.hands.push(hand);
+                }
+
+                hand.processTouchMove(event);
+            }
+        },
         {passive: true}
-    ); */
+    );
 
     canvas.addEventListener(
         "contextmenu",
@@ -12564,6 +12507,7 @@ WorldMorph.prototype.initEventListeners = function () {
         },
         false
     );
+
     canvas.addEventListener( // Firefox
         "DOMMouseScroll",
         event => {
@@ -12578,6 +12522,7 @@ WorldMorph.prototype.initEventListeners = function () {
         event => event.preventDefault(),
         true
     );
+
     window.addEventListener(
         "drop",
         event => {
