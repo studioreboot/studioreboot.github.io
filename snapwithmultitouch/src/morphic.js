@@ -12389,17 +12389,8 @@ WorldMorph.prototype.initEventListeners = function () {
     var primaryPointerMade = false;
 
     canvas.addEventListener(
-        "pointerenter",
-        (ev) => {
-            var hand;
-            
-        }
-    )
-
-    canvas.addEventListener(
         "pointerdown",
         (ev) => {
-            console.log('pointer');
             var hand;
             if (!primaryPointerMade) {
                 this.hands[0].pointerId = ev.pointerId;
