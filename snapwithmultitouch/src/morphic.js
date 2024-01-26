@@ -11262,6 +11262,7 @@ HandMorph.prototype.init = function (aWorld) {
     this.touchStartPosition = null;
     this.inUse = false;
     this.pointerId = null;
+    this.createTime = Date.now();
 
     // properties for caching dragged objects:
     this.cachedFullImage = null;
@@ -11500,30 +11501,34 @@ HandMorph.prototype.processMouseDown = function (event) {
         while (!morph[actualClick]) {
             morph = morph.parent;
         }
+        /* console.log(`Cast a "${actualClick}" at ${this.bounds.origin}`); */
         morph[actualClick](this.bounds.origin);
     }
 };
 
+/** @param {Touch} touch */
 HandMorph.prototype.processTouchStart = function (event, touch) {
     MorphicPreferences.isTouchDevice = true;
-    clearInterval(this.touchHoldTimeout);
+    clearTimeout(this.touchHoldTimeout);
     this.touchStartPosition = new Point(
         touch.pageX,
         touch.pageY
     );
-    this.touchHoldTimeout = setInterval( // simulate mouseRightClick
+    this.touchHoldTimeout = setTimeout( // simulate mouseRightClick
         () => {
             this.processMouseDown({button: 2});
             this.processMouseUp({button: 2});
             event.preventDefault();
-            clearInterval(this.touchHoldTimeout);
+            clearTimeout(this.touchHoldTimeout);
         },
         400
     );
     this.processMouseMove(touch); // update my position
     this.processMouseDown({button: 0});
+    event.preventDefault();
 };
 
+/** @param {Touch} touch */
 HandMorph.prototype.processTouchMove = function (touch) {
     var pos = new Point(touch.pageX, touch.pageY);
     MorphicPreferences.isTouchDevice = true;
@@ -11532,12 +11537,12 @@ HandMorph.prototype.processTouchMove = function (touch) {
         return;
     }
     this.processMouseMove(touch);
-    clearInterval(this.touchHoldTimeout);
+    clearTimeout(this.touchHoldTimeout);
 };
 
 HandMorph.prototype.processTouchEnd = function (event) {
     MorphicPreferences.isTouchDevice = true;
-    clearInterval(this.touchHoldTimeout);
+    clearTimeout(this.touchHoldTimeout);
     nop(event);
     this.processMouseUp({button: 0});
 };
@@ -11572,6 +11577,7 @@ HandMorph.prototype.processMouseUp = function () {
         while (!morph[expectedClick]) {
             morph = morph.parent;
         }
+        /* console.log(`Cast a "${expectedClick}" at ${this.bounds.origin}`); */
         morph[expectedClick](this.bounds.origin);
     }
     this.mouseButton = null;
@@ -12424,8 +12430,6 @@ WorldMorph.prototype.initEventListeners = function () {
                 }
 
                 hand.processTouchStart(event, touch);
-
-                event.preventDefault();
             }
         },
         false
@@ -12452,19 +12456,23 @@ WorldMorph.prototype.initEventListeners = function () {
     canvas.addEventListener(
         "touchend",
         (event) => {
-            for (let i = 0; i < event.touches.length; i++) {
-                const touch = event.touches.item(i);
+            for (let i = 0; i < event.changedTouches.length; i++) {
+                const touch = event.changedTouches.item(i);
 
                 /** @type {HandMorph} */
                 let hand = this.pointerWithId(touch.identifier);
 
-                if (!hand) {
+                if (!madePrimaryYet) {
+                    this.hand.pointerId = touch.identifier;
+                    madePrimaryYet = true;
+                    hand = this.hand;
+                } else if (!hand) {
                     hand = new HandMorph(this);
                     hand.pointerId = touch.identifier;
                     this.hands.push(hand);
                 }
 
-                hand.processTouchEnd(touch);
+                hand.processTouchEnd(event);
 
                 //this.freePointer(touch.identifier);
             }
@@ -12481,8 +12489,8 @@ WorldMorph.prototype.initEventListeners = function () {
     canvas.addEventListener(
         "touchmove",
         (event) => {
-            for (let i = 0; i < event.touches.length; i++) {
-                const touch = event.touches.item(i);
+            for (let i = 0; i < event.changedTouches.length; i++) {
+                const touch = event.changedTouches.item(i);
 
                 /** @type {HandMorph} */
                 let hand = this.pointerWithId(touch.identifier);
