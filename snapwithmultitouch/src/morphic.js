@@ -11509,17 +11509,17 @@ HandMorph.prototype.processMouseDown = function (event) {
 /** @param {Touch} touch */
 HandMorph.prototype.processTouchStart = function (event, touch) {
     MorphicPreferences.isTouchDevice = true;
-    clearTimeout(this.touchHoldTimeout);
+    clearInterval(this.touchHoldTimeout);
     this.touchStartPosition = new Point(
         touch.pageX,
         touch.pageY
     );
-    this.touchHoldTimeout = setTimeout( // simulate mouseRightClick
+    this.touchHoldTimeout = setInterval( // simulate mouseRightClick
         () => {
             this.processMouseDown({button: 2});
             this.processMouseUp({button: 2});
             event.preventDefault();
-            clearTimeout(this.touchHoldTimeout);
+            clearInterval(this.touchHoldTimeout);
         },
         400
     );
@@ -11537,12 +11537,12 @@ HandMorph.prototype.processTouchMove = function (touch) {
         return;
     }
     this.processMouseMove(touch);
-    clearTimeout(this.touchHoldTimeout);
+    clearInterval(this.touchHoldTimeout);
 };
 
 HandMorph.prototype.processTouchEnd = function (event) {
     MorphicPreferences.isTouchDevice = true;
-    clearTimeout(this.touchHoldTimeout);
+    clearInterval(this.touchHoldTimeout);
     nop(event);
     this.processMouseUp({button: 0});
 };
