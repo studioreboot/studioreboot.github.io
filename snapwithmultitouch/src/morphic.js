@@ -12109,19 +12109,16 @@ WorldMorph.prototype.fullDrawOn = function (aContext, aRect) {
 WorldMorph.prototype.updateBroken = function () {
     var ctx = this.worldCanvas.getContext('2d');
     this.condenseDamages();
-    for (let i = 0; i < this.broken.length; i++) {
-        const rect = this.broken[i];
+    this.broken.forEach(rect => {
         if (rect.extent().gt(ZERO)) {
             this.fullDrawOn(ctx, rect);
         }
-    }
+    });
     this.broken = [];
 };
 
 WorldMorph.prototype.stepAnimations = function () {
-    for (let i = 0; i < this.animations.length; i++) {
-        this.animations[i].step();
-    }
+    this.animations.forEach(anim => anim.step());
     this.animations = this.animations.filter(v => v.isActive);
 };
 
@@ -12491,10 +12488,15 @@ WorldMorph.prototype.initEventListeners = function () {
                 /** @type {HandMorph} */
                 let hand = this.pointerWithId(touch.identifier);
 
-                if (!hand) {
+                if (!madePrimaryYet) {
+                    this.hand.pointerId = touch.identifier;
+                    madePrimaryYet = true;
+                    hand = this.hand;
+                } else if (!hand) {
                     hand = new HandMorph(this);
                     hand.pointerId = touch.identifier;
                     this.hands.push(hand);
+                    hand.processTouchStart()
                 }
 
                 hand.processTouchMove(touch);
