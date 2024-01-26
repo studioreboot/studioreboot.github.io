@@ -12109,12 +12109,13 @@ WorldMorph.prototype.fullDrawOn = function (aContext, aRect) {
 WorldMorph.prototype.updateBroken = function () {
     var ctx = this.worldCanvas.getContext('2d');
     this.condenseDamages();
-    while (this.broken.length > 0) {
-        var rect = this.broken.shift();
+    for (let i = 0; i < this.broken.length; i++) {
+        const rect = this.broken[i];
         if (rect.extent().gt(ZERO)) {
             this.fullDrawOn(ctx, rect);
         }
     }
+    this.broken = [];
 };
 
 WorldMorph.prototype.stepAnimations = function () {
