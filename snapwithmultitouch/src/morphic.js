@@ -12476,9 +12476,11 @@ WorldMorph.prototype.initEventListeners = function () {
 
                 hand.processTouchEnd(event);
 
-                if (navigator.userAgent.indexOf("Safari") !== -1) {
-                    this.freePointer(touch.identifier);
-                }
+                setTimeout(() => {
+                    if (navigator.userAgent.indexOf("Safari") !== -1) {
+                        this.freePointer(touch.identifier);
+                    }
+                }, 400);
             }
         },
         false
