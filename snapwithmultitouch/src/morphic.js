@@ -11522,7 +11522,6 @@ HandMorph.prototype.processTouchStart = function (event, touch) {
     );
     this.processMouseMove(touch); // update my position
     this.processMouseDown({button: 0});
-    event.preventDefault();
 };
 
 HandMorph.prototype.processTouchMove = function (touch) {
@@ -12095,7 +12094,7 @@ Object.defineProperty(WorldMorph.prototype, "hand", {
     get: function () {
         return this.hands.find(v => v.inUse);
     }
-})
+});
 
 // World Morph display:
 
@@ -12110,17 +12109,19 @@ WorldMorph.prototype.fullDrawOn = function (aContext, aRect) {
 WorldMorph.prototype.updateBroken = function () {
     var ctx = this.worldCanvas.getContext('2d');
     this.condenseDamages();
-    this.broken.forEach(rect => {
+    while (this.broken.length > 0) {
+        var rect = this.broken.shift();
         if (rect.extent().gt(ZERO)) {
             this.fullDrawOn(ctx, rect);
         }
-    });
-    this.broken = [];
+    }
 };
 
 WorldMorph.prototype.stepAnimations = function () {
-    this.animations.forEach(anim => anim.step());
-    this.animations = this.animations.filter(anim => anim.isActive);
+    for (let i = 0; i < this.animations.length; i++) {
+        this.animations[i].step();
+    }
+    this.animations = this.animations.filter(v => v.isActive);
 };
 
 WorldMorph.prototype.condenseDamages = function () {
@@ -12385,6 +12386,8 @@ WorldMorph.prototype.initEventListeners = function () {
         this.changed();
     }
 
+    var madePrimaryYet = false;
+
     canvas.addEventListener(
         "mousedown",
         event => {
@@ -12407,19 +12410,25 @@ WorldMorph.prototype.initEventListeners = function () {
         "touchstart",
         (event) => {
             for (let i = 0; i < event.touches.length; i++) {
-                const touch = event.touches[i];
-                
+                const touch = event.touches.item(i);
+
                 /** @type {HandMorph} */
                 let hand = this.pointerWithId(touch.identifier);
 
-                if (!hand) {
+                if (!madePrimaryYet) {
+                    this.hand.pointerId = touch.identifier;
+                    madePrimaryYet = true;
+                    hand = this.hand;
+                } else if (!hand) {
                     hand = new HandMorph(this);
                     hand.pointerId = touch.identifier;
                     this.hands.push(hand);
                     hand.processTouchStart()
                 }
 
-                hand.processTouchStart(touch);
+                hand.processTouchStart(event, touch);
+
+                event.preventDefault();
             }
         },
         false
@@ -12447,8 +12456,8 @@ WorldMorph.prototype.initEventListeners = function () {
         "touchend",
         (event) => {
             for (let i = 0; i < event.touches.length; i++) {
-                const touch = event.touches[i];
-                
+                const touch = event.touches.item(i);
+
                 /** @type {HandMorph} */
                 let hand = this.pointerWithId(touch.identifier);
 
@@ -12460,7 +12469,7 @@ WorldMorph.prototype.initEventListeners = function () {
 
                 hand.processTouchEnd(touch);
 
-                this.freePointer(touch.identifier);
+                //this.freePointer(touch.identifier);
             }
         },
         false
@@ -12476,8 +12485,8 @@ WorldMorph.prototype.initEventListeners = function () {
         "touchmove",
         (event) => {
             for (let i = 0; i < event.touches.length; i++) {
-                const touch = event.touches[i];
-                
+                const touch = event.touches.item(i);
+
                 /** @type {HandMorph} */
                 let hand = this.pointerWithId(touch.identifier);
 
@@ -12487,7 +12496,7 @@ WorldMorph.prototype.initEventListeners = function () {
                     this.hands.push(hand);
                 }
 
-                hand.processTouchMove(event);
+                hand.processTouchMove(touch);
             }
         },
         {passive: true}
