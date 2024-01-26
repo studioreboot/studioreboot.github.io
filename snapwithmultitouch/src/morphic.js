@@ -12421,6 +12421,7 @@ WorldMorph.prototype.initEventListeners = function () {
 
                 if (!madePrimaryYet) {
                     this.hand.pointerId = touch.identifier;
+                    this.hand.isPrimary = true;
                     madePrimaryYet = true;
                     hand = this.hand;
                 } else if (!hand) {
@@ -12466,12 +12467,9 @@ WorldMorph.prototype.initEventListeners = function () {
 
                 if (!madePrimaryYet) {
                     this.hand.pointerId = touch.identifier;
+                    this.hand.isPrimary = true;
                     madePrimaryYet = true;
                     hand = this.hand;
-                } else if (!hand) {
-                    hand = new HandMorph(this);
-                    hand.pointerId = touch.identifier;
-                    this.hands.push(hand);
                 }
 
                 hand.processTouchEnd(event);
@@ -12503,6 +12501,7 @@ WorldMorph.prototype.initEventListeners = function () {
 
                 if (!madePrimaryYet) {
                     this.hand.pointerId = touch.identifier;
+                    this.hand.isPrimary = true;
                     madePrimaryYet = true;
                     hand = this.hand;
                 } else if (!hand) {
