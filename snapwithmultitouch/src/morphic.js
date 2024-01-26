@@ -12423,7 +12423,7 @@ WorldMorph.prototype.initEventListeners = function () {
                 hand.processTouchStart(ev)
             }
         },
-        true
+        false
     );
 
     canvas.addEventListener(
