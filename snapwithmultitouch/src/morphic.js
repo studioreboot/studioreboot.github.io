@@ -12085,6 +12085,7 @@ WorldMorph.prototype.init = function (aCanvas, fillPage) {
     this.lastEditedText = null;
     this.activeMenu = null;
     this.activeHandle = null;
+    this.lastActiveHand = null;
 
     this.hands[0].inUse = true;
     this.hands[0].isPrimary = true;
@@ -12374,8 +12375,11 @@ WorldMorph.prototype.pointerWithId = function (pId) {
 };
 
 WorldMorph.prototype.setActiveHand = function (aHand) {
-    this.hands.forEach(h => h.inUse = false);
-    aHand.inUse = true;
+    if (this.hand != aHand) {
+        this.lastActiveHand = this.hand;
+        this.hands.forEach(h => h.inUse = false);
+        aHand.inUse = true;
+    }
 };
 
 WorldMorph.prototype.freePointer = function (pId) {
@@ -12475,6 +12479,8 @@ WorldMorph.prototype.initEventListeners = function () {
                 }
 
                 hand.processTouchEnd(event);
+
+                this.setActiveHand(this.lastActiveHand);
 
                 if (navigator.userAgent.indexOf("Safari") !== -1 && !hand.isPrimary) {
                     setTimeout(() => {
