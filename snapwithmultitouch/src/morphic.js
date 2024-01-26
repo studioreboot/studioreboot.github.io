@@ -12421,7 +12421,6 @@ WorldMorph.prototype.initEventListeners = function () {
                     hand = new HandMorph(this);
                     hand.pointerId = touch.identifier;
                     this.hands.push(hand);
-                    hand.processTouchStart()
                 }
 
                 hand.processTouchStart(event, touch);
@@ -12496,7 +12495,6 @@ WorldMorph.prototype.initEventListeners = function () {
                     hand = new HandMorph(this);
                     hand.pointerId = touch.identifier;
                     this.hands.push(hand);
-                    hand.processTouchStart()
                 }
 
                 hand.processTouchMove(touch);
