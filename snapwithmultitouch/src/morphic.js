@@ -12413,8 +12413,8 @@ WorldMorph.prototype.initEventListeners = function () {
     canvas.addEventListener(
         "touchstart",
         (event) => {
-            for (let i = 0; i < event.touches.length; i++) {
-                const touch = event.touches.item(i);
+            for (let i = 0; i < event.changedTouches.length; i++) {
+                const touch = event.changedTouches.item(i);
 
                 /** @type {HandMorph} */
                 let hand = this.pointerWithId(touch.identifier);
@@ -12428,6 +12428,8 @@ WorldMorph.prototype.initEventListeners = function () {
                     hand.pointerId = touch.identifier;
                     this.hands.push(hand);
                 }
+
+                this.setActiveHand(hand);
 
                 hand.processTouchStart(event, touch);
             }
@@ -12474,7 +12476,9 @@ WorldMorph.prototype.initEventListeners = function () {
 
                 hand.processTouchEnd(event);
 
-                //this.freePointer(touch.identifier);
+                if (navigator.userAgent.indexOf("Safari") !== -1) {
+                    this.freePointer(touch.identifier);
+                }
             }
         },
         false
@@ -12504,6 +12508,8 @@ WorldMorph.prototype.initEventListeners = function () {
                     hand.pointerId = touch.identifier;
                     this.hands.push(hand);
                 }
+
+                this.setActiveHand(hand);
 
                 hand.processTouchMove(touch);
             }
