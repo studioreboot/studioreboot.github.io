@@ -62,7 +62,7 @@
 <list>
 <l>proc</l>
 </list>
-<l>var world = proc.blockReceiver().parentThatIsA(WorldMorph); return world.hands.toString()</l>
+<l>var world = proc.blockReceiver().parentThatIsA(WorldMorph); return world.hands.map(v => v.pointerId).toString()</l>
 </block>
 <list/>
 </block>
