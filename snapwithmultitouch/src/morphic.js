@@ -12474,11 +12474,11 @@ WorldMorph.prototype.initEventListeners = function () {
 
                 hand.processTouchEnd(event);
 
-                setTimeout(() => {
-                    if (navigator.userAgent.indexOf("Safari") !== -1) {
+                if (navigator.userAgent.indexOf("Safari") !== -1 && !hand.isPrimary) {
+                    setTimeout(() => {
                         this.freePointer(touch.identifier);
-                    }
-                }, 400);
+                    }, 400);
+                }
             }
         },
         false
