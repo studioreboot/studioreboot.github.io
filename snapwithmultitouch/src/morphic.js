@@ -12482,7 +12482,7 @@ WorldMorph.prototype.initEventListeners = function () {
 
                 this.setActiveHand(this.lastActiveHand);
 
-                if (navigator.userAgent.indexOf("Safari") !== -1 && !hand.isPrimary) {
+                if (/iPod|iPad|iPhone/gi.test(navigator.userAgent) !== -1 && !hand.isPrimary) {
                     setTimeout(() => {
                         this.freePointer(touch.identifier);
                     }, 5000);
