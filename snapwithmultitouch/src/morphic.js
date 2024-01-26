@@ -12480,12 +12480,14 @@ WorldMorph.prototype.initEventListeners = function () {
 
                 hand.processTouchEnd(event);
 
-                this.setActiveHand(this.lastActiveHand);
+                if (!hand.isPrimary) {
+                    this.setActiveHand(this.lastActiveHand);
 
-                if (/iPod|iPad|iPhone/gi.test(navigator.userAgent) && !hand.isPrimary) {
-                    setTimeout(() => {
-                        this.freePointer(touch.identifier);
-                    }, 5000);
+                    if (/iPod|iPad|iPhone/gi.test(navigator.userAgent)) {
+                        setTimeout(() => {
+                            this.freePointer(touch.identifier);
+                        }, 5000);
+                    }
                 }
             }
         },
