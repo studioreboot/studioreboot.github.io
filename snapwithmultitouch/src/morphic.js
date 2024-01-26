@@ -11261,6 +11261,7 @@ HandMorph.prototype.init = function (aWorld) {
     this.contextMenuEnabled = false;
     this.touchStartPosition = null;
     this.inUse = false;
+    this.isPrimary = false;
     this.pointerId = null;
     this.createTime = Date.now();
 
@@ -12086,6 +12087,7 @@ WorldMorph.prototype.init = function (aCanvas, fillPage) {
     this.activeHandle = null;
 
     this.hands[0].inUse = true;
+    this.hands[0].isPrimary = true;
 
     if (!fillPage && aCanvas.isRetinaEnabled) {
         this.initRetina();
