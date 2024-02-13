@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>audio thingy</title>
+</head>
+<body>
+    <audio src="" id="audioPlayer" controls></audio>
+    <p id="time"></p>
+    <script>
+        var searchParams = new URL(window.location.href).searchParams;
+        var player = document.getElementById("audioPlayer"), time = document.getElementById("time");
+        player.src = "tracks/bg" + searchParams.get("t") + ".wav";
+        setInterval(() => {
+            time.textContent = player.currentTime;
+        }, 1);
+    </script>
+</body>
+</html>
