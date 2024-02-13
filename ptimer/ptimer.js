@@ -338,6 +338,8 @@ class PeriodTimerApp extends FrameMorph {
         this.periodTitle.text = this.periods[this.index];
         this.periodTitle.fixLayout();
 
+        this.clock.deadline = this.deadlines[this.index];
+
         this.trackDisplay.text = this.currentTrack === -1 ? "" : "playing: " + tracks[this.currentTrack - 1];
         this.trackDisplay.fixLayout();
 
