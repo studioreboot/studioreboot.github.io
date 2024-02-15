@@ -244,6 +244,7 @@ class PeriodTimerApp extends FrameMorph {
         clock = new PTimerClockMorph();
         clock.setRadius(adjust(270, true));
         clock.lineWidth = adjust(2.5);
+        clock.handWidth = adjust(5, true);
 
         clock.center = this.center;
 
