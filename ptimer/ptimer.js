@@ -327,6 +327,7 @@ class PeriodTimerApp extends FrameMorph {
 
         clock.setRadius(adjust(270, true));
         clock.center = c.add(new Point(0, adjust(16)));
+        clock.handWidth = adjust(5, true);
 
         periodTitle.position = new Point(
             this.left + adjust(30),
