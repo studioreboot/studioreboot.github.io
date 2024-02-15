@@ -47,7 +47,8 @@ const tracks = [
     `Glenn Miller & His Orchestra - "I Know Why (And So Do You)" (1941)\n(from "Sun Valley Serenade")`,
     `Layton & Johnstone - "The Wedding Of The Painted Doll" (1929)\n(the definition of the feeling "nobody's home, but i hear footsteps\noutside my door, and i don't like it.")`,
     `Pee Wee Hunt & His Orchestra - "Twelve Street Rag" (1948)\n("inspiration" of a theme heard in "Spongebob SquarePants")`,
-    `Russ Morgan & His Orchestra - "Goodnight My Beautiful" (1937-38)\n(you might've heard this, depending on whether you have a life or not,\ni got the latter.)`
+    `Russ Morgan & His Orchestra - "Goodnight My Beautiful" (1937-38)\n(you might've heard this, depending on whether you have a life or not,\ni got the latter.)`,
+    `Alex Mendham & His Orchestra - "Midnight, the Stars and You (2020)\n(in high fidelity, no this is not the one heard in\n"The Shining")`
 ];
 
 var newNumber = irand(0, tracks.length - 1);
@@ -341,7 +342,7 @@ class PeriodTimerApp extends FrameMorph {
             this.clock.top - ((this.top - this.clock.top) / 2) - adjust(5, true)
         );
 
-        smallerText.position = periodTitle.bottomRight.subtract(new Point(0, smallerText.height + adjust(6, true)));
+        smallerText.position = periodTitle.bottomRight.subtract(new Point(0, smallerText.height));
 
         this.verse1.center = new Point(w / 6, c.y);
         this.verse2.center = new Point(w - (w / 6), c.y);
