@@ -25,6 +25,14 @@ function msAt (hour = 0, minute = 0, second = 0, millisecond = 0) {
     return Date.now() - ms(dt.getHours() - hour, dt.getMinutes() - minute, dt.getSeconds() - second, dt.getMilliseconds() - millisecond);
 }
 
+function time (ms) {
+    return {
+        seconds: (((ms / 1000) % 60)),
+        minutes: (((ms / 60000) % 60)),
+        hours: (((ms / 3600000) % 12))
+    };
+}
+
 const tracks = [
     `Russ Morgan & His Orchestra - "What Do You Know About Love" (1937-38)`,
     `Russ Morgan & His Orchestra - "A Room With A View" (1937-38)`,
@@ -50,7 +58,10 @@ function trand (min, max) {
         xhr.open("GET", `https://www.random.org/integers/?num=1&min=${min}&max=${max}&format=plain&col=1&base=10&rnd=new`, true);
         xhr.onload = function () {
             resolve(+xhr.responseText);
-        }
+        };
+        xhr.onerror = function () {
+            resolve(irand(min, max));
+        };
         xhr.send(null);
     });
 }
@@ -227,23 +238,29 @@ class PeriodTimerApp extends FrameMorph {
     }
 
     createClockAndPeriodTitle () {
-        var clock, periodTitle;
+        var clock, periodTitle, smallerText;
 
         clock = new PTimerClockMorph();
         clock.setRadius(adjust(270, true));
-        clock.lineWidth = 2.5;
+        clock.lineWidth = adjust(2.5);
 
         clock.center = this.center;
 
-        periodTitle = new StringMorph("Period 1", adjust(64), "monospace");
+        periodTitle = new StringMorph("Period 1", adjust(48), "monospace");
         periodTitle.position = new Point(this.left + adjust(15), this.bottom + adjust(15));
         periodTitle.color = WHITE;
 
+        smallerText = new StringMorph("", adjust(36, true), "monospace", false, false);
+        smallerText.position = periodTitle.bottomRight.subtract(new Point(0, smallerText.height));
+        smallerText.color = WHITE.darker(36);
+
         this.clock = clock;
         this.periodTitle = periodTitle;
+        this.periodDetails = smallerText;
 
         this.add(this.clock);
         this.add(this.periodTitle);
+        this.add(this.periodDetails);
     }
 
     createTrackDisplays () {
@@ -304,7 +321,8 @@ class PeriodTimerApp extends FrameMorph {
 
         if (!this.didMakeThingsYet) return;
 
-        var periodTitle = this.periodTitle, clock = this.clock, w = this.width, c = this.center;
+        var periodTitle = this.periodTitle, clock = this.clock, w = this.width, c = this.center,
+            smallerText = this.periodDetails;
 
         clock.setRadius(adjust(270, true));
         clock.center = c.add(new Point(0, adjust(16)));
@@ -323,6 +341,8 @@ class PeriodTimerApp extends FrameMorph {
             this.clock.top - ((this.top - this.clock.top) / 2) - adjust(5, true)
         );
 
+        smallerText.position = periodTitle.bottomRight.subtract(new Point(0, smallerText.height + adjust(6, true)));
+
         this.verse1.center = new Point(w / 6, c.y);
         this.verse2.center = new Point(w - (w / 6), c.y);
     }
@@ -335,7 +355,7 @@ class PeriodTimerApp extends FrameMorph {
     }
 
     updateUI () {
-        this.periodTitle.text = this.periods[this.index];
+        this.periodTitle.text = this.periods[this.index] + " ";
         this.periodTitle.fixLayout();
 
         this.clock.deadline = this.deadlines[this.index];
@@ -354,6 +374,15 @@ class PeriodTimerApp extends FrameMorph {
             this.index++;
             this.updateUI();
         }
+
+        var details = this.periodDetails,
+            timeLeft = time(this.clock.deadline - Date.now()), current = new Date();
+
+        details.text = `(${Math.floor(timeLeft.hours)}hr ${Math.floor(timeLeft.minutes)}m ${Math.floor(timeLeft.seconds)}s) [${current.getHours()}:${current.getMinutes() < 10 ?  "0" + current.getMinutes() : current.getMinutes()}]`;
+
+        details.rerender();
+        details.fixLayout();
+        details.changed();
 
         /* if (this.currentTrackAudio instanceof Audio && this.verse1 && this.verse2) {
             var event = this.currentTrackMeta[this.trackProgramCounter];
@@ -450,7 +479,3 @@ class PeriodTimerApp extends FrameMorph {
         xhr.send(null);
     }
 };
-
-//////////////////////////////////////////////////////////
-// PeriodTimerApp ////////////////////////////////////////
-//////////////////////////////////////////////////////////
