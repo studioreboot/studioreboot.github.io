@@ -34,8 +34,8 @@ function time (ms) {
 }
 
 const tracks = [
-    `Russ Morgan & His Orchestra - "What Do You Know About Love" (1937-38)`,
-    `Russ Morgan & His Orchestra - "A Room With A View" (1937-38)`,
+    `Tommy Dorsey & His Orchestra - "I Guess I'll Have To Dream The Rest" (1941)`,
+    `Roy Fox & His Orchestra - "Lullaby Of The Leaves" (1932)`,
     `Freddie Rich & His Orchestra - "I'm Wishing"\n(from the 1937 Walt Disney film "Snow White & the Seven Dwarfs")`,
     `George Olsen & His Music - "Lullaby Of The Leaves" (1932)`,
     `Russ Morgan & His Orchestra - "Could Be" (1937-38)\n(filled with swing)`,
@@ -67,9 +67,9 @@ function trand (min, max) {
     });
 }
 
-var rain = new Audio("rain.ogg");
+/* var rain = new Audio("rain.ogg");
 rain.loop = true;
-rain.volume = 0.15;
+rain.volume = 0.05; */
 
 //////////////////////////////////////////////////////////
 // PeriodTimerClock //////////////////////////////////////
@@ -358,7 +358,7 @@ class PeriodTimerApp extends FrameMorph {
     }
 
     updateUI () {
-        this.periodTitle.text = this.periods[this.index] + " ";
+        this.periodTitle.text = this.periods[this.index-1] + " ";
         this.periodTitle.fixLayout();
 
         this.clock.deadline = this.deadlines[this.index];
