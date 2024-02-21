@@ -67,9 +67,9 @@ function trand (min, max) {
     });
 }
 
-/* var rain = new Audio("rain.ogg");
+var rain = new Audio("rain.ogg");
 rain.loop = true;
-rain.volume = 0.05; */
+rain.volume = 0;
 
 //////////////////////////////////////////////////////////
 // PeriodTimerClock //////////////////////////////////////
