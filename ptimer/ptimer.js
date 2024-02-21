@@ -235,7 +235,7 @@ class PeriodTimerApp extends FrameMorph {
         this.createTrackDisplays();
 
         this.didMakeThingsYet = true;
-        rain.play();
+        //rain.play();
     }
 
     createClockAndPeriodTitle () {
