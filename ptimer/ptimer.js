@@ -145,6 +145,8 @@ class PeriodTimerApp extends FrameMorph {
 
         this.trackProgramCounter = 0;
 
+        this.audioContext = new AudioContext();
+
         this.deadlines = [
             msAt(7, 30),
             msAt(7, 50),
@@ -166,7 +168,7 @@ class PeriodTimerApp extends FrameMorph {
             msAt(2, 32)
         ];
 
-        this.bellHits = [9e99];
+        this.bellHits = [];
 
         for (let i = 0; i < this.deadlines.length; i++) {
             const deadline = this.deadlines[i];
@@ -199,6 +201,7 @@ class PeriodTimerApp extends FrameMorph {
 
         this.didCheckEvent = false;
         this.nextUpdateDeadline = Date.now() + 15000;
+        this.doPause = false;
 
         for (let i = 1; i < (tracks.length + 1); i++) {
             this.selectableTracks.push(i);
@@ -244,24 +247,53 @@ class PeriodTimerApp extends FrameMorph {
         // this.parseNextTrackMeta();
     }
 
+    /** @param {CanvasRenderingContext2D} ctx */
+    render (ctx) {
+        super.render(ctx);
+
+        /* ctx.fillStyle = BLACK.lighter(15).toString();
+        ctx.beginPath();
+        ctx.arc(this.width / 2, this.height / 2, ) */
+    }
+
+    createNodes () {
+        var gain = this.audioContext.createGain();
+
+        this.gainNode = gain;
+        this.gainNode.connect(this.audioContext.destination);
+    }
+
     loadNextTrack () {
-        var aud = new Audio("tracks/bg" + this.nextTrack + (this.nextTrack < 10 ? ".wav" : ".ogg")), self = this;
+        var ctx = this.audioContext, buffer, source,
+            url = window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "tracks/bg" + this.nextTrack + (this.nextTrack < 10 ? ".wav" : ".ogg"),
+            self = this;
 
         if (this.nextTrack !== 12) {
-            aud.volume = 0.15;
-        }
-
-        aud.load();
-        aud.onended = function () {
-            self.currentTrack = -1;
-            self.currentTrackAudio = null;
-            setTimeout(() => {
-                self.playTrack();
-            }, 2000);
-            self.trackProgramCounter = 0;
-            self.updateUI();
+            this.gainNode.gain.value = 0.15;
         };
-        this.nextTrackAudio = aud;
+        
+        var xhr = new XMLHttpRequest();
+        xhr.responseType = "arraybuffer";
+        xhr.open("GET", url, true);
+        xhr.onload = function () {
+            ctx.decodeAudioData(xhr.response, (aBuffer) => {
+                buffer = aBuffer;
+                source = ctx.createBufferSource();
+                source.buffer = buffer;
+                source.onended = function () {
+                    self.currentTrack = -1;
+                    self.currentTrackAudio = null;
+                    setTimeout(() => {
+                        self.playTrack();
+                    }, 2000);
+                    self.trackProgramCounter = 0;
+                    self.updateUI();
+                }
+                source.connect(self.gainNode);
+                self.nextTrackAudio = source;
+            });
+        };
+        xhr.send(null);
     }
 
     openIn (aWorld) {
@@ -351,12 +383,7 @@ class PeriodTimerApp extends FrameMorph {
             this.fixLayout();
             this.playTrack();
         } else {
-            if (this.currentTrackAudio.paused) {
-                this.currentTrackAudio.play();
-            } else {
-                this.currentTrackAudio.pause();
-                console.log(this.currentTrackAudio.currentTime);
-            }
+            this.doPause = !this.doPause;
         }
     }
 
@@ -418,6 +445,12 @@ class PeriodTimerApp extends FrameMorph {
         if (!this.didMakeThingsYet) return;
 
         var now = Date.now();
+
+        if (this.audioContext.state === "suspended" && !this.doPause) {
+            this.audioContext.resume();
+        } else if (this.audioContext.state === "running" && this.doPause) {
+            this.audioContext.suspend();
+        }
 
         if (now >= this.deadlines[this.index] && this.index < this.deadlines.length) {
             this.index++;
@@ -500,7 +533,7 @@ class PeriodTimerApp extends FrameMorph {
 
         this.nextTrack = this.nextTrackAudio = this.nextTrackMeta = null;
 
-        this.currentTrackAudio.play();
+        this.currentTrackAudio.start();
 
         this.pickNextTrack();
 
