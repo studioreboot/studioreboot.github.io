@@ -3,27 +3,27 @@ function adjust (x, useHeight = false) {
         return (x / 599) * window.innerHeight;
     }
     return (x / 1366) * window.innerWidth;
-}
+};
 
 function dateIs (month, date) {
     var dt = new Date();
 
     return ((dt.getMonth() + 1) === month) && dt.getDate() === date;
-}
+};
 
 function irand (min, max) {
     return Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1) + Math.ceil(min));
-}
+};
 
 function ms (hour = 0, minute = 0, second = 0, millisecond = 0) {
     return (((hour * 60 * 60 * 1000) + (minute * 60 * 1000)) + (second * 1000)) + millisecond;
-}
+};
 
 function msAt (hour = 0, minute = 0, second = 0, millisecond = 0) {
     var dt = new Date();
 
     return Date.now() - ms(dt.getHours() - hour, dt.getMinutes() - minute, dt.getSeconds() - second, dt.getMilliseconds() - millisecond);
-}
+};
 
 function time (ms) {
     return {
@@ -31,7 +31,7 @@ function time (ms) {
         minutes: (((ms / 60000) % 60)),
         hours: (((ms / 3600000) % 12))
     };
-}
+};
 
 const tracks = [
     `Tommy Dorsey & His Orchestra - "I Guess I'll Have To Dream The Rest"\n(1941)`,
@@ -53,6 +53,8 @@ const tracks = [
     `Ray Noble & His Orchestra - "This Is Romance" (1934)`
 ];
 
+const BELL_DELAY = 48264;
+
 var newNumber = irand(0, tracks.length - 1);
 
 function trand (min, max) {
@@ -67,11 +69,14 @@ function trand (min, max) {
         };
         xhr.send(null);
     });
-}
+};
 
 var rain = new Audio("rain.ogg");
 rain.loop = true;
 rain.volume = 0;
+
+var bell = new Audio("bell.ogg");
+bell.volume = 0.8;
 
 //////////////////////////////////////////////////////////
 // PeriodTimerClock //////////////////////////////////////
@@ -115,6 +120,7 @@ class PeriodTimerApp extends FrameMorph {
         this.trackProgramCounter = 0;
 
         this.deadlines = [
+            msAt(7, 30),
             msAt(7, 50),
             msAt(8, 25),
             msAt(8, 50),
@@ -134,7 +140,17 @@ class PeriodTimerApp extends FrameMorph {
             msAt(2, 32)
         ];
 
+        this.bellHits = [9e99];
+
+        for (let i = 0; i < this.deadlines.length; i++) {
+            const deadline = this.deadlines[i];
+            this.bellHits.push(deadline - BELL_DELAY);
+        };
+
+        this.bellIndex = 0;
+
         this.periods = [
+            "Arrival",
             "Period 1",
             "Trojan TV",
             "Period 2",
@@ -375,13 +391,20 @@ class PeriodTimerApp extends FrameMorph {
     step () {
         if (!this.didMakeThingsYet) return;
 
-        if (Date.now() > this.deadlines[this.index] && this.index < this.deadlines.length) {
+        var now = Date.now();
+
+        if (now >= this.deadlines[this.index] && this.index < this.deadlines.length) {
             this.index++;
             this.updateUI();
-        }
+        };
+
+        if (now >= this.bellHits[this.bellIndex] && this.bellIndex < this.bellHits.length) {
+            this.bellIndex++;
+            bell.play();
+        };
 
         var details = this.periodDetails,
-            timeLeft = time(this.clock.deadline - Date.now()), current = new Date();
+            timeLeft = time(this.clock.deadline - now), current = new Date();
 
         details.text = `(${Math.floor(timeLeft.hours)}hr ${Math.floor(timeLeft.minutes)}m ${Math.floor(timeLeft.seconds)}s) [${current.getHours()}:${current.getMinutes() < 10 ?  "0" + current.getMinutes() : current.getMinutes()}]`;
 
