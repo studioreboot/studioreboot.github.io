@@ -266,14 +266,14 @@ class PeriodTimerApp extends FrameMorph {
 
     loadNextTrack () {
         var ctx = this.audioContext, buffer, source,
-            url = window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "tracks/bg" + this.nextTrack + (this.nextTrack < 10 ? ".wav" : ".ogg"),
+            url = "tracks/bg" + this.nextTrack + (this.nextTrack < 10 ? ".wav" : ".ogg"),
             self = this;
 
         if (this.nextTrack !== 12) {
             this.gainNode.gain.value = 0.15;
         };
         
-        var xhr = new XMLHttpRequest();
+        /* var xhr = new XMLHttpRequest();
         xhr.responseType = "arraybuffer";
         xhr.open("GET", url, true);
         xhr.onload = function () {
@@ -294,7 +294,27 @@ class PeriodTimerApp extends FrameMorph {
                 self.nextTrackAudio = source;
             });
         };
-        xhr.send(null);
+        xhr.send(null); */
+
+        var aud = new Audio(), self = this;
+
+        if (this.nextTrack !== 12) {
+            aud.volume = 0.15;
+        };
+
+        aud.src = "tracks/bg" + this.nextTrack + (this.nextTrack < 10 ? ".wav" : ".ogg");
+        aud.load();
+        aud.onended = function () {
+            self.currentTrack = -1;
+            self.currentTrackAudio = null;
+            setTimeout(() => {
+                self.playTrack();
+            }, 2000);
+            self.trackProgramCounter = 0;
+            self.updateUI();
+        };
+
+        this.nextTrackAudio = aud;
     }
 
     openIn (aWorld) {
@@ -388,8 +408,13 @@ class PeriodTimerApp extends FrameMorph {
             this.fixLayout();
             this.playTrack();
         } else {
-            this.doPause = !this.doPause;
-        }
+            //this.doPause = !this.doPause;
+            if (this.currentTrackAudio.paused) {
+                this.currentTrackAudio.play();
+            } else {
+                this.currentTrackAudio.pause();
+            }
+        };
     }
 
     fixLayout () {
