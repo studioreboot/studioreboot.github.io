@@ -476,11 +476,11 @@ class PeriodTimerApp extends FrameMorph {
 
         var now = Date.now();
 
-        if (this.audioContext.state === "suspended" && !this.doPause) {
+        /* if (this.audioContext.state === "suspended" && !this.doPause) {
             this.audioContext.resume();
         } else if (this.audioContext.state === "running" && this.doPause) {
             this.audioContext.suspend();
-        }
+        } */
 
         if (now >= this.deadlines[this.index] && this.index < this.deadlines.length) {
             this.index++;
