@@ -565,7 +565,7 @@ class PeriodTimerApp extends FrameMorph {
 
         this.nextTrack = this.nextTrackAudio = this.nextTrackMeta = null;
 
-        this.currentTrackAudio.start();
+        this.currentTrackAudio.play();
 
         this.pickNextTrack();
 
