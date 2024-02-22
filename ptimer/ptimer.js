@@ -34,7 +34,7 @@ function time (ms) {
 }
 
 const tracks = [
-    `Tommy Dorsey & His Orchestra - "I Guess I'll Have To Dream The Rest" (1941)`,
+    `Tommy Dorsey & His Orchestra - "I Guess I'll Have To Dream The Rest"\n(1941)`,
     `Roy Fox & His Orchestra - "Lullaby Of The Leaves" (1932)`,
     `Freddie Rich & His Orchestra - "I'm Wishing"\n(from the 1937 Walt Disney film "Snow White & the Seven Dwarfs")`,
     `George Olsen & His Music - "Lullaby Of The Leaves" (1932)`,
@@ -46,9 +46,11 @@ const tracks = [
     `Sid Phillips & His Melodians - "Heartaches" (1931)\n(heard in the "Mr. Incredible" memes,\nyou know, when he turns more into a skeleton as time progresses.)`,
     `Glenn Miller & His Orchestra - "I Know Why (And So Do You)" (1941)\n(from "Sun Valley Serenade")`,
     `Layton & Johnstone - "The Wedding Of The Painted Doll" (1929)\n(the definition of the feeling "nobody's home, but i hear footsteps\noutside my door, and i don't like it.")`,
-    `Pee Wee Hunt & His Orchestra - "Twelve Street Rag" (1948)\n("inspiration" of a theme heard in "Spongebob SquarePants")`,
+    /* `Pee Wee Hunt & His Orchestra - "Twelve Street Rag" (1948)\n("inspiration" of a theme heard in "Spongebob SquarePants")`, */
+    `John Scott Trotter & His Orchestra - "Cloud Dreams" (1968)`,
     `Russ Morgan & His Orchestra - "Goodnight My Beautiful" (1937-38)\n(you might've heard this, depending on whether you have a life or not,\ni got the latter.)`,
-    `Alex Mendham & His Orchestra - "Midnight, the Stars and You (2020)\n(in high fidelity, no this is not the one heard in\n"The Shining")`
+    `Alex Mendham & His Orchestra - "Midnight, the Stars and You (2020)\n(in high fidelity, no this is not the one heard in\n"The Shining")`,
+    `Ray Noble & His Orchestra - "This Is Romance" (1934)`
 ];
 
 var newNumber = irand(0, tracks.length - 1);
