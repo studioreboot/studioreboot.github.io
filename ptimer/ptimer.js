@@ -71,6 +71,32 @@ function trand (min, max) {
     });
 };
 
+var version = 0, gotVersionYet = false,
+    versionURL = "https://studioreboot.github.io/ptimer/version";
+
+(function(){
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", versionURL, true);
+    xhr.onload = function () {
+        version = +xhr.responseText;
+        gotVersionYet = true;
+    };
+    xhr.send(null);
+})();
+
+function checkVersion () {
+    if (gotVersionYet) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", versionURL, true);
+        xhr.onload = function () {
+            if (+xhr.responseText > version) {
+                window.location.reload();
+            }
+        };
+        xhr.send(null);
+    }
+}
+
 var rain = new Audio("rain.ogg");
 rain.loop = true;
 rain.volume = 0;
@@ -172,6 +198,7 @@ class PeriodTimerApp extends FrameMorph {
         ];
 
         this.didCheckEvent = false;
+        this.nextUpdateDeadline = Date.now() + 15000;
 
         for (let i = 1; i < (tracks.length + 1); i++) {
             this.selectableTracks.push(i);
@@ -253,7 +280,6 @@ class PeriodTimerApp extends FrameMorph {
         this.createTrackDisplays();
 
         this.didMakeThingsYet = true;
-        //rain.play();
     }
 
     createClockAndPeriodTitle () {
@@ -402,6 +428,11 @@ class PeriodTimerApp extends FrameMorph {
             this.bellIndex++;
             bell.play();
         };
+
+        if (now >= this.nextUpdateDeadline) {
+            this.nextUpdateDeadline = Date.now() + 2000;
+            checkVersion();
+        }
 
         var details = this.periodDetails,
             timeLeft = time(this.clock.deadline - now), current = new Date();
