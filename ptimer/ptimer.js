@@ -176,6 +176,7 @@ class PeriodTimerApp extends FrameMorph {
         };
 
         this.bellIndex = 0;
+        this.waitTime = false;
 
         this.periods = [
             "Arrival",
@@ -216,7 +217,7 @@ class PeriodTimerApp extends FrameMorph {
 
         setTimeout(() => {
             this.canTapYet = true;
-        }, 2000);
+        }, 2000);    
 
         this.pickNextTrack();
     }
@@ -312,6 +313,10 @@ class PeriodTimerApp extends FrameMorph {
         this.createTrackDisplays();
 
         this.didMakeThingsYet = true;
+
+        setTimeout(() => {
+            this.waitTime = true;
+        }, 2500);
     }
 
     createClockAndPeriodTitle () {
@@ -459,7 +464,9 @@ class PeriodTimerApp extends FrameMorph {
 
         if (now >= this.bellHits[this.bellIndex] && this.bellIndex < this.bellHits.length) {
             this.bellIndex++;
-            bell.play();
+            if (this.waitTime) {
+                bell.play();
+            }
         };
 
         if (now >= this.nextUpdateDeadline) {
