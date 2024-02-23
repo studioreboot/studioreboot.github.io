@@ -519,16 +519,16 @@ class PeriodTimerApp extends FrameMorph {
 
         if ((now >= this.bellHits[this.bellIndex] && this.bellIndex < this.bellHits.length) || this.testBell) {
             this.bellIndex++;
+            var lastGain = this.gainNode.gain.value;
             if (this.waitTime) {
                 this.disableGainControl = true;
-                var lastGain = this.gainNode.gain.value;
                 this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 1.25);
                 setTimeout(() => {
                     bell.play();
                     this.audioContext.suspend();
                     bell.onended = function () {
                         self.audioContext.resume();
-                        self.gainNode.gain.linearRampToValueAtTime(lastGain, self.audioContext.currentTime + 1.25);
+                        self.gainNode.gain.linearRampToValueAtTime(0.25, self.audioContext.currentTime + 1.25);
                         setTimeout(() => {
                             self.disableGainControl = false;
                         }, 1250);
