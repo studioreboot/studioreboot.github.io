@@ -126,8 +126,9 @@ var rain = new Audio("rain.ogg");
 rain.loop = true;
 rain.volume = 0;
 
-var bell = new Audio("bell.ogg");
-bell.volume = 0.8;
+var bell = new Sound("bell.ogg");
+bell.volume = 80;
+bell.applyTo();
 
 //////////////////////////////////////////////////////////
 // PeriodTimerClock //////////////////////////////////////
@@ -205,6 +206,7 @@ class PeriodTimerApp extends FrameMorph {
         this.bellIndex = 0;
         this.waitTime = false;
         this.testBell = false;
+        this.isBellPlaying = false;
 
         this.periods = [
             "Arrival",
@@ -507,6 +509,16 @@ class PeriodTimerApp extends FrameMorph {
         this.changed();
     }
 
+    setTrackText (nText) {
+        if (this.trackDisplay.text !== nText) {
+            this.trackDisplay.changed();
+            this.trackDisplay.text = nText;
+            this.trackDisplay.fixLayout();
+            this.fixLayout();
+            this.trackDisplay.fullChanged();
+        }
+    }
+
     step () {
         if (!this.didMakeThingsYet) return;
 
@@ -519,24 +531,189 @@ class PeriodTimerApp extends FrameMorph {
 
         if ((now >= this.bellHits[this.bellIndex] && this.bellIndex < this.bellHits.length) || this.testBell) {
             this.bellIndex++;
-            var lastGain = this.gainNode.gain.value;
             if (this.waitTime) {
                 this.disableGainControl = true;
                 this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 1.25);
+                this.bellTextFade = false;
                 setTimeout(() => {
+                    this.isBellPlaying = true;
                     bell.play();
                     this.audioContext.suspend();
+                    this.oldTrackText = this.trackDisplay.text;
                     bell.onended = function () {
-                        self.audioContext.resume();
-                        self.gainNode.gain.linearRampToValueAtTime(0.25, self.audioContext.currentTime + 1.25);
                         setTimeout(() => {
-                            self.disableGainControl = false;
-                        }, 1250);
+                            self.trackDisplay.alpha = 1;
+                            self.setTrackText(self.oldTrackText);
+                            self.audioContext.resume();
+                            self.gainNode.gain.linearRampToValueAtTime(0.25, self.audioContext.currentTime + 1.25);
+                            setTimeout(() => {
+                                self.disableGainControl = false;
+                                self.isBellPlaying = false;
+                            }, 1250);
+                        }, 500);
                     };
+                    bell.applyTo();
                 }, 1250);
             }
             this.testBell = false;
         };
+
+        if (this.isBellPlaying) {
+            var time = bell.currentTime;
+            if (time <= 0.403) {
+                this.setTrackText(`"Oranges & Lemons" - a song telling the british topography.`);
+            } else if (time <= 1.083) {
+                this.setTrackText("Or-");
+            } else if (time <= 1.688) {
+                this.setTrackText("Orange");
+            } else if (time <= 2.313) {
+                this.setTrackText("Oranges");
+            } else if (time <= 2.932) {
+                this.setTrackText("Oranges &");
+            } else if (time <= 3.557) {
+                this.setTrackText("Oranges & Lemons,");
+            } else if (time <= 3.945) {
+                this.setTrackText("Oranges & Lemons,\nSay");
+            } else if (time <= 4.232) {
+                this.setTrackText("Oranges & Lemons,\nSay the");
+            } else if (time <= 4.842) {
+                this.setTrackText("Oranges & Lemons,\nSay the bells");
+            } else if (time <= 5.497) {
+                this.setTrackText("Oranges & Lemons,\nSay the bells of");
+            } else if (time <= 6.137) {
+                this.setTrackText("Oranges & Lemons,\nSay the bells of St.");
+            } else if (time <= 6.787) {
+                this.setTrackText("Oranges & Lemons,\nSay the bells of St. Clem-");
+            } else if (time <= 8.077) {
+                this.setTrackText("Oranges & Lemons,\nSay the bells of St. Clement's");
+            } else if (time <= 8.092) {
+                this.setTrackText("");
+            } else if (time <= 8.767) {
+                this.setTrackText("You");
+            } else if (time <= 9.402) {
+                this.setTrackText("You owe");
+            } else if (time <= 10.047) {
+                this.setTrackText("You owe me");
+            } else if (time <= 10.692) {
+                this.setTrackText("You owe me five");
+            } else if (time <= 11.352) {
+                this.setTrackText("You owe me five farthings!");
+            } else if (time <= 11.699) {
+                this.setTrackText("You owe me five farthings!\nSay");
+            } else if (time <= 11.966) {
+                this.setTrackText("You owe me five farthings!\nSay the");
+            } else if (time <= 12.591) {
+                this.setTrackText("You owe me five farthings!\nSay the bells");
+            } else if (time <= 13.226) {
+                this.setTrackText("You owe me five farthings!\nSay the bells of");
+            } else if (time <= 13.906) {
+                this.setTrackText("You owe me five farthings!\nSay the bells of St.");
+            } else if (time <= 14.632) {
+                this.setTrackText("You owe me five farthings!\nSay the bells of St. Martin's");
+            } else if (time <= 15.937) {
+                this.setTrackText("");
+            } else if (time <= 16.622) {
+                this.setTrackText("When");
+            } else if (time <= 17.267) {
+                this.setTrackText("When will");
+            } else if (time <= 17.881) {
+                this.setTrackText("When will you");
+            } else if (time <= 18.582) {
+                this.setTrackText("When will you pay");
+            } else if (time <= 19.212) {
+                this.setTrackText("When will you pay me?");
+            } else if (time <= 19.554) {
+                this.setTrackText("When will you pay me?\nSay");
+            } else if (time <= 19.867) {
+                this.setTrackText("When will you pay me?\nSay the");
+            } else if (time <= 20.506) {
+                this.setTrackText("When will you pay me?\nSay the bells");
+            } else if (time <= 21.151) {
+                this.setTrackText("When will you pay me?\nSay the bells at");
+            } else if (time <= 21.821) {
+                this.setTrackText("When will you pay me?\nSay the bells at Old");
+            } else if (time <= 22.456) {
+                this.setTrackText("When will you pay me?\nSay the bells at Old Bai-");
+            } else if (time <= 22.769) {
+                this.setTrackText("When will you pay me?\nSay the bells at Old Bailey");
+            } else if (time <= 23.756) {
+                this.setTrackText("");
+            } else if (time <= 24.421) {
+                this.setTrackText("When");
+            } else if (time <= 25.051) {
+                this.setTrackText("When I");
+            } else if (time <= 25.716) {
+                this.setTrackText("When I grow");
+            } else if (time <= 26.411) {
+                this.setTrackText("When I grow ri-");
+            } else if (time <= 27.041) {
+                this.setTrackText("When I grow rich,");
+            } else if (time <= 27.394) {
+                this.setTrackText("When I grow rich,\nSay");
+            } else if (time <= 27.737) {
+                this.setTrackText("When I grow rich,\nSay the");
+            } else if (time <= 28.351) {
+                this.setTrackText("When I grow rich,\nSay the bells");
+            } else if (time <= 29.021) {
+                this.setTrackText("When I grow rich,\nSay the bells at");
+            } else if (time <= 29.686) {
+                this.setTrackText("When I grow rich,\nSay the bells at Shore")
+            } else if (time <= 30.936) {
+                this.setTrackText("When I grow rich,\nSay the bells at Shoreditch");
+            } else if (time <= 31.582) {
+                this.setTrackText("*sending drums to Jesus,\nplease wait*")
+            } else if (time <= 32.422) {
+                this.setTrackText("When");
+            } else if (time <= 33.067) {
+                this.setTrackText("When will");
+            } else if (time <= 33.717) {
+                this.setTrackText("When will that");
+            } else if (time <= 35.382) {
+                this.setTrackText("When will that be?");
+            } else if (time <= 35.802) {
+                this.setTrackText("When will that be?\nSay");
+            } else if (time <= 35.717) {
+                this.setTrackText("When will that be?\nSay the");
+            } else if (time <= 36.372) {
+                this.setTrackText("When will that be?\nSay the bells");
+            } else if (time <= 37.032) {
+                this.setTrackText("When will that be?\nSay the bells of");
+            } else if (time <= 37.642) {
+                this.setTrackText("When will that be?\nSay the bells of St.");
+            } else if (time <= 38.358) {
+                this.setTrackText("When will that be?\nSay the bells of St. Dun");
+            } else if (time <= 39.683) {
+                this.setTrackText("When will that be?\nSay the bells of St. Dunstan's");
+            } else if (time <= 40.433) {
+                this.setTrackText("I");
+            } else if (time <= 41.058) {
+                this.setTrackText("I do");
+            } else if (time <= 41.723) {
+                this.setTrackText("I do not");
+            } else if (time <= 42.378) {
+                this.setTrackText("I do not k-");
+            } else if (time <= 43.033) {
+                this.setTrackText("I do not know.");
+            } else if (time <= 43.401) {
+                this.setTrackText("I do not know.\nSays");
+            } else if (time <= 43.723) {
+                this.setTrackText("I do not know.\nSays the");
+            } else if (time <= 44.363) {
+                this.setTrackText("I do not know.\nSays the great");
+            } else if (time <= 45.028) {
+                this.setTrackText("I do not know.\nSays the great bell");
+            } else if (time <= 45.739) {
+                this.setTrackText("I do not know.\nSays the great bell at");
+            } else if (time <= 46.535) {
+                this.setTrackText("I do not know.\nSays the great bell at Bow");
+            } else if (time <= 46.641 && !this.bellTextFade) {
+                this.trackDisplay.fadeTo(0, 350, "linear", () => {
+                    this.trackDisplay.alpha = 0;
+                    this.fullChanged();
+                });
+                this.bellTextFade = true;
+            }
+        }
 
         if (now >= this.nextUpdateDeadline) {
             this.nextUpdateDeadline = Date.now() + 2000;
@@ -544,7 +721,7 @@ class PeriodTimerApp extends FrameMorph {
         }
 
         var details = this.periodDetails,
-            timeLeft = time(this.clock.deadline - now), current = new Date();
+            timeLeft = window.time(this.clock.deadline - now), current = new Date();
 
         details.text = `(${Math.floor(timeLeft.hours)}hr ${Math.floor(timeLeft.minutes)}m ${Math.floor(timeLeft.seconds)}s) [${current.getHours()}:${current.getMinutes() < 10 ?  "0" + current.getMinutes() : current.getMinutes()}]`;
 
