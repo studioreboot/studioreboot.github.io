@@ -97,7 +97,7 @@ function trand (min, max) {
 };
 
 var version = 0, gotVersionYet = false,
-    versionURL = "https://studioreboot.github.io/ptimer/version";
+    versionURL = "https://raw.githubusercontent.com/studioreboot/studioreboot.github.io/main/ptimer/version";
 
 (function(){
     var xhr = new XMLHttpRequest();
