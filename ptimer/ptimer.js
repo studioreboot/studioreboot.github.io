@@ -273,15 +273,15 @@ class PeriodTimerApp extends FrameMorph {
     }
 
     async pickNextTrack () {
+        var idx = this.selectableTracks.length > 1 ? +(await trand(0, this.selectableTracks.length - 1)) : 0;
+
+        this.tracksToBeUsedNext.push(this.selectableTracks[idx]);
+        this.selectableTracks.splice(idx, 1);
+
         if (this.selectableTracks.length < 1) {
             this.selectableTracks = this.tracksToBeUsedNext.slice();
             this.tracksToBeUsedNext = [];
         }
-
-        var idx = +(await trand(0, this.selectableTracks.length - 1));
-
-        this.tracksToBeUsedNext.push(this.selectableTracks[idx]);
-        this.selectableTracks.splice(idx, 1);
 
         this.nextTrack = this.tracksToBeUsedNext[this.tracksToBeUsedNext.length - 1];
 
@@ -316,7 +316,9 @@ class PeriodTimerApp extends FrameMorph {
             this.gainNode.gain.value = 0.15;
         };
 
-        //console.log(url);
+        url = window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/" + url;
+
+        console.log("fetching audio: " + url);
         
         var xhr = new XMLHttpRequest();
         xhr.responseType = "arraybuffer";
@@ -339,6 +341,7 @@ class PeriodTimerApp extends FrameMorph {
                 source.connect(self.gainNode);
                 self.nextTrackAudio = source;
                 self.songLoadedYet = true;
+                console.log("audio loaded: " + url);
             });
         };
         xhr.send(null);
@@ -505,7 +508,7 @@ class PeriodTimerApp extends FrameMorph {
     step () {
         if (!this.didMakeThingsYet) return;
 
-        var now = Date.now();
+        var now = Date.now(), self = this;
 
         if (now >= this.deadlines[this.index] && this.index < this.deadlines.length) {
             this.index++;
@@ -516,6 +519,10 @@ class PeriodTimerApp extends FrameMorph {
             this.bellIndex++;
             if (this.waitTime) {
                 bell.play();
+                this.audioContext.suspend();
+                bell.onended = function () {
+                    self.audioContext.resume();
+                };
             }
         };
 
