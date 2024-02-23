@@ -204,6 +204,7 @@ class PeriodTimerApp extends FrameMorph {
 
         this.bellIndex = 0;
         this.waitTime = false;
+        this.testBell = false;
 
         this.periods = [
             "Arrival",
@@ -238,6 +239,7 @@ class PeriodTimerApp extends FrameMorph {
         // things:
         this.clock = null;
         this.periodTitle = null;
+        this.disableGainControl = false;
 
         this.didMakeThingsYet = false;
         this.canTapYet = false;
@@ -312,8 +314,8 @@ class PeriodTimerApp extends FrameMorph {
             url = "tracks/bg" + this.nextTrack + (this.nextTrack < 10 ? ".wav" : ".ogg"),
             self = this;
 
-        if (this.nextTrack !== 12) {
-            this.gainNode.gain.value = 0.15;
+        if (this.nextTrack !== 12 && !this.disableGainControl) {
+            this.gainNode.gain.value = 0.25;
         };
 
         url = window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/" + url;
@@ -515,15 +517,25 @@ class PeriodTimerApp extends FrameMorph {
             this.updateUI();
         };
 
-        if (now >= this.bellHits[this.bellIndex] && this.bellIndex < this.bellHits.length) {
+        if ((now >= this.bellHits[this.bellIndex] && this.bellIndex < this.bellHits.length) || this.testBell) {
             this.bellIndex++;
             if (this.waitTime) {
-                bell.play();
-                this.audioContext.suspend();
-                bell.onended = function () {
-                    self.audioContext.resume();
-                };
+                this.disableGainControl = true;
+                var lastGain = this.gainNode.gain.value;
+                this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 1.25);
+                setTimeout(() => {
+                    bell.play();
+                    this.audioContext.suspend();
+                    bell.onended = function () {
+                        self.audioContext.resume();
+                        self.gainNode.gain.linearRampToValueAtTime(lastGain, self.audioContext.currentTime + 1.25);
+                        setTimeout(() => {
+                            self.disableGainControl = false;
+                        }, 1250);
+                    };
+                }, 1250);
             }
+            this.testBell = false;
         };
 
         if (now >= this.nextUpdateDeadline) {
