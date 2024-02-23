@@ -57,17 +57,42 @@ const BELL_DELAY = 48264;
 
 var newNumber = irand(0, tracks.length - 1);
 
+/** @param {XMLHttpRequest} anXMLHttpRequest */
+function debugXHR (anXMLHttpRequest) {
+    anXMLHttpRequest.addEventListener("readystatechange", (ev) => {
+        console.log("XHR readyState has changed to " + anXMLHttpRequest.readyState);
+    });
+    anXMLHttpRequest.addEventListener("error", (ev) => {
+        console.log("XHR request failed");
+    });
+}
+
+function centerBetween (p1, p2) {
+    return p1.add(p2.subtract(p1).divideBy(2));
+};
+
 function trand (min, max) {
     return new Promise((resolve, reject) => {
+        var cancelOut = false;
         var xhr = new XMLHttpRequest();
+        // debugXHR(xhr);
         xhr.open("GET", `https://www.random.org/integers/?num=1&min=${min}&max=${max}&format=plain&col=1&base=10&rnd=new`, true);
         xhr.onload = function () {
-            resolve(+xhr.responseText);
+            if (!cancelOut) {
+                resolve(+xhr.responseText);
+            }
         };
         xhr.onerror = function () {
-            resolve(irand(min, max));
+            if (!cancelOut) {
+                resolve(irand(min, max));
+            }
         };
         xhr.send(null);
+
+        setTimeout(() => {
+            cancelOut = true;
+            resolve(irand(min, max));
+        }, 2000);
     });
 };
 
@@ -145,6 +170,8 @@ class PeriodTimerApp extends FrameMorph {
 
         this.trackProgramCounter = 0;
 
+        //this.microphone = new Microphone();
+
         this.audioContext = new AudioContext();
 
         this.deadlines = [
@@ -215,11 +242,24 @@ class PeriodTimerApp extends FrameMorph {
         this.didMakeThingsYet = false;
         this.canTapYet = false;
 
-        setTimeout(() => {
-            this.canTapYet = true;
-        }, 2000);    
+        this.songLoadedYet = false;
 
+        //this.audioContext.resume();
+
+        this.checkDidGetSongYet();
+
+        this.createNodes();
         this.pickNextTrack();
+    }
+
+    checkDidGetSongYet () {
+        if (this.songLoadedYet) {
+            this.canTapYet = true;
+        } else {
+            setTimeout(() => {
+                this.checkDidGetSongYet();
+            }, 1000);
+        }
     }
 
     showTapMenu () {
@@ -238,7 +278,8 @@ class PeriodTimerApp extends FrameMorph {
             this.tracksToBeUsedNext = [];
         }
 
-        var idx = await trand(0, this.selectableTracks.length - 1);
+        var idx = +(await trand(0, this.selectableTracks.length - 1));
+
         this.tracksToBeUsedNext.push(this.selectableTracks[idx]);
         this.selectableTracks.splice(idx, 1);
 
@@ -254,7 +295,9 @@ class PeriodTimerApp extends FrameMorph {
 
         /* ctx.fillStyle = BLACK.lighter(15).toString();
         ctx.beginPath();
-        ctx.arc(this.width / 2, this.height / 2, ) */
+        ctx.arc(this.width / 2, this.height / 2, this.microphone.volume * adjust(25), 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill(); */
     }
 
     createNodes () {
@@ -272,8 +315,10 @@ class PeriodTimerApp extends FrameMorph {
         if (this.nextTrack !== 12) {
             this.gainNode.gain.value = 0.15;
         };
+
+        //console.log(url);
         
-        /* var xhr = new XMLHttpRequest();
+        var xhr = new XMLHttpRequest();
         xhr.responseType = "arraybuffer";
         xhr.open("GET", url, true);
         xhr.onload = function () {
@@ -282,6 +327,7 @@ class PeriodTimerApp extends FrameMorph {
                 source = ctx.createBufferSource();
                 source.buffer = buffer;
                 source.onended = function () {
+                    source.disconnect();
                     self.currentTrack = -1;
                     self.currentTrackAudio = null;
                     setTimeout(() => {
@@ -292,29 +338,10 @@ class PeriodTimerApp extends FrameMorph {
                 }
                 source.connect(self.gainNode);
                 self.nextTrackAudio = source;
+                self.songLoadedYet = true;
             });
         };
-        xhr.send(null); */
-
-        var aud = new Audio(), self = this;
-
-        if (this.nextTrack !== 12) {
-            aud.volume = 0.15;
-        };
-
-        aud.src = "tracks/bg" + this.nextTrack + (this.nextTrack < 10 ? ".wav" : ".ogg");
-        aud.load();
-        aud.onended = function () {
-            self.currentTrack = -1;
-            self.currentTrackAudio = null;
-            setTimeout(() => {
-                self.playTrack();
-            }, 2000);
-            self.trackProgramCounter = 0;
-            self.updateUI();
-        };
-
-        this.nextTrackAudio = aud;
+        xhr.send(null);
     }
 
     openIn (aWorld) {
@@ -333,6 +360,9 @@ class PeriodTimerApp extends FrameMorph {
         this.createTrackDisplays();
 
         this.didMakeThingsYet = true;
+
+        this.audioContext.resume();
+        //this.microphone.start();
 
         setTimeout(() => {
             this.waitTime = true;
@@ -404,15 +434,16 @@ class PeriodTimerApp extends FrameMorph {
             this.tappers.destroy();
             this.tappers = null;
 
+            this.audioContext.resume();
+
             this.buildUI();
             this.fixLayout();
             this.playTrack();
         } else {
-            //this.doPause = !this.doPause;
-            if (this.currentTrackAudio.paused) {
-                this.currentTrackAudio.play();
+            if (this.audioContext.state === "suspended") {
+                this.audioContext.resume();
             } else {
-                this.currentTrackAudio.pause();
+                this.audioContext.suspend();
             }
         };
     }
@@ -424,8 +455,8 @@ class PeriodTimerApp extends FrameMorph {
 
         if (!this.didMakeThingsYet) return;
 
-        var periodTitle = this.periodTitle, clock = this.clock, w = this.width, c = this.center,
-            smallerText = this.periodDetails;
+        var periodTitle = this.periodTitle, clock = this.clock,
+            w = this.width, c = this.center, smallerText = this.periodDetails;
 
         clock.setRadius(adjust(270, true));
         clock.center = c.add(new Point(0, adjust(16)));
@@ -475,12 +506,6 @@ class PeriodTimerApp extends FrameMorph {
         if (!this.didMakeThingsYet) return;
 
         var now = Date.now();
-
-        /* if (this.audioContext.state === "suspended" && !this.doPause) {
-            this.audioContext.resume();
-        } else if (this.audioContext.state === "running" && this.doPause) {
-            this.audioContext.suspend();
-        } */
 
         if (now >= this.deadlines[this.index] && this.index < this.deadlines.length) {
             this.index++;
@@ -565,7 +590,7 @@ class PeriodTimerApp extends FrameMorph {
 
         this.nextTrack = this.nextTrackAudio = this.nextTrackMeta = null;
 
-        this.currentTrackAudio.play();
+        this.currentTrackAudio.start();
 
         this.pickNextTrack();
 
