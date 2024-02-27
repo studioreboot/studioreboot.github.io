@@ -8964,6 +8964,10 @@ class StringMorph extends Morph {
     mouseClickLeft (pos) {
         var cursor, slot, clickedText, startMark, endMark;
 
+        if (this.world) {
+            this.world.keyboardHandler.focus();
+        }
+
         if (this.isEditable) {
             if (!this.currentlySelecting) {
                 this.edit(); // creates a new cursor
