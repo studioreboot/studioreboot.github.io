@@ -196,9 +196,9 @@ class PeriodTimerApp extends FrameMorph {
             msAt(11, 43),
             msAt(12, 26),
             msAt(12, 28),
-            msAt(1, 0),
-            msAt(1, 40),
-            msAt(2, 29),
+            msAt(13, 0),
+            msAt(13, 40),
+            msAt(14, 29),
             tonight.getMilliseconds()
         ];
 
