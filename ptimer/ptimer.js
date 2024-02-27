@@ -274,6 +274,18 @@ class PeriodTimerApp extends FrameMorph {
         }
     }
 
+    developersMenu () {
+        var menu = super.developersMenu();
+        menu.addItem(
+            "test bell",
+            () => {
+                this.testBell = true;
+            },
+            "starts the bell sequence"
+        );
+        return menu;
+    }
+
     showTapMenu () {
         var tappers = new TextMorph("tap here please.", adjust(36), "monospace");
 
