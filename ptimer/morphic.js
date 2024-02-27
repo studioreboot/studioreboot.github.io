@@ -12013,6 +12013,7 @@ class WorldMorph extends FrameMorph {
         for (let i = 0; i < this.broken.length; i++) {
             const rect = this.broken[i];
             if (rect.extent.gt(ZERO)) {
+                ctx.clearRect(rect.left, rect.top, rect.width, rect.height);
                 this.fullDrawOn(ctx, rect);
             }
         }

@@ -126,7 +126,7 @@ var rain = new Audio("rain.ogg");
 rain.loop = true;
 rain.volume = 0;
 
-var bell = new PleaseSound("bell.ogg");
+var bell = new Sound("bell.ogg");
 bell.volume = 80;
 bell.applyTo();
 

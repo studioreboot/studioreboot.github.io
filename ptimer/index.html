@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Period Timer</title>
     <script src="morphic.js"></script>
-    <script src="mic.js"></script>
     <script src="sound.js"></script>
+    <script src="mic.js"></script>
     <script src="ptimer.js"></script>
     <script>
-        var world, pTimer;
+        var world, pTimer, script;
         window.onload = function () {
             world = new WorldMorph(document.getElementById("world"));
             world.isDevMode = true;
