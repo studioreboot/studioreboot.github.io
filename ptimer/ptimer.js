@@ -42,14 +42,14 @@ const tracks = [
     `Johnny Long & His Orchestra - "In The Middle Of May" (1940)`,
     `Ray Noble & His Orchestra - "Midnight, the Stars and You" (1934)\n(heard in the 1980 movie "The Shining")`,
     `Ray Noble & His Orchestra - "The Very Thought Of You" (1934)`,
-    `Glenn Miller & His Orchestra - "In The Mood" (1939)\n(the title is an innuendo)`,
+    `Glenn Miller & His Orchestra - "In The Mood" (1939)\n(the title is an innuendo, in fact the word is an innuendo)`,
     `Sid Phillips & His Melodians - "Heartaches" (1931)\n(heard in the "Mr. Incredible" memes,\nyou know, when he turns more into a skeleton as time progresses.)`,
     `Glenn Miller & His Orchestra - "I Know Why (And So Do You)" (1941)\n(from "Sun Valley Serenade")`,
     `Layton & Johnstone - "The Wedding Of The Painted Doll" (1929)\n(the definition of the feeling "nobody's home, but i hear footsteps\noutside my door, and i don't like it.")`,
     /* `Pee Wee Hunt & His Orchestra - "Twelve Street Rag" (1948)\n("inspiration" of a theme heard in "Spongebob SquarePants")`, */
     `John Scott Trotter & His Orchestra - "Cloud Dreams" (1968)`,
-    `Russ Morgan & His Orchestra - "Goodnight My Beautiful" (1937-38)\n(you might've heard this, depending on whether you have a life or not,\ni got the latter.)`,
-    `Alex Mendham & His Orchestra - "Midnight, the Stars and You (2020)\n(in high fidelity, no this is not the one heard in\n"The Shining")`,
+    `Russ Morgan & His Orchestra - "Goodnight My Beautiful" (1937-38)\n(you might've heard this, depending on whether you have a life or not,\ni don't have one.)`,
+    `Alex Mendham & His Orchestra - "Midnight, the Stars and You (2020)\n(in high fidelity, no this is not the one heard in\n"The Shining" you morons)`,
     `Ray Noble & His Orchestra - "This Is Romance" (1934)`
 ];
 
@@ -126,7 +126,7 @@ var rain = new Audio("rain.ogg");
 rain.loop = true;
 rain.volume = 0;
 
-var bell = new Sound("bell.ogg");
+var bell = new PleaseSound("bell.ogg");
 bell.volume = 80;
 bell.applyTo();
 
@@ -175,6 +175,11 @@ class PeriodTimerApp extends FrameMorph {
 
         this.audioContext = new AudioContext();
 
+        var tonight = new Date();
+
+        tonight.setHours(11);
+        tonight.setMinutes(59);
+
         this.deadlines = [
             msAt(7, 30),
             msAt(7, 50),
@@ -193,7 +198,7 @@ class PeriodTimerApp extends FrameMorph {
             msAt(1, 0),
             msAt(1, 40),
             msAt(2, 29),
-            msAt(2, 32)
+            tonight.getMilliseconds()
         ];
 
         this.bellHits = [];
