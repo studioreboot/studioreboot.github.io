@@ -275,7 +275,7 @@ class PeriodTimerApp extends FrameMorph {
     }
 
     showTapMenu () {
-        var tappers = new TextMorph("tap here please.", adjust(36), "\"Consolas\"");
+        var tappers = new TextMorph("tap here please.", adjust(36), "monospace");
 
         tappers.color = WHITE;
         tappers.center = this.center;
@@ -403,11 +403,11 @@ class PeriodTimerApp extends FrameMorph {
 
         clock.center = this.center;
 
-        periodTitle = new StringMorph("Period 1", adjust(48), "\"Consolas\"");
+        periodTitle = new StringMorph("Period 1", adjust(48), "monospace");
         periodTitle.position = new Point(this.left + adjust(15), this.bottom + adjust(15));
         periodTitle.color = WHITE;
 
-        smallerText = new StringMorph("", adjust(36, true), "\"Consolas\"", false, false);
+        smallerText = new StringMorph("", adjust(36, true), "monospace", false, false);
         smallerText.position = periodTitle.bottomRight.subtract(new Point(0, smallerText.height));
         smallerText.color = WHITE.darker(36);
 
@@ -423,7 +423,7 @@ class PeriodTimerApp extends FrameMorph {
     createTrackDisplays () {
         var trackDisplay, verse1, verse2;
 
-        trackDisplay = new TextMorph("", adjust(24, true), "\"Consolas\"", false, true, "center");
+        trackDisplay = new TextMorph("", adjust(24, true), "monospace", false, true, "center");
         trackDisplay.center = new Point(
             this.center.x,
             this.clock.top - ((this.top - this.clock.top) / 2)
@@ -434,8 +434,8 @@ class PeriodTimerApp extends FrameMorph {
 
         this.add(this.trackDisplay);
 
-        verse1 = new TextMorph("", adjust(18, true), "\"Consolas\"", null, null, "center", adjust(480));
-        verse2 = new TextMorph("", adjust(18, true), "\"Consolas\"", null, null, "center", adjust(480));
+        verse1 = new TextMorph("", adjust(18, true), "monospace", null, null, "center", adjust(480));
+        verse2 = new TextMorph("", adjust(18, true), "monospace", null, null, "center", adjust(480));
 
         verse1.color = verse2.color = WHITE;
 
