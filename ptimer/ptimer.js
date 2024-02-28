@@ -15,6 +15,13 @@ function irand (min, max) {
     return Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1) + Math.ceil(min));
 };
 
+function fixToStandard (num) {
+    if (num.toString().length === 1) {
+        return "0" + num;
+    }
+    return num.toString();
+}
+
 function ms (hour = 0, minute = 0, second = 0, millisecond = 0) {
     return (((hour * 60 * 60 * 1000) + (minute * 60 * 1000)) + (second * 1000)) + millisecond;
 };
@@ -780,14 +787,14 @@ class PeriodTimerApp extends FrameMorph {
         }
 
         var details = this.periodDetails,
-            timeLeft = window.time(this.clock.deadline - now), current = new Date(), isAM = true, hours = current.getHours();
+            timeLeft = window.time(this.clock.deadline - now), current = new Date(), isAM = true, hours = fixToStandard(current.getHours());
         
         if (current.getHours() >= 13) {
             isAM = false;
             hours -= 12;
         }
 
-        details.text = `(${Math.floor(timeLeft.hours)}hr ${Math.floor(timeLeft.minutes)}m ${Math.floor(timeLeft.seconds)}s) [${hours}:${current.getMinutes() < 10 ?  "0" + current.getMinutes() : current.getMinutes()} ${isAM ? "AM" : "PM"}]`;
+        details.text = `(${Math.floor(timeLeft.hours)}hr ${Math.floor(timeLeft.minutes)}m ${Math.floor(timeLeft.seconds)}s) [${hours}:${fixToStandard(current.getMinutes())} ${isAM ? "AM" : "PM"}]`;
 
         details.rerender();
         details.fixLayout();
