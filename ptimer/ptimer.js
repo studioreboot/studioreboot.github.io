@@ -447,6 +447,7 @@ class PeriodTimerApp extends FrameMorph {
             this.clock.top - ((this.top - this.clock.top) / 2)
         );
         trackDisplay.color = WHITE;
+        trackDisplay.fontName = "Consolas";
 
         this.trackDisplay = trackDisplay;
 
