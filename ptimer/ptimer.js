@@ -233,9 +233,8 @@ class PeriodTimerApp extends FrameMorph {
             "Period 6",
             "Transfer Time 5",
             "Lunch (7th & 8th)",
-            "Transfer Time 6",
             "Period 8",
-            "Transfer Time 7",
+            "Transfer Time 6",
             "Period 9",
             "Dismissal"
         ];
@@ -582,7 +581,7 @@ class PeriodTimerApp extends FrameMorph {
     step () {
         if (!this.didMakeThingsYet) return;
 
-        var now = new Date(), self = this
+        var now = new Date(), self = this;
 
         if (now >= this.deadlines[this.index] && this.index < this.deadlines.length) {
             this.index++;
