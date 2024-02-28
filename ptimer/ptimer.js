@@ -188,7 +188,7 @@ class PeriodTimerApp extends FrameMorph {
 
         var tonight = new Date();
 
-        tonight.setHours(11);
+        tonight.setHours(23);
         tonight.setMinutes(59);
 
         this.deadlines = [
