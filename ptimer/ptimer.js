@@ -286,6 +286,15 @@ class PeriodTimerApp extends FrameMorph {
             },
             "starts the bell sequence"
         );
+        if (this.nextTrackAudio) {
+            menu.addItem(
+                "skip this track",
+                () => {
+                    this.currentTrackAudio.stop();
+                },
+                "skips the current track"
+            );
+        }
         return menu;
     }
 
