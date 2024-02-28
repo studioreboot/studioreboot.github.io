@@ -209,7 +209,7 @@ class PeriodTimerApp extends FrameMorph {
             msAt(13, 0),
             msAt(13, 40),
             msAt(14, 29),
-            tonight.getMilliseconds()
+            tonight.getTime()
         ];
 
         this.bellHits = [];
