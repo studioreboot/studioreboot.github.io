@@ -21,8 +21,10 @@ function ms (hour = 0, minute = 0, second = 0, millisecond = 0) {
 
 function msAt (hour = 0, minute = 0, second = 0, millisecond = 0) {
     var dt = new Date();
-
-    return Date.now() - ms(dt.getHours() - hour, dt.getMinutes() - minute, dt.getSeconds() - second, dt.getMilliseconds() - millisecond);
+    dt.setHours(hour);
+    dt.setMinutes(minute);
+    dt.setSeconds(second, millisecond);
+    return dt.getTime();
 };
 
 function time (ms) {
@@ -51,7 +53,8 @@ const tracks = [
     `Russ Morgan & His Orchestra - "Goodnight My Beautiful" (1937-38)\n(you might've heard this, depending on whether you have a life or not,\ni don't have one.)`,
     `Alex Mendham & His Orchestra - "Midnight, the Stars and You (2020)\n(in high fidelity, no this is not the one heard in\n"The Shining" you morons)`,
     `Ray Noble & His Orchestra - "This Is Romance" (1934)`,
-    `Charlie Spivak & His Orchestra - "Time Alone Will Tell" (1944)`
+    `Charlie Spivak & His Orchestra - "Time Alone Will Tell" (1944)`,
+    `The Pied Pipers - "Alice Blue Gown" (1948)`
 ];
 
 const BELL_DELAY = 48264;
@@ -288,6 +291,7 @@ class PeriodTimerApp extends FrameMorph {
 
     showTapMenu () {
         var tappers = new TextMorph("tap here please.", adjust(36), "monospace");
+        tappers.fontName = "Consolas";
 
         tappers.color = WHITE;
         tappers.center = this.center;
@@ -422,6 +426,8 @@ class PeriodTimerApp extends FrameMorph {
         smallerText = new StringMorph("", adjust(36, true), "monospace", false, false);
         smallerText.position = periodTitle.bottomRight.subtract(new Point(0, smallerText.height));
         smallerText.color = WHITE.darker(36);
+        
+        periodTitle.fontName = smallerText.fontName = "Consolas";
 
         this.clock = clock;
         this.periodTitle = periodTitle;
@@ -448,6 +454,7 @@ class PeriodTimerApp extends FrameMorph {
 
         verse1 = new TextMorph("", adjust(18, true), "monospace", null, null, "center", adjust(480));
         verse2 = new TextMorph("", adjust(18, true), "monospace", null, null, "center", adjust(480));
+        verse1.fontName = verse2.fontName = "Consolas";
 
         verse1.color = verse2.color = WHITE;
 
@@ -551,7 +558,7 @@ class PeriodTimerApp extends FrameMorph {
     step () {
         if (!this.didMakeThingsYet) return;
 
-        var now = Date.now(), self = this;
+        var now = new Date(), self = this
 
         if (now >= this.deadlines[this.index] && this.index < this.deadlines.length) {
             this.index++;
