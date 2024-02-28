@@ -244,6 +244,7 @@ class PeriodTimerApp extends FrameMorph {
         this.nextUpdateDeadline = Date.now() + 15000;
         this.doPause = false;
         this.volume = 0;
+        this.isMuted = false;
 
         for (let i = 1; i < (tracks.length + 1); i++) {
             this.selectableTracks.push(i);
@@ -279,6 +280,7 @@ class PeriodTimerApp extends FrameMorph {
 
     developersMenu () {
         var menu = super.developersMenu();
+        menu.addLine();
         menu.addItem(
             "test bell",
             () => {
@@ -295,6 +297,18 @@ class PeriodTimerApp extends FrameMorph {
                 "skips the current track"
             );
         }
+        menu.addItem(
+            this.isMuted ? "unmute" : "mute",
+            () => {
+                this.isMuted = !this.isMuted;
+                if (this.isMuted) {
+                    this.gainNode.gain.value = 0;
+                } else {
+                    this.gainNode.gain.value = 0.25;
+                }
+            },
+            `${this.isMuted ? "un" : ""}mutes the audio`
+        );
         return menu;
     }
 
@@ -357,7 +371,7 @@ class PeriodTimerApp extends FrameMorph {
             url = "tracks/bg" + this.nextTrack + (this.nextTrack < 10 ? ".wav" : ".ogg"),
             self = this;
 
-        if (this.nextTrack !== 12 && !this.disableGainControl) {
+        if ((this.nextTrack !== 12 && !this.disableGainControl) && !this.isMuted) {
             this.gainNode.gain.value = 0.25;
         };
 
