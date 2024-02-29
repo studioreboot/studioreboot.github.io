@@ -117,9 +117,11 @@ var version = 0, versionName = "", gotVersionYet = false,
     xhr.open("GET", versionURL, true);
     xhr.onload = function () {
         var versionData = xhr.responseText.split("|");
+        console.log(xhr.responseText)
         version = +(versionData[0]);
-        versionName = (versionData[1]);
+        versionName = (versionData[1].replaceAll("\n", "").replaceAll("\r", ""));
         gotVersionYet = true;
+        console.log("got version " + version + " (" + versionName + ")");
     };
     xhr.send(null);
 })();
@@ -457,7 +459,7 @@ class PeriodTimerApp extends FrameMorph {
                 source.connect(self.gainNode);
                 self.nextTrackAudio = source;
                 self.songLoadedYet = true;
-                self.floatTimeDomain = self.analyserNode.getByteTimeDomainData(aBuffer);
+                /* self.floatTimeDomain = self.analyserNode.getByteTimeDomainData(aBuffer.getChannelData(0)); */
                 console.log("audio loaded: " + url);
             });
         };
@@ -509,7 +511,7 @@ class PeriodTimerApp extends FrameMorph {
         periodTitle.position = new Point(this.left + adjust(15), this.bottom + adjust(15));
         periodTitle.color = WHITE;
 
-        versionNameText = new StringMorph(`Version ${version} (${versionName})`, adjust(36, true), "monospace");
+        versionNameText = new StringMorph(`Version ${version} (${versionName})`, adjust(24, true), "monospace");
         versionNameText.position = periodTitle.position.subtract(new Point(
             0,
             versionNameText.height
