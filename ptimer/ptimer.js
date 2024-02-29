@@ -49,7 +49,7 @@ const tracks = [
     `George Olsen & His Music - "Lullaby Of The Leaves" (1932)`,
     `Ray Noble & His Orchestra - "It's All Forgotten Now" (1934)`,
     `Johnny Long & His Orchestra - "In The Middle Of May" (1940)`,
-    `Ray Noble & His Orchestra - "Midnight, the Stars and You" (1934)\n(heard in the 1980 movie "The Shining")`,
+    `Freddie Slack & His Orchestra - "Mr. Five by Five" (1942)\n(a #1 hit back in it's day, this was filled with fat jokes, whenever Squilly says "looks like\nMr. Five by Five" this is the song he's talking about, Colton wouldn't like this one)`,
     `Ray Noble & His Orchestra - "The Very Thought Of You" (1934)`,
     `Glenn Miller & His Orchestra - "In The Mood" (1939)\n(the title is an innuendo, in fact the word is an innuendo)`,
     `Sid Phillips & His Melodians - "Heartaches" (1931)\n(heard in the "Mr. Incredible" memes,\nyou know, when he turns more into a skeleton as time progresses.)`,
@@ -63,6 +63,8 @@ const tracks = [
     `Charlie Spivak & His Orchestra - "Time Alone Will Tell" (1944)`,
     `The Pied Pipers - "Alice Blue Gown" (1948)`
 ];
+
+const REVERB_ENABLE = true;
 
 const BELL_DELAY = 48264;
 
@@ -107,14 +109,16 @@ function trand (min, max) {
     });
 };
 
-var version = 0, gotVersionYet = false,
+var version = 0, versionName = "", gotVersionYet = false,
     versionURL = "https://raw.githubusercontent.com/studioreboot/studioreboot.github.io/main/ptimer/version";
 
 (function(){
     var xhr = new XMLHttpRequest();
     xhr.open("GET", versionURL, true);
     xhr.onload = function () {
-        version = +xhr.responseText;
+        var versionData = xhr.responseText.split("|");
+        version = +(versionData[0]);
+        versionName = (versionData[1]);
         gotVersionYet = true;
     };
     xhr.send(null);
@@ -125,7 +129,7 @@ function checkVersion () {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", versionURL, true);
         xhr.onload = function () {
-            if (+xhr.responseText > version) {
+            if (+(xhr.responseText.split(" ")[0]) > version) {
                 window.location.reload();
             }
         };
@@ -224,6 +228,7 @@ class PeriodTimerApp extends FrameMorph {
         this.testBell = false;
         this.isBellPlaying = false;
         this.analyserNode = null;
+        this.convolverNode = null;
 
         this.periods = [
             "Arrival",
@@ -249,8 +254,9 @@ class PeriodTimerApp extends FrameMorph {
         this.didCheckEvent = false;
         this.nextUpdateDeadline = Date.now() + 15000;
         this.doPause = false;
-        this.volume = 0;
+        this.volume = window.location.href.indexOf("5500") === -1 ? 0.25 : 1;
         this.isMuted = false;
+        this.loadedConvolverSample = false;
 
         for (let i = 1; i < (tracks.length + 1); i++) {
             this.selectableTracks.push(i);
@@ -259,6 +265,7 @@ class PeriodTimerApp extends FrameMorph {
         // things:
         this.clock = null;
         this.periodTitle = null;
+        this.versionNameText = null;
         this.disableGainControl = false;
 
         this.didMakeThingsYet = false;
@@ -274,8 +281,17 @@ class PeriodTimerApp extends FrameMorph {
         this.pickNextTrack();
     }
 
+    get musicVolume () {
+        return this.volume;
+    }
+
+    set musicVolume (m) {
+        this.volume = m;
+        this.gainNode.gain.value = m;
+    }
+
     checkDidGetSongYet () {
-        if (this.songLoadedYet) {
+        if (this.songLoadedYet && this.loadedConvolverSample) {
             this.canTapYet = true;
         } else {
             setTimeout(() => {
@@ -342,7 +358,12 @@ class PeriodTimerApp extends FrameMorph {
 
         this.nextTrack = this.tracksToBeUsedNext[this.tracksToBeUsedNext.length - 1];
 
-        this.loadNextTrack();
+        if (isNil(this.nextTrack)) {
+            this.pickNextTrack();
+        } else {
+            this.loadNextTrack();
+        }
+
         // this.parseNextTrackMeta();
     }
 
@@ -363,7 +384,37 @@ class PeriodTimerApp extends FrameMorph {
         var gain = this.audioContext.createGain(), analyzer;
 
         this.gainNode = gain;
-        this.gainNode.connect(this.audioContext.destination);
+
+        if (REVERB_ENABLE) {
+            var lowPass = this.audioContext.createBiquadFilter();
+
+            this.convolverNode = this.audioContext.createConvolver();
+            //this.convolverNode.normalize = true;
+
+            var xhr = new XMLHttpRequest(), self = this;
+            xhr.open("GET", window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/convolver.ogg");
+            xhr.responseType = "arraybuffer";
+            xhr.onload = function () {
+                self.audioContext.decodeAudioData(xhr.response, (buffer) => {
+                    self.convolverNode.buffer = buffer;
+                    self.loadedConvolverSample = true;
+                });
+            };
+            xhr.send(null);
+
+            this.convolverNode.connect(this.audioContext.destination);
+
+            lowPass.type = "lowpass";
+            lowPass.frequency.value = 3000;
+            lowPass.gain.value = 0.5;
+            lowPass.Q.value = 5;
+
+            lowPass.connect(this.convolverNode);
+
+            this.gainNode.connect(lowPass);
+        } else {
+            this.gainNode.connect(this.audioContext.destination);
+        }
         
         analyzer = this.audioContext.createAnalyser();
         analyzer.fftSize = 1024;
@@ -378,7 +429,7 @@ class PeriodTimerApp extends FrameMorph {
             self = this;
 
         if ((this.nextTrack !== 12 && !this.disableGainControl) && !this.isMuted) {
-            this.gainNode.gain.value = 0.25;
+            this.gainNode.gain.value = this.volume;
         };
 
         url = window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/" + url;
@@ -439,12 +490,18 @@ class PeriodTimerApp extends FrameMorph {
     }
 
     createClockAndPeriodTitle () {
-        var clock, periodTitle, smallerText;
+        var clock, periodTitle, smallerText, versionNameText;
 
         clock = new PTimerClockMorph();
         clock.setRadius(adjust(270, true));
         clock.lineWidth = adjust(2.5);
         clock.handWidth = adjust(5, true);
+
+        var dt = new Date();
+
+        if (dt.getMonth() === 2 && (dt.getDate() >= 16 && dt.getDate() <= 18)) {
+            clock.color = new Color(0, 128, 25);
+        }
 
         clock.center = this.center;
 
@@ -452,19 +509,32 @@ class PeriodTimerApp extends FrameMorph {
         periodTitle.position = new Point(this.left + adjust(15), this.bottom + adjust(15));
         periodTitle.color = WHITE;
 
+        versionNameText = new StringMorph(`Version ${version} (${versionName})`, adjust(36, true), "monospace");
+        versionNameText.position = periodTitle.position.subtract(new Point(
+            0,
+            versionNameText.height
+        ));
+        versionNameText.color = WHITE.darker(25);
+
         smallerText = new StringMorph("", adjust(36, true), "monospace", false, false);
         smallerText.position = periodTitle.bottomRight.subtract(new Point(0, smallerText.height));
         smallerText.color = WHITE.darker(36);
         
-        periodTitle.fontName = smallerText.fontName = "Consolas";
+        periodTitle.fontName = versionNameText.fontName = smallerText.fontName = "Consolas";
 
         this.clock = clock;
         this.periodTitle = periodTitle;
         this.periodDetails = smallerText;
+        this.versionNameText = versionNameText;
 
         this.add(this.clock);
         this.add(this.periodTitle);
         this.add(this.periodDetails);
+        this.add(this.versionNameText);
+    }
+
+    reactToDropOf (aMorph) {
+        this.addBack(aMorph);
     }
 
     createTrackDisplays () {
@@ -529,7 +599,8 @@ class PeriodTimerApp extends FrameMorph {
         if (!this.didMakeThingsYet) return;
 
         var periodTitle = this.periodTitle, clock = this.clock,
-            w = this.width, c = this.center, smallerText = this.periodDetails;
+            w = this.width, c = this.center, smallerText = this.periodDetails,
+            versionNameText = this.versionNameText;
 
         clock.setRadius(adjust(270, true));
         clock.center = c.add(new Point(0, adjust(16)));
@@ -539,6 +610,11 @@ class PeriodTimerApp extends FrameMorph {
             this.left + adjust(30),
             this.bottom - periodTitle.height - adjust(15)
         );
+
+        versionNameText.position = periodTitle.position.subtract(new Point(
+            0,
+            versionNameText.height
+        ));
 
         this.trackDisplay.fontSize = adjust(24, true);
         this.trackDisplay.rerender();
