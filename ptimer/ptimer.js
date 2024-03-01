@@ -693,7 +693,7 @@ class PeriodTimerApp extends FrameMorph {
     step () {
         if (!this.didMakeThingsYet) return;
 
-        var now = new Date(), self = this;
+        var now = Date.now(), self = this;
 
         if (now >= this.deadlines[this.index] && this.index < this.deadlines.length) {
             this.index++;
