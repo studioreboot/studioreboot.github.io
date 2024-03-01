@@ -259,6 +259,7 @@ class PeriodTimerApp extends FrameMorph {
         this.volume = window.location.href.indexOf("5500") === -1 ? 0.25 : 1;
         this.isMuted = false;
         this.loadedConvolverSample = false;
+        this.muteButton = false;
 
         for (let i = 1; i < (tracks.length + 1); i++) {
             this.selectableTracks.push(i);
@@ -388,7 +389,8 @@ class PeriodTimerApp extends FrameMorph {
         this.gainNode = gain;
 
         if (REVERB_ENABLE) {
-            var lowPass = this.audioContext.createBiquadFilter();
+            var lowPass = this.audioContext.createBiquadFilter(),
+                highPass = this.audioContext.createBiquadFilter();
 
             this.convolverNode = this.audioContext.createConvolver();
             //this.convolverNode.normalize = true;
@@ -404,16 +406,21 @@ class PeriodTimerApp extends FrameMorph {
             };
             xhr.send(null);
 
-            this.convolverNode.connect(this.audioContext.destination);
-
             lowPass.type = "lowpass";
             lowPass.frequency.value = 3000;
             lowPass.gain.value = 0.5;
             lowPass.Q.value = 5;
 
-            lowPass.connect(this.convolverNode);
+            highPass.type = "highpass";
+            highPass.frequency.frequency = 260;
+            highPass.gain.value = 0.7;
+            highPass.Q.value = 7;
 
-            this.gainNode.connect(lowPass);
+            highPass.connect(this.audioContext.destination);
+            lowPass.connect(highPass);
+
+            this.convolverNode.connect(lowPass);
+            this.gainNode.connect(this.convolverNode);
         } else {
             this.gainNode.connect(this.audioContext.destination);
         }
@@ -492,7 +499,7 @@ class PeriodTimerApp extends FrameMorph {
     }
 
     createClockAndPeriodTitle () {
-        var clock, periodTitle, smallerText, versionNameText;
+        var clock, periodTitle, smallerText, versionNameText, muteBtn;
 
         clock = new PTimerClockMorph();
         clock.setRadius(adjust(270, true));
@@ -511,6 +518,15 @@ class PeriodTimerApp extends FrameMorph {
         periodTitle.position = new Point(this.left + adjust(15), this.bottom + adjust(15));
         periodTitle.color = WHITE;
 
+        muteBtn = new TriggerMorph(this, "muteAudio", "mute", adjust(48), "monospace");
+        muteBtn.labelColor = WHITE;
+        muteBtn.createLabel();
+        muteBtn.color = BLACK;
+        muteBtn.highlightColor = BLACK.lighter(15);
+        muteBtn.pressColor = BLACK.lighter(25);
+        muteBtn.extent = muteBtn.label.bounds.expandBy(adjust(5)).extent;
+        muteBtn.width = muteBtn.width + adjust(55, true);
+
         versionNameText = new StringMorph(`Version ${version} (${versionName})`, adjust(24, true), "monospace");
         versionNameText.position = periodTitle.position.subtract(new Point(
             0,
@@ -528,11 +544,13 @@ class PeriodTimerApp extends FrameMorph {
         this.periodTitle = periodTitle;
         this.periodDetails = smallerText;
         this.versionNameText = versionNameText;
+        this.muteButton = muteBtn;
 
         this.add(this.clock);
         this.add(this.periodTitle);
         this.add(this.periodDetails);
         this.add(this.versionNameText);
+        this.add(this.muteButton);
     }
 
     reactToDropOf (aMorph) {
@@ -584,13 +602,7 @@ class PeriodTimerApp extends FrameMorph {
             this.buildUI();
             this.fixLayout();
             this.playTrack();
-        } else {
-            if (this.audioContext.state === "suspended") {
-                this.audioContext.resume();
-            } else {
-                this.audioContext.suspend();
-            }
-        };
+        }
     }
 
     fixLayout () {
@@ -602,7 +614,7 @@ class PeriodTimerApp extends FrameMorph {
 
         var periodTitle = this.periodTitle, clock = this.clock,
             w = this.width, c = this.center, smallerText = this.periodDetails,
-            versionNameText = this.versionNameText;
+            versionNameText = this.versionNameText, muteBtn = this.muteButton;
 
         clock.setRadius(adjust(270, true));
         clock.center = c.add(new Point(0, adjust(16)));
@@ -631,6 +643,21 @@ class PeriodTimerApp extends FrameMorph {
 
         this.verse1.center = new Point(w / 6, c.y);
         this.verse2.center = new Point(w - (w / 6), c.y);
+
+        muteBtn.position = this.bottomRight.subtract(adjust(15)).subtract(muteBtn.extent);
+    }
+
+    muteAudio () {
+        this.isMuted = !this.isMuted;
+
+        if (this.isMuted) {
+            this.trackDisplay.hide();
+            this.muteButton.labelString = "unmute";
+        } else {
+            this.trackDisplay.show();
+            this.muteButton.labelString = "mute";
+        }
+        this.muteButton.createLabel();
     }
 
     fixVersePositions () {
@@ -701,6 +728,12 @@ class PeriodTimerApp extends FrameMorph {
             }
             this.testBell = false;
         };
+
+        if (this.isMuted && this.audioContext.state === "running") {
+            this.audioContext.suspend();
+        } else if ((!this.isMuted) && this.audioContext.state === "suspended") {
+            this.audioContext.resume();
+        }
 
         if (this.isBellPlaying) {
             var time = bell.currentTime;
