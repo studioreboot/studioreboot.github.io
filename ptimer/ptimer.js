@@ -49,7 +49,7 @@ const tracks = [
     `George Olsen & His Music - "Lullaby Of The Leaves" (1932)`,
     `Ray Noble & His Orchestra - "It's All Forgotten Now" (1934)`,
     `Johnny Long & His Orchestra - "In The Middle Of May" (1940)`,
-    `Freddie Slack & His Orchestra - "Mr. Five by Five" (1942)\n(a #1 hit back in it's day, this was filled with fat jokes, whenever Squilly says "looks like\nMr. Five by Five" this is the song he's talking about, Colton wouldn't like this one)`,
+    `Freddie Slack & His Orchestra - "Mr. Five by Five" (1942)\n(Colton wouldn't like this one)`,
     `Ray Noble & His Orchestra - "The Very Thought Of You" (1934)`,
     `Glenn Miller & His Orchestra - "In The Mood" (1939)\n(the title is an innuendo, in fact the word is an innuendo)`,
     `Sid Phillips & His Melodians - "Heartaches" (1931)\n(heard in the "Mr. Incredible" memes,\nyou know, when he turns more into a skeleton as time progresses.)`,
@@ -148,7 +148,7 @@ var bell = new Sound("bell.ogg");
 bell.volume = 80;
 bell.applyTo();
 
-const ENABLE_PASSES = false;
+const ENABLE_PASSES = true;
 
 //////////////////////////////////////////////////////////
 // PeriodTimerClock //////////////////////////////////////
@@ -389,6 +389,10 @@ class PeriodTimerApp extends FrameMorph {
     createNodes () {
         var gain = this.audioContext.createGain(), analyzer;
 
+        var finalAdjust = this.audioContext.createGain();
+        finalAdjust.gain.value = 0.75;
+        finalAdjust.connect(this.audioContext.destination);
+
         this.gainNode = gain;
 
         if (REVERB_ENABLE) {
@@ -410,29 +414,30 @@ class PeriodTimerApp extends FrameMorph {
             xhr.send(null);
 
             lowPass.type = "lowpass";
-            lowPass.frequency.value = 2500;
+            lowPass.frequency.value = 3500;
             lowPass.gain.value = 0.65;
-            lowPass.Q.value = 7;
+            lowPass.Q.value = 3;
 
             if (ENABLE_PASSES) {
                 highPass.type = "highpass";
-                highPass.frequency.frequency = 260;
-                highPass.gain.value = 0.7;
-                highPass.Q.value = 7;
+                highPass.frequency.frequency = 1000;
+                highPass.gain.value = 0.5;
+                highPass.Q.value = 2;
 
-                highPass.connect(this.audioContext.destination);
-                lowPass.connect(highPass);
+                highPass.connect(finalAdjust);
 
-                this.convolverNode.connect(lowPass);
+                this.convolverNode.connect(highPass);
+                lowPass.connect(this.convolverNode);
+                this.gainNode.connect(lowPass);
+
             } else {
-                lowPass.connect(this.audioContext.destination);
-                this.convolverNode.connect(lowPass);
+                this.convolverNode.connect(finalAdjust);
+                lowPass.connect(this.convolverNode);
+                this.gainNode.connect(lowPass);
+                
             }
-
-            
-            this.gainNode.connect(this.convolverNode);
         } else {
-            this.gainNode.connect(this.audioContext.destination);
+            this.gainNode.connect(finalAdjust);
         }
         
         analyzer = this.audioContext.createAnalyser();
