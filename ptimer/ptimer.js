@@ -61,7 +61,8 @@ const tracks = [
     `Alex Mendham & His Orchestra - "Midnight, the Stars and You (2020)\n(in high fidelity, no this is not the one heard in\n"The Shining" you morons)`,
     `Ray Noble & His Orchestra - "This Is Romance" (1934)`,
     `Charlie Spivak & His Orchestra - "Time Alone Will Tell" (1944)`,
-    `The Pied Pipers - "Alice Blue Gown" (1948)`
+    `The Pied Pipers - "Alice Blue Gown" (1948)`,
+    `The Pied Pipers - "Somehow" (1949)\n(the song that got cut from the ELA slideshow project)`
 ];
 
 const REVERB_ENABLE = true;
@@ -146,6 +147,8 @@ rain.volume = 0;
 var bell = new Sound("bell.ogg");
 bell.volume = 80;
 bell.applyTo();
+
+const ENABLE_PASSES = false;
 
 //////////////////////////////////////////////////////////
 // PeriodTimerClock //////////////////////////////////////
@@ -407,19 +410,26 @@ class PeriodTimerApp extends FrameMorph {
             xhr.send(null);
 
             lowPass.type = "lowpass";
-            lowPass.frequency.value = 3000;
-            lowPass.gain.value = 0.5;
-            lowPass.Q.value = 5;
+            lowPass.frequency.value = 2500;
+            lowPass.gain.value = 0.65;
+            lowPass.Q.value = 7;
 
-            highPass.type = "highpass";
-            highPass.frequency.frequency = 260;
-            highPass.gain.value = 0.7;
-            highPass.Q.value = 7;
+            if (ENABLE_PASSES) {
+                highPass.type = "highpass";
+                highPass.frequency.frequency = 260;
+                highPass.gain.value = 0.7;
+                highPass.Q.value = 7;
 
-            highPass.connect(this.audioContext.destination);
-            lowPass.connect(highPass);
+                highPass.connect(this.audioContext.destination);
+                lowPass.connect(highPass);
 
-            this.convolverNode.connect(lowPass);
+                this.convolverNode.connect(lowPass);
+            } else {
+                lowPass.connect(this.audioContext.destination);
+                this.convolverNode.connect(lowPass);
+            }
+
+            
             this.gainNode.connect(this.convolverNode);
         } else {
             this.gainNode.connect(this.audioContext.destination);
@@ -527,7 +537,7 @@ class PeriodTimerApp extends FrameMorph {
         muteBtn.extent = muteBtn.label.bounds.expandBy(adjust(5)).extent;
         muteBtn.width = muteBtn.width + adjust(55, true);
 
-        versionNameText = new StringMorph(`Version ${version} (${versionName})`, adjust(24, true), "monospace");
+        versionNameText = new StringMorph(`version ${version} (${versionName})`, adjust(24, true), "monospace");
         versionNameText.position = periodTitle.position.subtract(new Point(
             0,
             versionNameText.height
