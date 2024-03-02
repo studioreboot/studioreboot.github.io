@@ -62,7 +62,7 @@ const tracks = [
     `Ray Noble & His Orchestra - "This Is Romance" (1934)`,
     `Charlie Spivak & His Orchestra - "Time Alone Will Tell" (1944)`,
     `The Pied Pipers - "Alice Blue Gown" (1948)`,
-    `The Pied Pipers - "Somehow" (1949)\n(the song that got cut from the ELA slideshow project)`
+    /* `The Pied Pipers - "Somehow" (1949)\n(the song that got cut from the ELA slideshow project)` */
 ];
 
 const REVERB_ENABLE = true;
