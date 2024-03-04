@@ -148,7 +148,7 @@ var bell = new Sound("bell.ogg");
 bell.volume = 80;
 bell.applyTo();
 
-const ENABLE_PASSES = false;
+const ENABLE_PASSES = true;
 
 //////////////////////////////////////////////////////////
 // PeriodTimerClock //////////////////////////////////////
