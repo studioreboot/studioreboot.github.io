@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tic-tac-toe</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="morphic.js"></script>
+    <script src="tictactoe.js"></script>
+    <script>
+        var world, worldCanvas, game;
+        window.onload = function () {
+            worldCanvas = document.getElementById("world");
+            worldCanvas.width = adjust(500);
+            worldCanvas.height = adjust(480);
+
+            world = new WorldMorph(worldCanvas, false);
+            world.isDevMode = true;
+            window.onbeforeunload = null;
+            
+            function loop () {
+                requestAnimationFrame(loop);
+                world.doOneCycle();
+            }
+
+            loop();
+
+            var params = new URL(window.location.href).searchParams;
+            if (params.has("bW")) {
+                TTTGameStateContext.DEFAULT_WIDTH = +params.get("bW");
+            }
+            if (params.has("bH")) {
+                TTTGameStateContext.DEFAULT_HEIGHT = +params.get("bH");
+            }
+
+            game = new TTTGameMorph();
+            game.openIn(world);
+        }
+    </script>
+</head>
+<body>
+    <canvas id="world" class="center"></canvas>
+</body>
+</html>
