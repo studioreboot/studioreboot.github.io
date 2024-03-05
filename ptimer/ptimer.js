@@ -79,7 +79,7 @@ function debugXHR (anXMLHttpRequest) {
     anXMLHttpRequest.addEventListener("error", (ev) => {
         console.log("XHR request failed");
     });
-}
+};
 
 function centerBetween (p1, p2) {
     return p1.add(p2.subtract(p1).divideBy(2));
@@ -112,6 +112,10 @@ function trand (min, max) {
 
 var version = 0, versionName = "", gotVersionYet = false,
     versionURL = "https://raw.githubusercontent.com/studioreboot/studioreboot.github.io/main/ptimer/version";
+
+function joinLines (...lines) {
+    return lines.join("\n");
+}
 
 (function(){
     var xhr = new XMLHttpRequest();
@@ -148,7 +152,94 @@ var bell = new Sound("bell.ogg");
 bell.volume = 80;
 bell.applyTo();
 
-const ENABLE_PASSES = true;
+const ENABLE_PASSES = false;
+
+// AlignmentMorph /////////////////////////////////////////////////////
+
+// I am a reified layout, either a row or a column of submorphs
+
+// AlignmentMorph inherits from Morph:
+
+class AlignmentMorph extends Morph {
+    // AlignmentMorph instance creation:
+    
+    constructor(orientation, padding) {
+        super();
+
+        // additional properties:
+        this.orientation = orientation || 'row'; // or 'column'
+        this.alignment = 'center'; // or 'left' in a column
+        this.padding = padding || 0;
+        this.respectHiddens = false;
+
+        // override inherited properites:
+    }
+
+    // AlignmentMorph displaying and layout
+    
+    render (ctx) {
+        // override to not draw anything, as alignments are just containers
+        // for layout of their components
+        nop(ctx);
+    }
+    
+    fixLayout () {
+        var last = null, newBounds;
+        if (this.children.length === 0) {
+            return null;
+        }
+        this.children.forEach(c => {
+            var cfb = c.fullBounds(), lfb;
+            if (c.isVisible || this.respectHiddens) {
+                if (last) {
+                    lfb = last.fullBounds();
+                    if (this.orientation === 'row') {
+                        c.position = lfb.topRight.add(new Point(
+                            this.padding,
+                            (lfb.height - cfb.height) / 2
+                        ));
+                    } else { // orientation === 'column'
+                        c.position = lfb.bottomLeft.add(new Point(
+                            this.alignment === 'center' ?
+                                (lfb.width - cfb.width) / 2
+                                : 0,
+                            this.padding
+                        ));
+                    }
+                    cfb = c.fullBounds();
+                    newBounds = newBounds.merge(cfb);
+                } else {
+                    newBounds = cfb;
+                }
+                last = c;
+            }
+        });
+        this.bounds = newBounds;
+    }
+}
+
+//////////////////////////////////////////////////////////
+// PeriodTimerPopup //////////////////////////////////////
+//////////////////////////////////////////////////////////
+
+class PeriodTimerPopup extends FrameMorph {
+    constructor (morphToPopup) {
+        super();
+
+        this.color = BLACK;
+        this.proppedMorph = morphToPopup;
+    }
+
+    fixLayout () {
+        this.proppedMorph.setCenter(this.center());
+    }
+}
+
+/*
+    to implement:
+
+    put a message saying ""
+*/
 
 //////////////////////////////////////////////////////////
 // PeriodTimerClock //////////////////////////////////////
@@ -373,19 +464,6 @@ class PeriodTimerApp extends FrameMorph {
         // this.parseNextTrackMeta();
     }
 
-    /** @param {CanvasRenderingContext2D} ctx */
-    render (ctx) {
-        super.render(ctx);
-
-        /* if (this.didMakeThingsYet) {
-            ctx.fillStyle = BLACK.lighter(15).toString();
-            ctx.beginPath();
-            ctx.arc(this.width / 2, this.height / 2, adjust(500), 0, Math.PI * 2);
-            ctx.closePath();
-            ctx.fill();
-        } */
-    }
-
     createNodes () {
         var gain = this.audioContext.createGain(), analyzer;
 
@@ -400,7 +478,7 @@ class PeriodTimerApp extends FrameMorph {
                 highPass = this.audioContext.createBiquadFilter();
 
             this.convolverNode = this.audioContext.createConvolver();
-            //this.convolverNode.normalize = true;
+            this.pConvolverNode = this.audioContext.createConvolver();
 
             var xhr = new XMLHttpRequest(), self = this;
             xhr.open("GET", window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/convolver.ogg");
@@ -408,6 +486,7 @@ class PeriodTimerApp extends FrameMorph {
             xhr.onload = function () {
                 self.audioContext.decodeAudioData(xhr.response, (buffer) => {
                     self.convolverNode.buffer = buffer;
+                    self.pConvolverNode.buffer = buffer;
                     self.loadedConvolverSample = true;
                 });
             };
@@ -513,6 +592,74 @@ class PeriodTimerApp extends FrameMorph {
         }, 2500);
     }
 
+    createNotice () {
+        if (+localStorage.getItem("showNoticeYet") === 939) {
+            this.buildUI();
+            this.fixLayout();
+            this.playTrack();
+
+            return;
+        }
+
+        var noticeTitle, noticeText, closeNoticeBtn, aligner2000;
+
+        aligner2000 = new AlignmentMorph("column", adjust(24));
+
+        noticeTitle = new StringMorph("a small notice", adjust(48), "monospace");
+        noticeTitle.color = WHITE;
+        noticeTitle.isItalic = true;
+
+        noticeText = new TextMorph(joinLines("using the mute button means that you agree that students",
+        "have not swayed you to press it. taylor, do me a favor and please focus on your work,",
+        "instead of the music. i know you have airpods, use them to mute it if you need to,",
+        "unless bayla's that precious to you.",
+        "",
+        "I don't think John Rian Reeves (the gyattmaster) likes that.",
+        "HI GUYS TJSI IS LOGAN BTW Sqillet wrote the fist part", ""), adjust(18), "monospace");
+        noticeText.color = WHITE.darker(15);
+        noticeText.alignment = "center";
+        noticeText.isItalic = true;
+        
+        closeNoticeBtn = new TriggerMorph(null, () => {
+            aligner2000.destroy();
+
+            this.buildUI();
+            this.fixLayout();
+            this.playTrack();
+        }, "close notice", adjust(36), "monospace");
+
+
+        closeNoticeBtn.hide();
+        closeNoticeBtn.createLabel();
+
+        closeNoticeBtn.labelColor = WHITE;
+        closeNoticeBtn.createLabel();
+        closeNoticeBtn.color = BLACK;
+        closeNoticeBtn.highlightColor = BLACK.lighter(15);
+        closeNoticeBtn.pressColor = BLACK.lighter(25);
+        closeNoticeBtn.extent = closeNoticeBtn.label.bounds.expandBy(adjust(5)).extent;
+        closeNoticeBtn.width = closeNoticeBtn.width + adjust(55, true);
+
+        aligner2000.add(noticeTitle);
+        aligner2000.add(noticeText);
+        aligner2000.add(closeNoticeBtn);
+
+        aligner2000.fixLayout();
+        
+        aligner2000.center = this.center;
+
+        this.add(aligner2000);
+        this.fullChanged();
+
+        setTimeout(() => {
+            localStorage.setItem("showNoticeYet", 939);
+            closeNoticeBtn.show();
+            aligner2000.fixLayout();
+            aligner2000.center = this.center;
+            this.fullChanged();
+        }, 4000);
+    }
+
     createClockAndPeriodTitle () {
         var clock, periodTitle, smallerText, versionNameText, muteBtn;
 
@@ -614,9 +761,7 @@ class PeriodTimerApp extends FrameMorph {
 
             this.audioContext.resume();
 
-            this.buildUI();
-            this.fixLayout();
-            this.playTrack();
+            this.createNotice();
         }
     }
 
