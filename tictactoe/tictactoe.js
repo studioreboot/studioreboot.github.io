@@ -620,7 +620,7 @@ TTTWinScreen.prototype.animatedShow = function (endFunc) {
                 endFunc();
                 this.destroy();
             });
-        }, 2000);
+        }, 5000);
     });
 };
 
