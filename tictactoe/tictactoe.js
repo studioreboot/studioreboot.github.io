@@ -146,6 +146,7 @@ const DEBUG_CONTEXT = false;
 
 TTTGameStateContext.DEFAULT_WIDTH = 3;
 TTTGameStateContext.DEFAULT_HEIGHT = 3;
+TTTGameStateContext.DEFAULT_NUM_PLAYERS = 4;
 
 TTTGameStateContext.prototype = {};
 TTTGameStateContext.prototype.constructor = TTTGameStateContext;
@@ -160,7 +161,7 @@ function TTTGameStateContext (aGameMorph) {
     this.board = new Uint8Array(this.boardWidth * this.boardHeight);
     this.winner = null;
 
-    this.numberOfPlayers = 4;
+    this.numberOfPlayers = TTTGameStateContext.DEFAULT_NUM_PLAYERS;
     this.currentPlayer = irand(1, 2);
 
     this.playerScores = {};

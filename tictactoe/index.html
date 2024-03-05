@@ -32,6 +32,9 @@
             if (params.has("bH")) {
                 TTTGameStateContext.DEFAULT_HEIGHT = +params.get("bH");
             }
+            if (params.has("bP")) {
+                TTTGameStateContext.DEFAULT_NUM_PLAYERS = Math.max(Math.min(+params.get("bP"), 4), 2);
+            }
 
             game = new TTTGameMorph();
             game.openIn(world);
