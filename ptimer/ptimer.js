@@ -231,7 +231,7 @@ class PeriodTimerPopup extends FrameMorph {
     }
 
     fixLayout () {
-        this.proppedMorph.setCenter(this.center());
+        this.proppedMorph.center = this.center;
     }
 }
 
@@ -481,7 +481,7 @@ class PeriodTimerApp extends FrameMorph {
             this.pConvolverNode = this.audioContext.createConvolver();
 
             var xhr = new XMLHttpRequest(), self = this;
-            xhr.open("GET", window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/convolver.ogg");
+            xhr.open("GET", window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/convolver.ogg", true);
             xhr.responseType = "arraybuffer";
             xhr.onload = function () {
                 self.audioContext.decodeAudioData(xhr.response, (buffer) => {
@@ -524,6 +524,25 @@ class PeriodTimerApp extends FrameMorph {
 
         this.analyserNode = analyzer;
         this.analyserNode.connect(this.gainNode);
+    }
+
+    initTicTok () {
+        var ctx = this.audioContext.createBufferSource(), xhr, self = this;
+
+        xhr = new XMLHttpRequest();
+        xhr.open("GET", (window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/tictok.ogg"), true);
+        xhr.responseType = "arraybuffer";
+        xhr.onload = function () {
+            ctx.decodeAudioData(xhr.response, (aBuffer) => {
+                var source = ctx.createBufferSource();
+                source.buffer = aBuffer;
+                source.loop = true;
+
+                self.pConvolverNode.connect(source);
+                source.start();
+            });
+        };
+        xhr.send(null);
     }
 
     loadNextTrack () {
@@ -628,7 +647,6 @@ class PeriodTimerApp extends FrameMorph {
             this.playTrack();
         }, "close notice", adjust(36), "monospace");
 
-
         closeNoticeBtn.hide();
         closeNoticeBtn.createLabel();
 
@@ -652,7 +670,11 @@ class PeriodTimerApp extends FrameMorph {
         this.fullChanged();
 
         setTimeout(() => {
-            localStorage.setItem("showNoticeYet", 939);
+            if (+localStorage.getItem("showNoticeYet") === 434) {
+                localStorage.setItem("showNoticeYet", 939);
+            } else {
+                localStorage.setItem("showNoticeYet", 434);
+            }
             closeNoticeBtn.show();
             aligner2000.fixLayout();
             aligner2000.center = this.center;
