@@ -153,6 +153,7 @@ function join (...lines) {
 TTTGameStateContext.DEFAULT_WIDTH = 3;
 TTTGameStateContext.DEFAULT_HEIGHT = 3;
 TTTGameStateContext.DEFAULT_NUM_PLAYERS = 4;
+TTTGameStateContext.DEFAULT_WIN_LENGTH = 3;
 
 TTTGameStateContext.prototype = {};
 TTTGameStateContext.prototype.constructor = TTTGameStateContext;
@@ -160,7 +161,7 @@ TTTGameStateContext.prototype.constructor = TTTGameStateContext;
 function TTTGameStateContext (aGameMorph) {
     this.boardWidth = TTTGameStateContext.DEFAULT_WIDTH;
     this.boardHeight = TTTGameStateContext.DEFAULT_HEIGHT;
-    this.winLineLength = 3;
+    this.winLineLength = TTTGameStateContext.DEFAULT_WIN_LENGTH;
 
     this.gameMorph = aGameMorph;
 
@@ -536,7 +537,7 @@ TTTWinScreen.prototype.createObjects = function () {
         case SCRN_INSTR:
             var title, contents;
 
-            title = new StringMorph("Usage:", adjust(24), "monospace", true, true);
+            title = new StringMorph("Configurable Tic-Tac-Toe:", adjust(24), "monospace", true, true);
             
             contents = new TextMorph(join(
                 "The board of this game can be changed to fit any size you'd like.",
@@ -714,14 +715,18 @@ TTTGameMorph.prototype.render = function (ctx) {
     ctx.closePath();
     ctx.clip();
 
-    for (let i = 0; i < bW; i++) {
-        if (i === 0) continue;
-        
+    for (let k = 0; k < bH; k++) {
+        if (k === 0) continue;
+
         ctx.beginPath();
-        ctx.moveTo(margin, (i * (h / bH)));
-        ctx.lineTo(w - margin, (i * (h / bH)));
+        ctx.moveTo(margin, (k * (h / bH)));
+        ctx.lineTo(w - margin, (k * (h / bH)));
         ctx.closePath();
         ctx.stroke();
+    }
+
+    for (let i = 0; i < bW; i++) {
+        if (i === 0) continue;
 
         ctx.beginPath();
         ctx.moveTo((i * (w / bW)), margin);
