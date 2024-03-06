@@ -1,3 +1,5 @@
+var debug = false;
+
 function adjust (v, useHeight = false) {
     if (useHeight) {
         return (v / 599) * innerHeight;
@@ -139,6 +141,10 @@ AlignmentMorph.prototype.fixLayout = function () {
 };
 
 const DEBUG_CONTEXT = false;
+
+function join (...lines) {
+    return lines.join("\n");
+}
 
 ////////////////////////////////////////////////////////////
 // TTTGameStateContext /////////////////////////////////////
@@ -488,7 +494,7 @@ TTTWinScreen.uber = Morph.prototype;
 function TTTWinScreen (aGameState) {
     TTTWinScreen.uber.init.call(this);
 
-    this.color = new Color(0, 0, 0, 0.4);
+    this.color = new Color(0, 0, 0, 0.7);
     this.alpha = 0;
     this.screen = SCRN_NONE;
     this.gameState = aGameState;
@@ -501,17 +507,19 @@ TTTWinScreen.prototype.setScreenTo = function (screenType) {
     this.createObjects();
     this.changed();
 
+    this.alpha = 1;
     this.creatingImage = true;
     this.thingImage = this.fullImage();
     this.children.forEach(c => c.destroy());
     this.creatingImage = false;
+    this.alpha = 0;
 };
 
 TTTWinScreen.prototype.createObjects = function () {
     var gameState = this.gameState, aligner = new AlignmentMorph("column", adjust(12));
     switch (this.screen) {
         case SCRN_TIE:
-            var tieText = new StringMorph("Tie", adjust(24), "monospace", false, true);
+            var tieText = new StringMorph("Tie", adjust(48), "monospace", true, true);
             tieText.setCenter(this.center().subtract(new Point(0, adjust(24))));
             aligner.add(tieText);
             break;
@@ -520,61 +528,58 @@ TTTWinScreen.prototype.createObjects = function () {
             icon.whichPlayer = gameState.winner;
             icon.setExtent(new Point(adjust(82), adjust(82)));
             align.add(icon);
-            align.add(new StringMorph("wins!", adjust(36), "monospace",  true, true));
+            align.add(new StringMorph("wins!", adjust(48), "monospace",  true, true));
             align.add(new StringMorph("h", adjust(12)));
             align.children[align.children.length - 1].color = CLEAR;
             aligner.add(align);
             break;
+        case SCRN_INSTR:
+            var title, contents;
+
+            title = new StringMorph("Usage:", adjust(24), "monospace", true, true);
+            
+            contents = new TextMorph(join(
+                "The board of this game can be changed to fit any size you'd like.",
+                "",
+                "If you go lower than 3 by 3, i'm just gonna say some bugs might",
+                "occur.",
+                "",
+                "You can also specify how many players you'd like there to be.",
+                "There is a limit, right now it's 7."
+            ), adjust(18), "monospace");
+            contents.alignment = 'center';
+
+            aligner.add(title);
+            aligner.add(contents);
+            break;
         default: break;
     }
     if (this.screen === SCRN_TIE || this.screen === SCRN_WIN) {
-        var align = new AlignmentMorph("row"), ico, temp;
+        var ico, temp, levels = Math.ceil(gameState.numberOfPlayers / 2), count = 0;
 
-        ico = new TTTPlayerIconMorph();
-        ico.whichPlayer = 1;
-        align.add(ico);
+        for (let i = 0; i < levels; i++) {
+            let align = new AlignmentMorph("row");
 
-        temp = new TextMorph("'s Score: " + gameState.getScoreFor(0), adjust(24), "monospace");
-        align.add(temp);
-
-        ico = new TTTPlayerIconMorph();
-        ico.whichPlayer = 2;
-        align.add(ico);
-
-        temp = new TextMorph("'s Score: " + gameState.getScoreFor(1), adjust(24), "monospace");
-        align.add(temp);
-
-        aligner.add(align);
-
-        for (let i = 0; i < align.children.length; i++) {
-            const child = align.children[i];
-            if (child instanceof TTTPlayerIconMorph) {
-                child.setExtent(new Point(adjust(82), adjust(82)));
+            for (let k = 0; k < 2; k++) {
+                if (count < gameState.numberOfPlayers) {
+                    ico = new TTTPlayerIconMorph();
+                    ico.whichPlayer = (count+1);
+                    align.add(ico);
+        
+                    temp = new TextMorph("'s Score: " + gameState.getScoreFor(count), adjust(24), "monospace");
+                    align.add(temp);
+        
+                    count++;
+                }
             }
-        }
 
-        align = new AlignmentMorph("row");
+            aligner.add(align);
 
-        ico = new TTTPlayerIconMorph();
-        ico.whichPlayer = 3;
-        align.add(ico);
-
-        temp = new TextMorph("'s Score: " + gameState.getScoreFor(2), adjust(24), "monospace");
-        align.add(temp);
-
-        ico = new TTTPlayerIconMorph();
-        ico.whichPlayer = 4;
-        align.add(ico);
-
-        temp = new TextMorph("'s Score: " + gameState.getScoreFor(3), adjust(24), "monospace");
-        align.add(temp);
-
-        aligner.add(align);
-
-        for (let i = 0; i < align.children.length; i++) {
-            const child = align.children[i];
-            if (child instanceof TTTPlayerIconMorph) {
-                child.setExtent(new Point(adjust(82), adjust(82)));
+            for (let i = 0; i < align.children.length; i++) {
+                const child = align.children[i];
+                if (child instanceof TTTPlayerIconMorph) {
+                    child.setExtent(new Point(adjust(82), adjust(82)));
+                }
             }
         }
     }
@@ -595,15 +600,15 @@ TTTWinScreen.prototype.createObjects = function () {
 
     aligner.fixLayout();
     aligner.setCenter(this.center());
-}
+};
 
 /** @param {CanvasRenderingContext2D} ctx */
 TTTWinScreen.prototype.render = function (ctx) {
     if (this.creatingImage) {
         TTTWinScreen.uber.render.call(this, ctx);
     } else {
-        ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(0, 0, this.width(), this.height());
+        /* ctx.fillStyle = "rgba(0,0,0,0.6)";
+        ctx.fillRect(0, 0, this.width(), this.height()); */
 
         ctx.drawImage(this.thingImage, 0, 0);
     }
@@ -611,18 +616,35 @@ TTTWinScreen.prototype.render = function (ctx) {
 
 TTTWinScreen.prototype.animatedShow = function (endFunc) {
     this.children = [];
+    this.beforeDestroy = endFunc;
+    var self = this;
     this.fadeTo(1, 1000, "sine-out", () => {
         this.alpha = 1;
         this.changed();
         setTimeout(() => {
-            this.fadeTo(0, 1000, "sine-out", () => {
-                this.alpha = 0;
-                this.changed();
-                endFunc();
-                this.destroy();
-            });
+            if (this.screen !== SCRN_INSTR) {
+                this.fadeTo(0, 1000, "sine-out", () => {
+                    this.alpha = 0;
+                    this.changed();
+                    self.beforeDestroy();
+                    this.destroy();
+                });
+            }
         }, 5000);
     });
+};
+
+TTTWinScreen.prototype.mouseClickLeft = function () {
+    if (this.screen === SCRN_INSTR) {
+        this.fadeTo(0, 1000, "sine-out", () => {
+            this.alpha = 0;
+            this.changed();
+            if (this.beforeDestroy) {
+                this.beforeDestroy();
+            }
+            this.destroy();
+        });
+    }
 };
 
 ////////////////////////////////////////////////////////////
@@ -719,9 +741,9 @@ TTTGameMorph.prototype.setButtonPlayerTo = function (idx, value) {
 
 TTTGameMorph.prototype.showTieScreen = function () {
     var winScreen = new TTTWinScreen(this.state);
-    winScreen.setExtent(this.extent());
+    winScreen.setExtent(this.world().extent());
     winScreen.setScreenTo(SCRN_TIE);
-    this.add(winScreen);
+    this.world().add(winScreen);
     this.isRunning = false;
     winScreen.animatedShow(() => {
         this.state.fullReset();
@@ -730,16 +752,19 @@ TTTGameMorph.prototype.showTieScreen = function () {
 };
 
 TTTGameMorph.prototype.popUp = function (aWinScreen) {
-    aWinScreen.setExtent(this.extent());
+    var self = this;
+    this.isRunning = false;
+    aWinScreen.setExtent(this.world().extent());
     aWinScreen.children.forEach(c => c.destroy());
     aWinScreen.children = [];
     aWinScreen.setScreenTo(aWinScreen.screen);
-    this.add(aWinScreen);
-    aWinScreen.animatedShow(() => {
-        this.state.fullReset();
-        this.isRunning = true;
-    });
-}
+    this.world().add(aWinScreen);
+    aWinScreen.animatedShow();
+    aWinScreen.beforeDestroy = () => {
+        self.state.fullReset();
+        self.isRunning = true;
+    };
+};
 
 TTTGameMorph.prototype.createHitboxes = function () {
     this.hitboxes.splice(0, this.hitboxes.length);
@@ -766,7 +791,7 @@ TTTGameMorph.prototype.createHitboxes = function () {
         const box = boxes[i];
         
         var morph = new TTTButtonMorph(this);
-        morph.bounds = box;
+        morph.bounds = box.translateBy(this.position());
         morph.color = new Color(irand(0, 255), irand(0, 255), irand(0, 255));
         morph.tilePos = new Point(cX, cY);
         
@@ -805,7 +830,10 @@ TTTGameMorph.prototype.openIn = function (aWorld) {
     aWorld.add(this);
     this.setExtent(aWorld.extent());
 
-    this.createHitboxes();
+    var scrn = new TTTWinScreen(this);
+    scrn.setScreenTo(SCRN_INSTR);
+    scrn.setExtent(aWorld.extent());
+    this.popUp(scrn);
 };
 
 ////////////////////////////////////////////////////////////
@@ -882,6 +910,39 @@ TTTPlayerIconMorph.prototype.render = function (ctx) {
             ctx.closePath();
             ctx.stroke();
             break;
+        case 5:
+            ctx.beginPath();
+            ctx.moveTo(ctx.lineWidth, ctx.lineWidth);
+            ctx.lineTo(w - ctx.lineWidth, ctx.lineWidth);
+            ctx.lineTo(w - ctx.lineWidth, h - ctx.lineWidth);
+            ctx.lineTo(ctx.lineWidth, h - ctx.lineWidth);
+            ctx.closePath();
+            ctx.stroke();
+            break;
+        case 6:
+            ctx.beginPath();
+            ctx.moveTo(ctx.lineWidth, ctx.lineWidth);
+            ctx.lineTo(w - ctx.lineWidth, ctx.lineWidth);
+            ctx.lineTo(w - ctx.lineWidth, h - ctx.lineWidth);
+            ctx.lineTo(ctx.lineWidth, h - ctx.lineWidth);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(ctx.lineWidth, ctx.lineWidth);
+            ctx.lineTo(w - ctx.lineWidth, h - ctx.lineWidth);
+            ctx.closePath();
+            ctx.stroke();
+            break;
+        case 7:
+            ctx.beginPath();
+            ctx.moveTo(ctx.lineWidth, h - ctx.lineWidth);
+            ctx.lineTo(w / 2, ctx.lineWidth);
+            ctx.lineTo(w - ctx.lineWidth, h - ctx.lineWidth);
+            ctx.lineTo(ctx.lineWidth, h - ctx.lineWidth);
+            ctx.closePath();
+            ctx.stroke();
+            break;
         default:
             break;
     }
@@ -897,6 +958,12 @@ TTTPlayerIconMorph.getColorFor = function (plr) {
             return "rgb(0,255,100)";
         case 4:
             return "yellow";
+        case 5:
+            return "purple";
+        case 6:
+            return "cyan";
+        case 7:
+            return "orange";
         default: break;
     }
 };
@@ -947,4 +1014,11 @@ TTTButtonMorph.prototype.setPlayerTo = function (plr) {
         this.state = BTN_USED;
         this.changed();
     }
+};
+
+TTTButtonMorph.prototype.render = function (ctx) {
+    if (debug) {
+        Morph.prototype.render.call(this, ctx);
+    }
+    TTTButtonMorph.uber.render.call(this, ctx);
 };

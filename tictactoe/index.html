@@ -11,10 +11,9 @@
         var world, worldCanvas, game;
         window.onload = function () {
             worldCanvas = document.getElementById("world");
-            worldCanvas.width = adjust(500);
-            worldCanvas.height = adjust(480);
 
-            world = new WorldMorph(worldCanvas, false);
+            world = new WorldMorph(worldCanvas);
+            world.color = BLACK;
             world.isDevMode = true;
             window.onbeforeunload = null;
             
@@ -33,15 +32,22 @@
                 TTTGameStateContext.DEFAULT_HEIGHT = +params.get("bH");
             }
             if (params.has("bP")) {
-                TTTGameStateContext.DEFAULT_NUM_PLAYERS = Math.max(Math.min(+params.get("bP"), 4), 2);
+                TTTGameStateContext.DEFAULT_NUM_PLAYERS = Math.max(Math.min(+params.get("bP"), 7), 2);
             }
 
             game = new TTTGameMorph();
             game.openIn(world);
+
+            game.setExtent(new Point(adjust(500), adjust(480)));
+            game.setCenter(world.center());
+            setTimeout(() => {
+                game.setCenter(world.center());
+                game.createHitboxes();
+            }, 500);
         }
     </script>
 </head>
 <body>
-    <canvas id="world" class="center"></canvas>
+    <canvas id="world"></canvas>
 </body>
 </html>
