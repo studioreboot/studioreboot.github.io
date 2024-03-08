@@ -1320,6 +1320,9 @@ Object.freeze(BLACK);
 Object.freeze(WHITE);
 Object.freeze(CLEAR);
 
+// used to figure out whether the browsers "virtualKeyboard" should be used.
+var isMobile = false;
+
 var standardSettings = {
     minimumFontHeight: getMinimumFontHeight(), // browser settings
     globalFontFamily: '',
@@ -12368,6 +12371,10 @@ WorldMorph.prototype.resetKeyboardHandler = function (keepValue) {
     }
     this.keyboardHandler.style.top = number2px(pos.y);
     this.keyboardHandler.style.left = number2px(pos.x);
+
+    if (isMobile && ("virtualKeyboard" in navigator)) {
+        navigator.virtualKeyboard.hide();
+    }
 };
 
 WorldMorph.prototype.pointerWithId = function (pId) {
@@ -12412,6 +12419,7 @@ WorldMorph.prototype.initEventListeners = function () {
                 this.onNextStep = () => this.keyboardHandler.focus();
             }
             this.hand.processMouseDown(event);
+            isMobile = false;
         },
         true
     );
@@ -12440,6 +12448,7 @@ WorldMorph.prototype.initEventListeners = function () {
 
                 hand.processTouchStart(event, touch);
             }
+            isMobile = true;
         },
         false
     );
@@ -12449,6 +12458,7 @@ WorldMorph.prototype.initEventListeners = function () {
         event => {
             event.preventDefault();
             this.hand.processMouseUp(event);
+            isMobile = false;
         },
         false
     );
@@ -12490,19 +12500,24 @@ WorldMorph.prototype.initEventListeners = function () {
                     }
                 }
             }
+            isMobile = true;
         },
         false
     );
 
     canvas.addEventListener(
         "mousemove",
-        event => this.hand.processMouseMove(event),
+        event => {
+            this.hand.processMouseMove(event);
+            isMobile = false;
+        },
         false
     );
 
     canvas.addEventListener(
         "touchmove",
         (event) => {
+            isMobile = true;
             for (let i = 0; i < event.changedTouches.length; i++) {
                 const touch = event.changedTouches.item(i);
 
@@ -12539,6 +12554,7 @@ WorldMorph.prototype.initEventListeners = function () {
         event => {
             this.hand.processMouseScroll(event);
             event.preventDefault();
+            isMobile = false;
         },
         false
     );
@@ -12548,6 +12564,7 @@ WorldMorph.prototype.initEventListeners = function () {
         event => {
             this.hand.processMouseScroll(event);
             event.preventDefault();
+            isMobile = false;
         },
         false
     );
@@ -12929,6 +12946,12 @@ WorldMorph.prototype.about = function () {
     );
 };
 
+WorldMorph.prototype.checkShouldKeyboardClose = function () {
+    if ((!isMobile) && ("virtualKeyboard" in navigator)) {
+        navigator.virtualKeyboard.hide();
+    }
+};
+
 WorldMorph.prototype.edit = function (aStringOrTextMorph) {
     if (this.lastEditedText === aStringOrTextMorph) {
         return;
@@ -12947,6 +12970,11 @@ WorldMorph.prototype.edit = function (aStringOrTextMorph) {
     this.worldCanvas.focus();
     this.keyboardHandler.focus();
 
+    if (isMobile && ("virtualKeyboard" in navigator)) {
+        navigator.virtualKeyboard.show();
+        navigator.virtualKeyboard.overlaysContent = true;
+    }
+
     // create a new cursor
     this.cursor = new CursorMorph(aStringOrTextMorph, this.keyboardHandler);
     this.keyboardFocus = this.cursor;
@@ -12961,12 +12989,6 @@ WorldMorph.prototype.edit = function (aStringOrTextMorph) {
         aStringOrTextMorph.escalateEvent('freshTextEdit', aStringOrTextMorph);
     }
     this.lastEditedText = aStringOrTextMorph;
-
-    this.keyboardHandler.focus();
-    this.keyboardHandler.focus();
-    this.keyboardHandler.focus();
-    this.keyboardHandler.focus();
-    this.keyboardHandler.focus();
 };
 
 WorldMorph.prototype.slide = function (aStringOrTextMorph) {
