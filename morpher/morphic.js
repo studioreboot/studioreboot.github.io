@@ -12961,6 +12961,12 @@ WorldMorph.prototype.edit = function (aStringOrTextMorph) {
         aStringOrTextMorph.escalateEvent('freshTextEdit', aStringOrTextMorph);
     }
     this.lastEditedText = aStringOrTextMorph;
+
+    this.keyboardHandler.focus();
+    this.keyboardHandler.focus();
+    this.keyboardHandler.focus();
+    this.keyboardHandler.focus();
+    this.keyboardHandler.focus();
 };
 
 WorldMorph.prototype.slide = function (aStringOrTextMorph) {
