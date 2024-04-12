@@ -52,12 +52,12 @@ const tracks = [
     `Freddie Slack & His Orchestra - "Mr. Five by Five" (1942)\n(Colton wouldn't like this one)`,
     `Ray Noble & His Orchestra - "The Very Thought Of You" (1934)`,
     `Glenn Miller & His Orchestra - "In The Mood" (1939)\n(the title is an innuendo, in fact the word is an innuendo)`,
-    `Sid Phillips & His Melodians - "Heartaches" (1931)\n(heard in the "Mr. Incredible" memes,\nyou know, when he turns more into a skeleton as time progresses.)`,
+    `Wayne King & His Orchestra - "The Waltz You Saved For Me" (1940)`,
     `Glenn Miller & His Orchestra - "I Know Why (And So Do You)" (1941)\n(from "Sun Valley Serenade")`,
     `Layton & Johnstone - "The Wedding Of The Painted Doll" (1929)\n(the definition of the feeling "nobody's home, but i hear footsteps\noutside my door, and i don't like it.")`,
     /* `Pee Wee Hunt & His Orchestra - "Twelve Street Rag" (1948)\n("inspiration" of a theme heard in "Spongebob SquarePants")`, */
     `John Scott Trotter & His Orchestra - "Cloud Dreams" (1968)`,
-    `Russ Morgan & His Orchestra - "Goodnight My Beautiful" (1937-38)\n(you might've heard this, depending on whether you have a life or not,\ni don't have one.)`,
+    `Geraldo & His Orchestra - "You're As Pretty As A Picture" (1939)`,
     `Alex Mendham & His Orchestra - "Midnight, the Stars and You (2020)\n(in high fidelity, no this is not the one heard in\n"The Shining" you morons)`,
     `Ray Noble & His Orchestra - "This Is Romance" (1934)`,
     `Charlie Spivak & His Orchestra - "Time Alone Will Tell" (1944)`,
@@ -634,7 +634,7 @@ class PeriodTimerApp extends FrameMorph {
         "unless bayla's that precious to you.",
         "",
         "I don't think John Rian Reeves (the gyattmaster) likes that.",
-        "HI GUYS TJSI IS LOGAN BTW Sqillet wrote the fist part", ""), adjust(18), "monospace");
+        "HI GUYS TJSI IS LOGAN BTW Sqillet wrote the fist part", ""), adjust(18, true), "monospace");
         noticeText.color = WHITE.darker(15);
         noticeText.alignment = "center";
         noticeText.isItalic = true;
