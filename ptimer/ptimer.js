@@ -52,8 +52,8 @@ const tracks = [
     `Freddie Slack & His Orchestra - "Mr. Five by Five" (1942)\n(Colton wouldn't like this one)`,
     `Ray Noble & His Orchestra - "The Very Thought Of You" (1934)`,
     `Glenn Miller & His Orchestra - "In The Mood" (1939)\n(the title is an innuendo, in fact the word is an innuendo)`,
-    `Wayne King & His Orchestra - "The Waltz You Saved For Me" (1940)`,
-    `Glenn Miller & His Orchestra - "I Know Why (And So Do You)" (1941)\n(from "Sun Valley Serenade")`,
+    `Wayne King & His Orchestra - "The Waltz You Saved For Me" (1940)\n(apparently you all won't complain if i change the high-tempo jazz to slow\ndance tracks)`,
+    `Layton & Johnstone - "In A Little Second Hand Store" (1933)`,
     `Layton & Johnstone - "The Wedding Of The Painted Doll" (1929)\n(the definition of the feeling "nobody's home, but i hear footsteps\noutside my door, and i don't like it.")`,
     /* `Pee Wee Hunt & His Orchestra - "Twelve Street Rag" (1948)\n("inspiration" of a theme heard in "Spongebob SquarePants")`, */
     `John Scott Trotter & His Orchestra - "Cloud Dreams" (1968)`,
