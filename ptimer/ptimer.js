@@ -51,7 +51,7 @@ const tracks = [
     `Johnny Long & His Orchestra - "In The Middle Of May" (1940)`,
     `Freddie Slack & His Orchestra - "Mr. Five by Five" (1942)\n(Colton wouldn't like this one)`,
     `Ray Noble & His Orchestra - "The Very Thought Of You" (1934)`,
-    `Glenn Miller & His Orchestra - "In The Mood" (1939)\n(the title is an innuendo, in fact the word is an innuendo)`,
+    `Ella Fitzgerald - "Little White Lies" (1958)`,
     `Wayne King & His Orchestra - "The Waltz You Saved For Me" (1940)\n(apparently you all won't complain if i change the high-tempo jazz to slow\ndance tracks)`,
     `Layton & Johnstone - "In A Little Second Hand Store" (1933)`,
     `Layton & Johnstone - "The Wedding Of The Painted Doll" (1929)\n(the definition of the feeling "nobody's home, but i hear footsteps\noutside my door, and i don't like it.")`,
