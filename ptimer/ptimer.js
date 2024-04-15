@@ -363,6 +363,7 @@ class PeriodTimerApp extends FrameMorph {
         this.clock = null;
         this.periodTitle = null;
         this.versionNameText = null;
+        this.volumeSlider = null;
         this.disableGainControl = false;
 
         this.didMakeThingsYet = false;
@@ -609,6 +610,10 @@ class PeriodTimerApp extends FrameMorph {
         setTimeout(() => {
             this.waitTime = true;
         }, 2500);
+
+        setTimeout(() => {
+            this.fixLayout();
+        }, 4000);
     }
 
     createNotice () {
@@ -683,7 +688,7 @@ class PeriodTimerApp extends FrameMorph {
     }
 
     createClockAndPeriodTitle () {
-        var clock, periodTitle, smallerText, versionNameText, muteBtn;
+        var clock, periodTitle, smallerText, versionNameText, muteBtn, volumeSlider;
 
         clock = new PTimerClockMorph();
         clock.setRadius(adjust(270, true));
@@ -711,6 +716,18 @@ class PeriodTimerApp extends FrameMorph {
         muteBtn.extent = muteBtn.label.bounds.expandBy(adjust(5)).extent;
         muteBtn.width = muteBtn.width + adjust(55, true);
 
+        volumeSlider = new SliderMorph();
+        volumeSlider.orientation = "horizontal";
+        volumeSlider.width = muteBtn.width;
+        volumeSlider.height = adjust(18);
+        volumeSlider.start = 0;
+        volumeSlider.stop = 100;
+        volumeSlider.size = 1;
+        volumeSlider.value = 45;
+        volumeSlider.color = BLACK.lighter(32);
+        volumeSlider.fixLayout();
+        volumeSlider.position = new Point(muteBtn.left, muteBtn.top - volumeSlider.height);
+
         versionNameText = new StringMorph(`version ${version} (${versionName})`, adjust(24, true), "monospace");
         versionNameText.position = periodTitle.position.subtract(new Point(
             0,
@@ -729,12 +746,14 @@ class PeriodTimerApp extends FrameMorph {
         this.periodDetails = smallerText;
         this.versionNameText = versionNameText;
         this.muteButton = muteBtn;
+        this.volumeSlider = volumeSlider;
 
         this.add(this.clock);
         this.add(this.periodTitle);
         this.add(this.periodDetails);
         this.add(this.versionNameText);
         this.add(this.muteButton);
+        this.add(this.volumeSlider);
     }
 
     reactToDropOf (aMorph) {
@@ -827,6 +846,8 @@ class PeriodTimerApp extends FrameMorph {
         this.verse2.center = new Point(w - (w / 6), c.y);
 
         muteBtn.position = this.bottomRight.subtract(adjust(15)).subtract(muteBtn.extent);
+        this.volumeSlider.width = this.childThatIsA(TriggerMorph).width;
+        this.volumeSlider.position = new Point(muteBtn.left, muteBtn.top - this.volumeSlider.height);
     }
 
     muteAudio () {
@@ -916,6 +937,8 @@ class PeriodTimerApp extends FrameMorph {
         } else if ((!this.isMuted) && this.audioContext.state === "suspended") {
             this.audioContext.resume();
         }
+
+        this.musicVolume = this.volumeSlider.value / 100;
 
         if (this.isBellPlaying) {
             var time = bell.currentTime;
