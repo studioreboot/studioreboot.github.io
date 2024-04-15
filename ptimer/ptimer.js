@@ -721,7 +721,7 @@ class PeriodTimerApp extends FrameMorph {
         volumeSlider.width = muteBtn.width;
         volumeSlider.height = adjust(18);
         volumeSlider.start = 0;
-        volumeSlider.stop = 100;
+        volumeSlider.stop = 250;
         volumeSlider.size = 1;
         volumeSlider.value = 45;
         volumeSlider.color = BLACK.lighter(32);
