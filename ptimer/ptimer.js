@@ -60,7 +60,7 @@ const tracks = [
     `Geraldo & His Orchestra - "You're As Pretty As A Picture" (1939)`,
     `Alex Mendham & His Orchestra - "Midnight, the Stars and You (2020)\n(in high fidelity, no this is not the one heard in\n"The Shining" you morons)`,
     `Ray Noble & His Orchestra - "This Is Romance" (1934)`,
-    `Charlie Spivak & His Orchestra - "Time Alone Will Tell" (1944)`,
+    `The London Symphony Orchestra - "Clair de Lune" (1992)`,
     `The Pied Pipers - "Alice Blue Gown" (1948)`,
     /* `The Pied Pipers - "Somehow" (1949)\n(the song that got cut from the ELA slideshow project)` */
 ];
