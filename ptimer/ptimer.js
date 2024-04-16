@@ -938,7 +938,9 @@ class PeriodTimerApp extends FrameMorph {
             this.audioContext.resume();
         }
 
-        this.musicVolume = this.volumeSlider.value / 100;
+        if (!this.disableGainControl) {
+            this.musicVolume = this.volumeSlider.value / 100;
+        }
 
         if (this.isBellPlaying) {
             var time = bell.currentTime;
