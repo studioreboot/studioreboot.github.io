@@ -453,6 +453,7 @@ class PeriodTimerApp extends FrameMorph {
             (this.isConvolverConnected ? "disable" : "enable") + " reverb",
             () => {
                 this.toggleConvolver();
+                this.lastReverbState = this.isConvolverConnected;
             },
             "disables/enables the global reverb."
         )
