@@ -49,7 +49,7 @@ const tracks = [
     `George Olsen & His Music - "Lullaby Of The Leaves" (1932)`,
     `Ray Noble & His Orchestra - "It's All Forgotten Now" (1934)`,
     `Johnny Long & His Orchestra - "In The Middle Of May" (1940)`,
-    `Freddie Slack & His Orchestra - "Mr. Five by Five" (1942)\n(Colton wouldn't like this one)`,
+    `Roger Wolfe Kahn & His Orchestra - "Exactly Like You" (1930)\n(personal favorite)`,
     `Ray Noble & His Orchestra - "The Very Thought Of You" (1934)`,
     `Ella Fitzgerald - "Little White Lies" (1958)`,
     `Wayne King & His Orchestra - "The Waltz You Saved For Me" (1940)\n(apparently you all won't complain if i change the high-tempo jazz to slow\ndance tracks)`,
@@ -65,7 +65,9 @@ const tracks = [
     /* `The Pied Pipers - "Somehow" (1949)\n(the song that got cut from the ELA slideshow project)` */
 ];
 
-const REVERB_ENABLE = true;
+var searchParams = new URL(window.location.href).searchParams
+
+const REVERB_ENABLE = (searchParams.has("dR") && searchParams.get("dR") == "0") ? false : true;
 
 const BELL_DELAY = 48264;
 
@@ -355,6 +357,8 @@ class PeriodTimerApp extends FrameMorph {
         this.loadedConvolverSample = false;
         this.muteButton = false;
 
+        this.isConvolverConnected = true;
+
         for (let i = 1; i < (tracks.length + 1); i++) {
             this.selectableTracks.push(i);
         }
@@ -365,6 +369,7 @@ class PeriodTimerApp extends FrameMorph {
         this.versionNameText = null;
         this.volumeSlider = null;
         this.disableGainControl = false;
+        this.lastReverbState = true;
 
         this.didMakeThingsYet = false;
         this.canTapYet = false;
@@ -377,6 +382,20 @@ class PeriodTimerApp extends FrameMorph {
 
         this.createNodes();
         this.pickNextTrack();
+    }
+
+    forceToggleConvolver (bool) {
+        if (this.isConvolverConnected === bool) return;
+
+        this.gainNode.disconnect();
+
+        if (bool === true) {
+            this.gainNode.connect(this.reverbConnector);
+        } else {
+            this.gainNode.connect(this.finalAdjust);
+        }
+
+        this.isConvolverConnected = bool;
     }
 
     get musicVolume () {
@@ -429,7 +448,18 @@ class PeriodTimerApp extends FrameMorph {
             },
             `${this.isMuted ? "un" : ""}mutes the audio`
         );
+        menu.addItem(
+            (this.isConvolverConnected ? "disable" : "enable") + " reverb",
+            () => {
+                this.toggleConvolver();
+            },
+            "disables/enables the global reverb."
+        )
         return menu;
+    }
+
+    toggleConvolver () {
+        this.forceToggleConvolver(!this.isConvolverConnected);
     }
 
     showTapMenu () {
@@ -472,6 +502,8 @@ class PeriodTimerApp extends FrameMorph {
         finalAdjust.gain.value = 0.75;
         finalAdjust.connect(this.audioContext.destination);
 
+        this.finalAdjust = finalAdjust
+
         this.gainNode = gain;
 
         if (REVERB_ENABLE) {
@@ -497,6 +529,8 @@ class PeriodTimerApp extends FrameMorph {
             lowPass.frequency.value = 3500;
             lowPass.gain.value = 0.65;
             lowPass.Q.value = 3;
+
+            this.reverbConnector = lowPass;
 
             if (ENABLE_PASSES) {
                 highPass.type = "highpass";
@@ -1172,6 +1206,13 @@ class PeriodTimerApp extends FrameMorph {
         this.currentTrackAudio = this.nextTrackAudio;
         this.currentTrack = this.nextTrack;
         this.currentTrackMeta = this.nextTrackMeta;
+
+        if (tracks[this.currentTrack].includes("Ella")) {
+            this.lastReverbState = this.isConvolverConnected;
+            this.forceToggleConvolver(false);
+        } else {
+            this.forceToggleConvolver(this.lastReverbState);
+        }
 
         this.nextTrack = this.nextTrackAudio = this.nextTrackMeta = null;
 
