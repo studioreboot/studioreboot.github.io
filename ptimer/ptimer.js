@@ -61,7 +61,8 @@ const tracks = [
     `Alex Mendham & His Orchestra - "Midnight, the Stars and You (2020)\n(in high fidelity, no this is not the one heard in\n"The Shining" you morons)`,
     `Ray Noble & His Orchestra - "This Is Romance" (1934)`,
     `The London Symphony Orchestra - "Clair de Lune" (1992)`,
-    `The Pied Pipers - "Alice Blue Gown" (1948)`,
+    `The Pied Pipers - Alice Blue Gown (1948)\n(this song has singing, if you can hear the words. congrats you're a nerd now!)`,
+    `Original Sacred Harp Choir - "Amazing Grace" (1922)\n(this is why i'm not christian. this is also the first recording of this song)`,
     /* `The Pied Pipers - "Somehow" (1949)\n(the song that got cut from the ELA slideshow project)` */
 ];
 
@@ -913,6 +914,13 @@ class PeriodTimerApp extends FrameMorph {
         this.trackDisplay.text = this.currentTrack === -1 ? "" : "playing: " + tracks[this.currentTrack - 1];
         this.trackDisplay.fixLayout();
 
+        if (tracks[this.currentTrack - 1].includes("Ella")) {
+            this.lastReverbState = this.isConvolverConnected;
+            this.forceToggleConvolver(false);
+        } else {
+            this.forceToggleConvolver(this.lastReverbState);
+        }
+
         this.fixLayout();
         this.changed();
     }
@@ -1206,13 +1214,6 @@ class PeriodTimerApp extends FrameMorph {
         this.currentTrackAudio = this.nextTrackAudio;
         this.currentTrack = this.nextTrack;
         this.currentTrackMeta = this.nextTrackMeta;
-
-        if (tracks[this.currentTrack].includes("Ella")) {
-            this.lastReverbState = this.isConvolverConnected;
-            this.forceToggleConvolver(false);
-        } else {
-            this.forceToggleConvolver(this.lastReverbState);
-        }
 
         this.nextTrack = this.nextTrackAudio = this.nextTrackMeta = null;
 
