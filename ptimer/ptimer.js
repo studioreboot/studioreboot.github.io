@@ -62,7 +62,7 @@ const tracks = [
     `Ray Noble & His Orchestra - "This Is Romance" (1934)`,
     `The London Symphony Orchestra - "Clair de Lune" (1992)`,
     `The Pied Pipers - Alice Blue Gown (1948)\n(this song has singing, if you can hear the words. congrats you're a nerd now!)`,
-    `Original Sacred Harp Choir - "Amazing Grace" (1922)\n(this is why i'm not christian. this is also the first recording of this song)`,
+    `Original Sacred Harp Choir - "Amazing Grace" (1922)\n(this is why i'm not christian, this is horrifiying. this is also the first recording of this song)`,
     /* `The Pied Pipers - "Somehow" (1949)\n(the song that got cut from the ELA slideshow project)` */
 ];
 
