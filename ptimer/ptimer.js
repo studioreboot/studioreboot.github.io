@@ -67,6 +67,10 @@ const tracks = [
     /* `The Pied Pipers - "Somehow" (1949)\n(the song that got cut from the ELA slideshow project)` */
 ];
 
+if (irand(0, 100) === 0) {
+    tracks.push(`The Pied Pipers - "Somehow" (1949)\n(the song that got cut from the ELA slideshow project)`);
+}
+
 var searchParams = new URL(window.location.href).searchParams
 
 const REVERB_ENABLE = (searchParams.has("dR") && searchParams.get("dR") == "0") ? false : true;
