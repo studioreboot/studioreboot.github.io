@@ -926,7 +926,7 @@ class PeriodTimerApp extends FrameMorph {
             trackName = "";
         }
 
-        if (/(Ella)|(Alice Blue Gown)/g.test(trackName)) {
+        if (/(Ella)|(Alice Blue Gown)|(The United States)/g.test(trackName)) {
             this.lastReverbState = this.isConvolverConnected;
             this.forceToggleConvolver(false);
         } else {
