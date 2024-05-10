@@ -57,7 +57,7 @@ const tracks = [
     `Layton & Johnstone - "The Wedding Of The Painted Doll" (1929)\n(the definition of the feeling "nobody's home, but i hear footsteps\noutside my door, and i don't like it.")`,
     /* `Pee Wee Hunt & His Orchestra - "Twelve Street Rag" (1948)\n("inspiration" of a theme heard in "Spongebob SquarePants")`, */
     `John Scott Trotter & His Orchestra - "Cloud Dreams" (1968)`,
-    `Geraldo & His Orchestra - "You're As Pretty As A Picture" (1939)`,
+    `The United States Army Field Band - "Sing, Sing, Sing" (2016)\n(if this isn't a bop to you, either your a taylor swift fan, or you're a hard rock.)`,
     `Alex Mendham & His Orchestra - "Midnight, the Stars and You (2020)\n(in high fidelity, no this is not the one heard in\n"The Shining" you morons)`,
     `Ray Noble & His Orchestra - "This Is Romance" (1934)`,
     `The London Symphony Orchestra - "Clair de Lune" (1992)`,
