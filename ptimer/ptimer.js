@@ -916,7 +916,13 @@ class PeriodTimerApp extends FrameMorph {
         this.trackDisplay.text = this.currentTrack === -1 ? "" : "playing: " + tracks[this.currentTrack - 1];
         this.trackDisplay.fixLayout();
 
-        if (tracks[this.currentTrack - 1].includes("Ella")) {
+        var trackName = tracks[this.currentTrack - 1];
+
+        if (!(typeof trackName === "string")) {
+            trackName = "";
+        }
+
+        if (/(Ella)|(Alice Blue Gown)/g.test(trackName)) {
             this.lastReverbState = this.isConvolverConnected;
             this.forceToggleConvolver(false);
         } else {
