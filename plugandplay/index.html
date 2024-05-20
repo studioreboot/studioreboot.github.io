@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Plug & Play</title>
+        <script src="morphic.js"></script>
+        <script src="plugandplay.js"></script>
+        <script>
+            var world;
+            window.onload = function () {
+                world = new WorldMorph(document.getElementById("world"));
+                world.isDevMode = true;
+                window.onbeforeunload = null;
+                setInterval(() => {
+                    world.doOneCycle();
+                }, 1);
+            }
+        </script>
+    </head>
+    <body style="margin: 0;">
+        <canvas id="world" tabindex="1"></canvas>
+    </body>
+</html>
