@@ -11,6 +11,7 @@
             window.onload = function () {
                 world = new WorldMorph(document.getElementById("world"));
                 world.isDevMode = true;
+                world.showHands = true;
                 window.onbeforeunload = null;
                 game = new PlugAndPlayMorph();
                 game.openIn(world);
