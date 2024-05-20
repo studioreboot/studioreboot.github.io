@@ -30,7 +30,7 @@ PlugAndPlayMorph.prototype.openIn = function (aWorld) {
     aWorld.add(this);
     this.setExtent(aWorld.extent());
     this.makeTest();
-}
+};
 
 PlugAndPlayMorph.prototype.reactToWorldResize = function (aRect) {
     this.setExtent(aRect.extent());
