@@ -7,11 +7,13 @@
         <script src="morphic.js"></script>
         <script src="plugandplay.js"></script>
         <script>
-            var world;
+            var world, game;
             window.onload = function () {
                 world = new WorldMorph(document.getElementById("world"));
                 world.isDevMode = true;
                 window.onbeforeunload = null;
+                game = new PlugAndPlayMorph();
+                game.openIn(world);
                 setInterval(() => {
                     world.doOneCycle();
                 }, 1);
