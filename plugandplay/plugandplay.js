@@ -17,13 +17,23 @@ PlugAndPlayMorph.prototype.init = function () {
 };
 
 PlugAndPlayMorph.prototype.makeTest = function () {
-    var txt;
+    var txt, align;
 
-    txt = new TextMorph("there should be something here.");
+    align = new AlignmentMorph("column", adjust(16));
+
+    txt = new TextMorph("Plug & Play", adjust(48), "monospace", true, true);
     txt.color = BLACK;
     txt.setCenter(this.center());
 
-    this.add(txt);
+    align.add(txt);
+
+    txt = new TextMorph("a game i was legally obligated to make.", adjust(36), "monospace", false, true);
+    txt.color = BLACK.lighter(10);
+    txt.setCenter(this.center());
+
+    align.add(txt);
+
+    this.add(align);
 };
 
 PlugAndPlayMorph.prototype.openIn = function (aWorld) {
@@ -35,3 +45,21 @@ PlugAndPlayMorph.prototype.openIn = function (aWorld) {
 PlugAndPlayMorph.prototype.reactToWorldResize = function (aRect) {
     this.setExtent(aRect.extent());
 };
+
+PlugMorph.prototype = new BoxMorph();
+PlugMorph.prototype.constructor = PlugMorph;
+PlugMorph.uber = BoxMorph.prototype;
+
+function PlugMorph () {
+    this.init();
+};
+
+PlugMorph.prototype.init = function () {
+    PlugMorph.uber.init.call(this);
+
+    this.color = BLACK;
+};
+
+PlugMorph.prototype.render = function (ctx) {
+    PlugMorph.uber.render.call(this, ctx);
+}
