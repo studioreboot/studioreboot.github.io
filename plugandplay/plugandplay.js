@@ -21,7 +21,7 @@ PlugAndPlayMorph.prototype.makeTest = function () {
 
     align = new AlignmentMorph("column", adjust(16));
 
-    txt = new TextMorph("Plug & Play", adjust(48), "monospace", true, true);
+    txt = new TextMorph("Plug & Play", adjust(52), "monospace", true, true);
     txt.color = BLACK;
     txt.setCenter(this.center());
 
@@ -32,6 +32,8 @@ PlugAndPlayMorph.prototype.makeTest = function () {
     txt.setCenter(this.center());
 
     align.add(txt);
+
+    align.fixLayout();
 
     this.add(align);
 };
