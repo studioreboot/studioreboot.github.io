@@ -63,7 +63,8 @@ const tracks = [
     `The London Symphony Orchestra - "Clair de Lune" (1992)`,
     `The Pied Pipers - Alice Blue Gown (1948)\n(this song has singing, if you can understand the words, congrats! you're a nerd now!)`,
     `Original Sacred Harp Choir - "Amazing Grace" (1922)\n(first recording of this hymn. this one sounds better than the newer ones imo.)`,
-    `Roger Wolfe Kahn & His Orchestra with Squilly - "Exactly Like You" (1930/2024)\n(i sing in this.)`
+    `Roger Wolfe Kahn & His Orchestra with Squilly - "Exactly Like You" (1930/2024)\n(i sing in this.)`,
+    `Slim Whitman - "When I'm Callin' You"\n(squilly 'bout to get a little dizzy.)`
     /* `The Pied Pipers - "Somehow" (1949)\n(the song that got cut from the ELA slideshow project)` */
 ];
 
