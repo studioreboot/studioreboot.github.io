@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tab Refresher</title>
+    <style>
+        .center {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .txt {
+            font-family: monospace;
+            font-size: 2em;
+        }
+    </style>
+    <script>
+        window.onload = function () {
+            localStorage.setItem("refreshes", +localStorage.getItem("refreshes") + 1);
+        }
+    </script>
+</head>
+<body>
+    <p class="center txt" id="ref">Tab Refresh: 0</p>
+    <script>
+        document.getElementById('ref').textContent = `Tab Refresh: ${localStorage.getItem("refreshes")}`;
+    </script>
+</body>
+</html>
