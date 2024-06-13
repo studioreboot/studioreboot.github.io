@@ -2,12 +2,16 @@ function irand (min, max) {
     return Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1) + Math.ceil(min));
 }
 
+var searchParams = new URL(window.location.href).searchParams;
+
 window.onclick = function () {
-    setInterval(() => {
-        let noise = new Audio("tracks/noise.ogg");
-        noise.volume = 0.8;
-        noise.play();
-    }, 2500);
+    if (!searchParams.has("noNoise")) {
+        setInterval(() => {
+            let noise = new Audio("tracks/noise.ogg");
+            noise.volume = 0.8;
+            noise.play();
+        }, 2500);
+    }
     var track;
 
     function playNextTrack () {
@@ -28,7 +32,9 @@ window.onclick = function () {
 
     window.onclick = null;
 
-    let noise = new Audio("tracks/noise.ogg");
+    if (!searchParams.has("noNoise")) {
+        let noise = new Audio("tracks/noise.ogg");
         noise.volume = 0.8;
         noise.play();
+    }
 }
