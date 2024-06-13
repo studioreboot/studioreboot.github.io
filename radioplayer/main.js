@@ -37,4 +37,11 @@ window.onclick = function () {
         noise.volume = 0.8;
         noise.play();
     }
+
+    document.getElementById("skip-btn").onclick = function () {
+        track.pause();
+        setTimeout(() => {
+            playNextTrack();
+        }, 500);
+    }
 }
