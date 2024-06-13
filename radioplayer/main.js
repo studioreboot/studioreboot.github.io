@@ -7,7 +7,7 @@ var searchParams = new URL(window.location.href).searchParams;
 window.onclick = function () {
     if (!searchParams.has("noNoise")) {
         setInterval(() => {
-            let noise = new Audio("tracks/noise.ogg");
+            let noise = new Audio("tracks/noise.mp3");
             noise.volume = 0.8;
             noise.play();
         }, 2500);
@@ -15,7 +15,7 @@ window.onclick = function () {
     var track;
 
     function playNextTrack () {
-        track = new Audio("tracks/track" + irand(1, 17) + ".ogg");
+        track = new Audio("tracks/track" + irand(1, 17) + ".mp3");
         track.volume = 0.9;
 
         track.onended = function () {
