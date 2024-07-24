@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Audio Scrambler</title>
+        <script src="jquery-3.7.1.slim.min.js"></script>
+        <script src="FileSaver.min.js"></script>
+        <script src="buffertowav.js"></script>
+        <script src="libsamplerate.min.js"></script>
+        <style>
+            #scramb-opt p {
+                margin: 0;
+            }
+
+            #error-log p {
+                margin: 0;
+            }
+
+            #scramb-opt h4 {
+                margin: 4px;
+                margin-left: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <fieldset>
+            <legend>Samples:</legend>
+            <ul id="sample-list"></ul>
+            <button id="add-sample">Add Sample</button>
+        </fieldset>
+        <fieldset id="scramb-opt">
+            <legend>Scramble Options:</legend>
+            <h4>Cut Length:</h4>
+            <p>Minimum Cut Length: <input type="text" id="min-cut-length" value="0.5s"></p>
+            <p>Maximum Cut Length: <input type="text" id="max-cut-length" value="1.25s"></p>
+            <h4>Sample Reverse Dice Configuration:</h4>
+            <p>Reverse Dice Sides: <input type="number" id="revdice-sides" value="10"></p>
+            <p>Reverse Dice Chance: <input type="number" id="revdice-chance" value="6"></p>
+            <h4>Channel Configuration:</h4>
+            <p>Channel Reverse Dice Sides: <input type="number" id="chrev-sides" value="10"></p>
+            <p>Channel Reverse  Dice Chance: <input type="number" id="chrev-chance" value="6"></p>
+            <h4>Audio Configuration:</h4>
+            <p>Audio Length: <input type="text" id="min-audio-length" value="2m"></p>
+            <p>Loop Iterations: <input type="number" id="loop-iter", value="1"></p>
+        </fieldset>
+        <br>
+        <button id="scramble-now">Scramble Samples</button>
+        <br>
+        <br>
+        <fieldset id="error-log">
+            <legend>Output Log:</legend>
+        </fieldset>
+        <script src="scrambler.js"></script>
+    </body>
+</html>
