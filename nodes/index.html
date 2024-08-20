@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Audio Node Graph</title>
+        <script src="libs/morphic.js"></script>
+        <script src="libs/symbols.js"></script>
+        <script src="libs/widgets.js"></script>
+        <script src="node-graph.js"></script>
+        <script defer>
+            var world;
+            window.onload = function () {
+                world = new WorldMorph(document.getElementById("world"));
+                world.isDevMode = true;
+                window.onbeforeunload = null;
+                setInterval(() => {
+                    world.doOneCycle();
+                }, 1);
+                world.add(new NodeMorph());
+            }
+        </script>
+    </head>
+    <body style="margin: 0;">
+        <canvas id="world"></canvas>
+    </body>
+</html>
