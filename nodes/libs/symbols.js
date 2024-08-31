@@ -251,6 +251,25 @@ SymbolMorph.prototype.render = function (ctx) {
     ctx.restore();
 };
 
+SymbolMorph.prototype.developersMenu = function () {
+    /** @type {MenuMorph} */
+    var menu = SymbolMorph.uber.developersMenu.call(this), lMenu, self = this;
+    menu.addLine();
+    lMenu = new MenuMorph(null, null);
+    for (let idx = 0; idx < this.names.length; idx++) {
+        const name = this.names[idx];
+        lMenu.addItem(name, () => {
+            self.name = name;
+            self.fullChanged();
+        });
+    }
+    menu.addMenu(
+        "set symbol...",
+        lMenu
+    );
+    return menu;
+}
+
 SymbolMorph.prototype.renderShape = function (ctx, aColor) {
     // private
     switch (this.name) {
