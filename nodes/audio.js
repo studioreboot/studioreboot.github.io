@@ -1,2 +1,0 @@
-const globalContext = new AudioContext();
-
