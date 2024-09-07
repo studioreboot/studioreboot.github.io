@@ -1,5 +1,21 @@
 // some parts of this file require morphic.js, such as Color and other sorts of things.
 
+/*
+    09/07/2024 (basic idea of node-engine.js)
+
+    a ProcessNode will need to build a AudioNode tree whenever the NodeEngine gets the call to start
+    playing the project.
+
+    a NodeMorph, if parameters are changed, will call a function in it's ProcessNode to adjust itself
+    to it's new parameters.
+
+    nodes that are deemed "static" will have a function that will get called by the NodeEngine,
+    such nodes will only be able to write into a buffer that will then get played by the NodeEngine
+    later on.
+
+    function names have not yet been decided, however the basic idea has been established.
+*/
+
 // operation types:
 
 const OperationType = {
@@ -45,8 +61,8 @@ class NodeEngine {
         this.destinationNode = null;
     }
 
-    setContext (newContext) {
-        this.previewContext = newContext;
+    newContext () {
+        return new AudioContext();
     }
 
     registerNode (aNodeClass) {
@@ -80,26 +96,3 @@ class ProcessNode {
         aBody.finalize();
     }
 };
-
-
-/* ///////////////////////////////////////////////////////////////////
-// ProcessNodeInstance ////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////
-
-// ProcessNodeInstance inherits from BaseNode:
-
-ProcessNodeInstance.prototype = new BaseNode();
-ProcessNodeInstance.prototype.constructor = ProcessNodeInstance;
-ProcessNodeInstance.uber = BaseNode.prototype;
-
-// ProcessNodeInstance instance creation:
-
-function ProcessNodeInstance () {
-    this.init();
-}
-
-// ProcessNodeInstance initialization:
-
-ProcessNodeInstancea.prototype.init = function () {
-    
-}; */

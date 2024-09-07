@@ -15,7 +15,8 @@
     - a NodeMorph requires it's own ProgramNode to figure out what it is suppose to
     display graphically, and what it's suppose to do.
     - a ProgramNode requires a NodeEngine, which links it up to all the other ProgramNodes.
-    - ProgramNodes can be 
+    - ProgramNodes and NodeMorphs both require eachother. Why? They're marrie- They need the info from each
+    other. Think of it like a client and server. One needs to sync up with the other.
 */
 
 const isDevMode = false;
@@ -316,6 +317,17 @@ NodeMorph.prototype.createBody = function () {
     this.body = body;
     this.add(this.body);
 };
+
+NodeMorph.prototype.userMenu = function () {
+    var menu = new MenuMorph(this);
+    menu.addItem(
+        "destroy node...",
+        () => {
+            this.destroy();
+        }
+    );
+    return menu;
+}
 
 ///////////////////////////////////////////////////////////////////
 // NodeBodyMorph //////////////////////////////////////////////////

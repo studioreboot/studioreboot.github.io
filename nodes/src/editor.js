@@ -13,6 +13,8 @@
     and basically plugged in. they will be opened by the user and then saved for later using indexedDB.
 */
 
+const version = 0.6;
+
 var AudioEditorMorph;
 
 ///////////////////////////////////////////////////////////////////
@@ -57,7 +59,16 @@ AudioEditorMorph.prototype.reactToDropOf = function (aMorph) {
     if (aMorph instanceof NodeMorph) {
         this.nodeGraph.add(aMorph);
     }
-}
+};
+
+AudioEditorMorph.prototype.userMenu = function () {
+    return new MenuMorph();
+};
+
+AudioEditorMorph.prototype.step = function () {
+    if (!this.programEngine) return;
+    this.programEngine.step();
+};
 
 AudioEditorMorph.prototype.timeCodeToSamples = function (aTimeCode) {
     return (aTimeCode.seconds + (60 * aTimeCode.minutes) + (3600 * aTimeCode.hours)) * this.globalContext.sampleRate;
