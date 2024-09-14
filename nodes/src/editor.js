@@ -67,7 +67,7 @@ AudioEditorMorph.prototype.userMenu = function () {
 
 AudioEditorMorph.prototype.step = function () {
     if (!this.programEngine) return;
-    this.programEngine.step();
+    //this.programEngine.step();
 };
 
 AudioEditorMorph.prototype.timeCodeToSamples = function (aTimeCode) {

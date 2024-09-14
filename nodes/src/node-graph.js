@@ -459,7 +459,8 @@ NodeLinkerMorph.prototype.init = function (aParamContainer) {
     this.isDraggable = false;
 
     // overriding inherited properties:
-    this.typeColor = typeColors[this.container.paramInfo.acceptedType];
+    this.typeColor = WHITE;
+    if (this.container) this.typeColor = typeColors[this.container.paramInfo.acceptedType];
     this.color = this.typeColor.copy();
     this.outlineColor = new Color(25, 25, 25);
     this.outlineWidth = 1.5;
@@ -782,25 +783,140 @@ ConnectionMorph.prototype.init = function (inpLinker, outLinker) {
     this.input = inpLinker;
     this.output = outLinker;
 
+    this.listeners = {
+        input: null,
+        output: null
+    };
+
     this.holes = [this.bounds];
+    this.color = PINK;
+
+    this.addListeners();
+    this.update();
 };
+
+ConnectionMorph.prototype.setInputAndOutput = function (inp, out) {
+    this.input.removeEventListener(this.listeners.input);
+    this.output.removeEventListener(this.listeners.output);
+
+    this.input = inp;
+    this.output = out;
+
+    this.addListeners();
+    this.update();
+};
+
+ConnectionMorph.prototype.addListeners = function () {
+    this.listeners.input = this.input.addEventListener("morphChanged", () => {
+        this.update();
+    });
+    this.listeners.output = this.output.addEventListener("morphChanged", () => {
+        this.update();
+    });
+}
 
 /** @param {CanvasRenderingContext2D} ctx */
 ConnectionMorph.prototype.render = function (ctx) {
-    var w = this.width(), h = this.height(), grad, drawType;
+    var w = this.width(), h = this.height(), grad, drawType, l = this.left(), t = this.top();
 
-    if (this.input.top() < this.output.top() && this.input.left() < this.output.left()) {
-        grad = ctx.createLinearGradient(0, h, w, 0);
-        drawType = 1;
-    } else if (this.input.top() < this.output.top() && this.input.left() > this.output.left()) {
-        grad = ctx.createLinearGradient(w, 0, 0, h);
-        drawType = 2;
+    /* if (this.world().isDevMode) {
+        ctx.save();
+        ctx.globalAlpha = 0.25;
+        ConnectionMorph.uber.render.call(this, ctx);
+        ctx.restore();
+    } */
+
+    ctx.lineWidth = 2.5;
+
+    var iCenter = this.input.center(), oCenter = this.output.center(),
+        iX = iCenter.x - l, iY = iCenter.y - t,
+        oX = oCenter.x - l, oY = oCenter.y - t,
+        farthestLeft = Math.min(iX, oX), farthestRight = Math.max(iX, oX);
+
+    var cX = (farthestRight + farthestLeft) / 2,
+        cY = (Math.max(iY, oY) + Math.min(iY, oY)) / 2;
+
+    let maxPaddingAdjust = 45;
+    let xPadding = Math.min(distance(iX, 0, oX, 0) / 2, maxPaddingAdjust); //, yPadding = 25, vPadding = 30;
+
+    var yQuarter = Math.abs(Math.min(distance(0, iY, 0, oY) / 2, maxPaddingAdjust)),
+        xQuarter = (Math.min(distance(iX, 0, oX, 0) / 2, maxPaddingAdjust));
+
+    // to remember: the input goes to the output.
+    if (iX > oX) {
+        // output line:
+        ctx.beginPath();
+        ctx.moveTo(oX, oY);
+        ctx.bezierCurveTo(oX < iX ? oX - xPadding : oX + xPadding, oY, oX - xPadding, oY < iY ? oY + yQuarter : oY - yQuarter, cX, cY);
+        ctx.moveTo(cX, cY);
+        ctx.closePath();
+        ctx.stroke();
+
+        // input line:
+        ctx.beginPath();
+        ctx.moveTo(iX, iY);
+        ctx.bezierCurveTo(oX < iX ? iX + xPadding : iX - xPadding, iY, iX + xPadding, oY < iY ? iY - yQuarter : iY + yQuarter, cX, cY);
+        ctx.moveTo(cX, cY);
+        ctx.closePath();
+        ctx.stroke();
+    } else {
+        // output line:
+        ctx.beginPath();
+        ctx.moveTo(oX, oY);
+        ctx.quadraticCurveTo(oX - xQuarter, oY, cX, cY);
+        ctx.moveTo(cX, cY);
+        ctx.closePath();
+        ctx.stroke();
+
+        // input line:
+        ctx.beginPath();
+        ctx.moveTo(iX, iY);
+        ctx.quadraticCurveTo(iX + xQuarter, iY, cX, cY);
+        ctx.moveTo(cX, cY);
+        ctx.closePath();
+        ctx.stroke();
     }
 
-    grad.addColorStop(0, this.input.color);
-    grad.addColorStop(1, this.input.color);
+    // old draw routine:
+
+    /*
+    if (oCenter.x > iCenter.x && oCenter.y < iCenter.y - vPadding) {
+        ctx.beginPath();
+        ctx.moveTo(iX, iY);
+        ctx.quadraticCurveTo(iX - xPadding, iY - yPadding, cX, cY);
+        ctx.moveTo(cX, cY);
+        ctx.quadraticCurveTo(oX + xPadding, oY + (yPadding / 2.5), oX, oY);
+        ctx.moveTo(oX, oY);
+        ctx.closePath();
+        ctx.stroke();
+    } else if (oCenter.x > iCenter.x && oCenter.y > iCenter.y + vPadding) {
+        ctx.beginPath();
+        ctx.moveTo(iX, iY);
+        ctx.quadraticCurveTo(iX - xPadding, iY - yPadding, cX, cY);
+        ctx.moveTo(cX, cY);
+        ctx.quadraticCurveTo(oX + xPadding, oY + yPadding, oX, oY);
+        ctx.moveTo(oX, oY);
+        ctx.closePath();
+        ctx.stroke();
+    } else if (oCenter.x > iCenter.x && (oCenter.y > iCenter.y - vPadding || iCenter.y < iCenter.y + vPadding)) {
+        ctx.beginPath();
+        ctx.moveTo(iX, iY);
+        ctx.quadraticCurveTo(iX - xPadding, iY, cX, cY);
+        ctx.moveTo(cX, cY);
+        ctx.quadraticCurveTo(oX + xPadding, oY, oX, oY);
+        ctx.moveTo(oX, oY);
+        ctx.closePath();
+        ctx.stroke();
+    } else if (oCenter.x > iCenter.x) {}
+    */
 };
 
 ConnectionMorph.prototype.update = function () {
     // to do: actually implement this, even though it is very scary.
+
+    // this *should* give the "render" function more room to work with.
+    this.changed();
+    this.bounds = this.input.fullBounds().merge(this.output.fullBounds()).expandBy(30);
+    this.changed();
+    this.holes = [this.bounds.translateBy(this.position().neg())];
 };

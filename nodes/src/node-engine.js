@@ -29,13 +29,23 @@ const OperationType = {
 
 /*
     I am a positional descriptor.
+
+    based on Point.
 */
 
 class SpatialPosition {
-    constructor () {
-        this.x = 0;
-        this.y = 0;
-        this.z = 0;
+    constructor (x = 0, y = 0, z = 0) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    copy () {
+        return new SpatialPosition(this.x, this.y, this.z);
+    }
+
+    add () {
+        
     }
 }
 
