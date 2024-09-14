@@ -86,6 +86,7 @@ AudioEditorMorph.prototype.reactToWorldResize = function (aWorld) {
 AudioEditorMorph.prototype.buildPanes = function () {
     this.createTopbar();
     this.createNodeEditor();
+    this.createVer();
 };
 
 AudioEditorMorph.prototype.fixLayout = function () {
@@ -93,7 +94,17 @@ AudioEditorMorph.prototype.fixLayout = function () {
     this.graphScroller.setExtent(this.extent().subtract(this.topBar.bottomLeft()));
 
     this.topBar.setWidth(this.width());
+    this.version.setPosition(this.bottomRight().subtract(this.version.extent()));
 };
+
+AudioEditorMorph.prototype.createVer = function () {
+    var versionText = new StringMorph("alpha ver. " + version.toString(), 12, "monospace");
+    versionText.color = WHITE;
+
+    this.version = versionText;
+
+    this.add(this.version);
+}
 
 AudioEditorMorph.prototype.createNodeEditor = function () {
     // this entire implementation will probably be changed due to asthetic reasons.

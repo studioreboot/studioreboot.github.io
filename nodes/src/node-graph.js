@@ -19,7 +19,7 @@
     other. Think of it like a client and server. One needs to sync up with the other.
 */
 
-const isDevMode = false;
+const isDevMode = true;
 
 const PINK = new Color(255, 105, 180);
 
@@ -627,7 +627,7 @@ ParameterContainerMorph.prototype.init = function (param, isInputOutput) {
     // overriding inherited properties:
     this.color = PINK;
 
-    this.construct();
+    this.build();
 };
 
 // ParameterContainerMorph rendering:
@@ -642,6 +642,7 @@ ParameterContainerMorph.prototype.node = function () {
 ParameterContainerMorph.prototype.build = function () {
     this.setExtent(ZERO.copy());
     this.construct();
+    this.aligner.fixLayout();
     this.setExtent(this.fullBounds().extent());
 }
 
@@ -905,6 +906,13 @@ ConnectionMorph.prototype.setInputAndOutput = function (inp, out) {
     this.input = inp;
     this.output = out;
 
+    if (this.input instanceof NodeLinkerMorph) {
+        this.input.connection = this;
+    }
+    if (this.output instanceof NodeLinkerMorph) {
+        this.output.connection = this;
+    }
+
     this.addListeners();
     this.update();
 };
@@ -922,12 +930,12 @@ ConnectionMorph.prototype.addListeners = function () {
 ConnectionMorph.prototype.render = function (ctx) {
     var w = this.width(), h = this.height(), grad, drawType, l = this.left(), t = this.top();
 
-    /* if (this.world().isDevMode) {
+    if (isDevMode) {
         ctx.save();
         ctx.globalAlpha = 0.25;
         ConnectionMorph.uber.render.call(this, ctx);
         ctx.restore();
-    } */
+    }
 
     ctx.lineWidth = 2.5;
 
