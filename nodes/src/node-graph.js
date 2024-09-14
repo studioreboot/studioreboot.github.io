@@ -123,6 +123,11 @@ AttachmentMorph.prototype.justDropped = function () {
     }
 };
 
+AttachmentMorph.prototype.moveBy = function (delta) {
+    AttachmentMorph.uber.moveBy.call(this, delta);
+    this.connection.update();
+};
+
 ///////////////////////////////////////////////////////////////////
 // NodeGraphMorph /////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
@@ -390,6 +395,15 @@ NodeMorph.prototype.userMenu = function () {
         }
     );
     return menu;
+};
+
+NodeMorph.prototype.destroy = function () {
+    NodeMorph.uber.destroy.call(this);
+    this.forAllChildren(c => {
+        if (c instanceof NodeLinkerMorph) {
+            c.severeConnection();
+        }
+    });
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -475,10 +489,18 @@ NodeBodyMorph.prototype.finalize = function () {
             c.color = WHITE;
         }
         this.add(c);
+        if (c instanceof ParameterContainerMorph) {
+            c.build();
+        }
     });
     this.fixLayout();
 
     this.setExtent(this.fullBounds().extent());
+    this.children.forEach(c => {
+        if (c instanceof ParameterContainerMorph) {
+            c.fixLayout();
+        }
+    })
 };
 
 // NodeBodyMorph - fixing layout:
@@ -581,6 +603,12 @@ NodeLinkerMorph.prototype.rootForGrab = function () {
     return this.world();
 };
 
+NodeLinkerMorph.prototype.mouseDownRight = function () {
+    if (this.connection) {
+        this.severeConnection();
+    }
+}
+
 NodeLinkerMorph.prototype.mouseDownLeft = function () {
     if (!this.connection) {
         var attach = new AttachmentMorph(null, this);
@@ -594,7 +622,14 @@ NodeLinkerMorph.prototype.mouseDownLeft = function () {
 NodeLinkerMorph.prototype.severeConnection = function () {
     this.connection.destroy();
     this.connection = null;
-}
+};
+
+NodeLinkerMorph.prototype.moveBy = function (delta) {
+    NodeLinkerMorph.uber.moveBy.call(this, delta);
+    if (this.connection) {
+        this.connection.update();
+    }
+};
 
 ///////////////////////////////////////////////////////////////////
 // ParameterContainerMorph ////////////////////////////////////////
@@ -627,7 +662,7 @@ ParameterContainerMorph.prototype.init = function (param, isInputOutput) {
     // overriding inherited properties:
     this.color = PINK;
 
-    this.build();
+    this.isBuildYet = false;
 };
 
 // ParameterContainerMorph rendering:
@@ -644,6 +679,8 @@ ParameterContainerMorph.prototype.build = function () {
     this.construct();
     this.aligner.fixLayout();
     this.setExtent(this.fullBounds().extent());
+
+    this.isBuildYet = true;
 }
 
 ParameterContainerMorph.prototype.construct = function () {
@@ -653,11 +690,18 @@ ParameterContainerMorph.prototype.construct = function () {
     align.alignment = "left";
     
     linker = new NodeLinkerMorph(this);
-    paramTitle = new TextMorph(this.paramInfo.name, 8, "monospace", false, true);
+    paramTitle = new TextMorph(this.paramInfo.name, 9, "monospace", false, true);
+    paramTitle.color = WHITE.darker(15);
+
+    align.add(paramTitle);
+
+    if (this.paramInfo.acceptedType === "number") {
+        var inpField = new InputFieldMorph(this.paramInfo.defaultValue, true);
+        inpField.setWidth(this.width());
+        align.add(inpField);
+    }
 
     this.aligner = align;
-
-    this.aligner.add(paramTitle);
 
     this.linker = linker;
     this.add(this.linker);
@@ -666,6 +710,7 @@ ParameterContainerMorph.prototype.construct = function () {
 
 ParameterContainerMorph.prototype.fixLayout = function () {
     if (!this.node()) return;
+    if (!this.isBuildYet) return;
 
     var thisNode = this.node();
 
@@ -673,12 +718,12 @@ ParameterContainerMorph.prototype.fixLayout = function () {
         this.aligner.fixLayout();
     }
 
-    if (this.linker) {
-        if (this.isInput) {
-            this.linker.setCenter(new Point(thisNode.left() + (thisNode.border / 2), this.center().y));
-        } else {
-            this.linker.setCenter(new Point(thisNode.right() - (thisNode.border / 2), this.center().y));
-        }
+    this.bounds.setWidth(this.parentThatIsA(NodeBodyMorph).width());
+
+    if (this.isInput) {
+        this.linker.setCenter(new Point(thisNode.left() + (thisNode.border / 2), this.center().y));
+    } else {
+        this.linker.setCenter(new Point(thisNode.right() - (thisNode.border / 2), this.center().y));
     }
 };
 
@@ -895,14 +940,10 @@ ConnectionMorph.prototype.init = function (inpLinker, outLinker) {
     this.holes = [this.bounds];
     this.color = PINK;
 
-    this.addListeners();
     this.update();
 };
 
 ConnectionMorph.prototype.setInputAndOutput = function (inp, out) {
-    this.input.removeEventListener(this.listeners.input);
-    this.output.removeEventListener(this.listeners.output);
-
     this.input = inp;
     this.output = out;
 
@@ -913,17 +954,7 @@ ConnectionMorph.prototype.setInputAndOutput = function (inp, out) {
         this.output.connection = this;
     }
 
-    this.addListeners();
     this.update();
-};
-
-ConnectionMorph.prototype.addListeners = function () {
-    this.listeners.input = this.input.addEventListener("morphChanged", () => {
-        this.update();
-    });
-    this.listeners.output = this.output.addEventListener("morphChanged", () => {
-        this.update();
-    });
 };
 
 /** @param {CanvasRenderingContext2D} ctx */
@@ -1027,8 +1058,15 @@ ConnectionMorph.prototype.update = function () {
     // to do: actually implement this, even though it is very scary.
 
     // this *should* give the "render" function more room to work with.
-    this.changed();
-    this.bounds = this.input.fullBounds().merge(this.output.fullBounds()).expandBy(30);
-    this.changed();
+    this.fullChanged();
+    this.bounds = this.input.bounds.merge(this.output.bounds).expandBy(30);
+    this.fullChanged();
     this.holes = [this.bounds.translateBy(this.position().neg())];
+};
+
+ConnectionMorph.prototype.destroy = function () {
+    ConnectionMorph.uber.destroy.call(this);
+
+    this.input.connection = null;
+    this.output.connection = null;
 };

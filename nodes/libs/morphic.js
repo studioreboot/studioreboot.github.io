@@ -3060,8 +3060,6 @@ function BaseNode(parent, childrenArray) {
 BaseNode.prototype.init = function (parent, childrenArray) {
     this.parent = parent || null;
     this.children = childrenArray || [];
-
-    this.listeners = {};
 };
 
 // BaseNode string representation: e.g. 'a BaseNode[3]'
@@ -3200,31 +3198,6 @@ BaseNode.prototype.childThatIsA = function () {
         }
     }
     return null;
-};
-
-// event listeners.
-
-BaseNode.prototype.addEventListener = function (evName, func) {
-    var lID = now();
-    this.listeners[lID] = {
-        listeningFor: evName,
-        toCall: func
-    };
-    return lID;
-};
-
-BaseNode.prototype.removeEventListener = function (listenerId) {
-    delete this.listeners[listenerId];
-};
-
-BaseNode.prototype.dispatchEvent = function (evName, ...args) {
-    var lKeys = Object.keys(this.listeners)
-    for (let i = 0; i < lKeys.length; i++) {
-        const listener = this.listeners[lKeys[i]];
-        if (listener.listeningFor === evName) {
-            listener.toCall.apply(listener, args);
-        }
-    };
 };
 
 // Morphs //////////////////////////////////////////////////////////////
@@ -3907,7 +3880,6 @@ Morph.prototype.changed = function () {
     if (this.parent) {
         this.parent.childChanged(this);
     }
-    this.dispatchEvent("morphChanged", this);
 };
 
 Morph.prototype.fullChanged = function () {
@@ -3917,8 +3889,6 @@ Morph.prototype.fullChanged = function () {
             this.fullBounds().spread()
         );
     };
-    this.dispatchEvent("morphChanged", this);
-    this.dispatchEvent("morphFullChanged", this);
 };
 
 Morph.prototype.childChanged = function () {
@@ -11333,7 +11303,6 @@ HandMorph.prototype.changed = function () {
             this.world.broken.push(b.spread());
         }
     }
-    this.dispatchEvent("morphChanged", this);
 };
 
 HandMorph.prototype.moveBy = function (delta) {
