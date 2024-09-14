@@ -95,6 +95,7 @@ function AttachmentMorph (aConnection, aLinker) {
 AttachmentMorph.prototype.init = function (aConnection, aLinker) {
     AttachmentMorph.uber.init.call(this);
 
+    this.updateTick = 5;
     this.connection = aConnection; // the connection of which we'll connect to another linker (if any.)
     this.linker = aLinker; // the linker of which this attachment was created from.
 
@@ -116,8 +117,12 @@ AttachmentMorph.prototype.justDropped = function () {
     this.destroy();
     var morph = world.topMorphAt(this.position());
     if (morph instanceof NodeLinkerMorph) {
-        this.connection.setInputAndOutput(this.linker.isInput ? this.linker : morph, this.linker.isInput ? morph : this.linker);
-        this.connection.update();
+        if (morph.parentThatIsA(NodeMorph) === this.linker.parentThatIsA(NodeMorph) || morph.isInput === this.linker.isInput) {
+            this.linker.severeConnection();
+        } else {
+            this.connection.setInputAndOutput(this.linker.isInput ? this.linker : morph, this.linker.isInput ? morph : this.linker);
+            this.connection.update();
+        }
     } else {
         this.linker.severeConnection();
     }
@@ -125,7 +130,19 @@ AttachmentMorph.prototype.justDropped = function () {
 
 AttachmentMorph.prototype.moveBy = function (delta) {
     AttachmentMorph.uber.moveBy.call(this, delta);
-    this.connection.update();
+    if (this.updateTick > 0) {
+        this.updateTick--;
+    }
+
+    if (this.updateTick === 0) {
+        if (this.connections.length && this.parentThatIsA(HandMorph)) {
+            for (let idx = 0; idx < this.connections.length; idx++) {
+                this.connections[idx].update();
+            }
+        }
+    }
+
+    this.updateTick = 5;
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -185,7 +202,7 @@ NodeGraphMorph.prototype.userMenu = function () {
     this.nodeEngine.registeredNodes.forEach(node => {
 
     });
-    if (this.world().isDevMode) {
+    if (isDevMode || this.world().isDevMode) {
         menu.addItem(
             "dev node.",
             () => {
@@ -404,7 +421,15 @@ NodeMorph.prototype.destroy = function () {
             c.severeConnection();
         }
     });
-}
+};
+
+NodeMorph.prototype.justDropped = function () {
+    this.forAllChildren(c => {
+        if (c instanceof NodeLinkerMorph) {
+            c.connections.forEach(conn => conn.update(true));
+        }
+    });
+};
 
 ///////////////////////////////////////////////////////////////////
 // NodeBodyMorph //////////////////////////////////////////////////
@@ -539,9 +564,11 @@ NodeLinkerMorph.prototype.init = function (aParamContainer) {
     NodeLinkerMorph.uber.init.call(this);
 
     // additonal properties:
-    this.connection = null;
+    this.connections = [];
+    this.newConnection = null;
     this.container = aParamContainer;
     this.isDraggable = false;
+    this.updateTick = 0;
 
     // overriding inherited properties:
     this.typeColor = WHITE;
@@ -594,6 +621,12 @@ NodeLinkerMorph.prototype.mouseEnter = function () {
     this.changed();
 };
 
+NodeLinkerMorph.prototype.step = function () {
+    if (this.updateTick > 0) {
+        this.updateTick--;
+    }
+}
+
 NodeLinkerMorph.prototype.mouseLeave = function () {
     this.color = this.typeColor.copy();
     this.changed();
@@ -603,8 +636,8 @@ NodeLinkerMorph.prototype.rootForGrab = function () {
     return this.world();
 };
 
-NodeLinkerMorph.prototype.mouseDownRight = function () {
-    if (this.connection) {
+NodeLinkerMorph.prototype.mouseClickLeft = function () {
+    if (this.newConnection) {
         this.severeConnection();
     }
 }
@@ -612,22 +645,42 @@ NodeLinkerMorph.prototype.mouseDownRight = function () {
 NodeLinkerMorph.prototype.mouseDownLeft = function () {
     if (!this.connection) {
         var attach = new AttachmentMorph(null, this);
-        this.connection = new ConnectionMorph(this.isInput ? this : attach, this.isInput ? attach : this);
-        attach.connection = this.connection;
+        this.newConnection = new ConnectionMorph(this.isInput ? this : attach, this.isInput ? attach : this);
+        attach.connection = this.newConnection;
         attach.pickUp(this.world());
-        this.parentThatIsA(NodeGraphMorph).addBack(this.connection);
+        this.parentThatIsA(NodeGraphMorph).addBack(this.newConnection);
     }
 };
 
 NodeLinkerMorph.prototype.severeConnection = function () {
-    this.connection.destroy();
-    this.connection = null;
+    this.newConnection.destroy();
+    this.newConnection = null;
 };
 
 NodeLinkerMorph.prototype.moveBy = function (delta) {
     NodeLinkerMorph.uber.moveBy.call(this, delta);
-    if (this.connection) {
-        this.connection.update();
+    if (this.connections.length && this.parentThatIsA(HandMorph)) {
+        for (let idx = 0; idx < this.connections.length; idx++) {
+            this.connections[idx].update();
+        }
+    }
+};
+
+NodeLinkerMorph.prototype.removeConnection = function (conn) {
+    if (this.newConnection === conn) {
+        this.newConnection = null;
+    }
+    if (this.connections.indexOf(conn) !== -1) {
+        this.connections.splice(this.connections.indexOf(conn), 1);
+    }
+};
+
+NodeLinkerMorph.prototype.addConnection = function (conn) {
+    if (this.newConnection === conn) {
+        this.newConnection = null;
+    }
+    if (this.connections.indexOf(conn) === -1) {
+        this.connections.push(conn);
     }
 };
 
@@ -931,6 +984,7 @@ ConnectionMorph.prototype.init = function (inpLinker, outLinker) {
     // additional properties:
     this.input = inpLinker;
     this.output = outLinker;
+    this.updateTick = 0;
 
     this.listeners = {
         input: null,
@@ -948,10 +1002,10 @@ ConnectionMorph.prototype.setInputAndOutput = function (inp, out) {
     this.output = out;
 
     if (this.input instanceof NodeLinkerMorph) {
-        this.input.connection = this;
+        this.input.addConnection(this);
     }
     if (this.output instanceof NodeLinkerMorph) {
-        this.output.connection = this;
+        this.output.addConnection(this);
     }
 
     this.update();
@@ -984,6 +1038,12 @@ ConnectionMorph.prototype.render = function (ctx) {
 
     var yQuarter = Math.abs(Math.min(distance(0, iY, 0, oY) / 2, maxPaddingAdjust)),
         xQuarter = (Math.min(distance(iX, 0, oX, 0) / 2, maxPaddingAdjust));
+
+    var grad = ctx.createLinearGradient(iX, iY, oX, oY);
+    grad.addColorStop(0, this.output.color.toString());
+    grad.addColorStop(1, this.input.color.toString());
+
+    ctx.strokeStyle = grad;
 
     // to remember: the input goes to the output.
     if (iX > oX) {
@@ -1054,19 +1114,33 @@ ConnectionMorph.prototype.render = function (ctx) {
     */
 };
 
-ConnectionMorph.prototype.update = function () {
-    // to do: actually implement this, even though it is very scary.
+ConnectionMorph.prototype.update = function (forceUpdate = false) {
+    if (!forceUpdate && this.updateTick > 0) {
+        this.updateTick--;
+        return;
+    }
 
     // this *should* give the "render" function more room to work with.
-    this.fullChanged();
-    this.bounds = this.input.bounds.merge(this.output.bounds).expandBy(30);
-    this.fullChanged();
+    this.changed();
+    this.bounds = this.input.fullBounds().merge(this.output.fullBounds()).expandBy(30);
+    this.changed();
     this.holes = [this.bounds.translateBy(this.position().neg())];
+
+    this.updateTick = 2;
 };
 
 ConnectionMorph.prototype.destroy = function () {
     ConnectionMorph.uber.destroy.call(this);
 
-    this.input.connection = null;
-    this.output.connection = null;
+    if (this.input instanceof NodeLinkerMorph) {
+        this.input.removeConnection(this);
+    } else {
+        this.input.connection = null;
+    }
+
+    if (this.output instanceof NodeLinkerMorph) {
+        this.output.removeConnection(this);
+    } else {
+        this.output.connection = null;
+    }
 };
