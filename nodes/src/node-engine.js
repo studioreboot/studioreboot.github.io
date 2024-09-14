@@ -102,7 +102,8 @@ class ProcessNode {
     buildBody (aBody) {
         aBody.addText("This is a basic node with no");
         aBody.addText("particular function.");
-        aBody.addParam("Test", "number");
+        aBody.addParam("Test", "number", 5, true);
+        aBody.addParam("Test", "number", 5, false);
         aBody.finalize();
     }
 };

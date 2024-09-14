@@ -41,6 +41,8 @@ var NodeMorph;
 var NodeTemplate;
 var ParameterContainerMorph;
 var NodeBodyMorph;
+var AttachmentMorph;
+var NodeLinkerMorph;
 var InfoPopupIconMorph;
 var InfoPopupMorph;
 var ConnectionMorph;
@@ -61,6 +63,64 @@ SelectionMorph.prototype.init = function (aMorph) {
     this.morph = aMorph;
     this.bounds = this.morph.fullBounds().expandBy(15);
     this.color = WHITE;
+};
+
+///////////////////////////////////////////////////////////////////
+// AttachmentMorph ////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+
+/*
+    I serve one purpose, and that purpose is connect to nodes together.
+
+    A NodeLinkerMorph will create me upon the mouse moving (and it's left button being down.).
+
+    Should I be dropped, I will check if there are any Linkers near me and connect those
+    two together. If I am dropped and there is no linkers near me, I will destroy the connection.
+*/
+
+// AttachmentMorph inherits from Morph:
+
+AttachmentMorph.prototype = new Morph();
+AttachmentMorph.prototype.constructor = AttachmentMorph;
+AttachmentMorph.uber = Morph.prototype;
+
+// AttachmentMorph instance creation:
+
+function AttachmentMorph (aConnection, aLinker) {
+    this.init(aConnection, aLinker);
+};
+
+// AttachmentMorph initialization:
+
+AttachmentMorph.prototype.init = function (aConnection, aLinker) {
+    AttachmentMorph.uber.init.call(this);
+
+    this.connection = aConnection; // the connection of which we'll connect to another linker (if any.)
+    this.linker = aLinker; // the linker of which this attachment was created from.
+
+    this.setExtent(new Point(4, 4));
+}
+
+// AttachmentMorph mouse handling:
+
+AttachmentMorph.prototype.render = nop;
+
+AttachmentMorph.prototype.changed = function () {
+    AttachmentMorph.uber.changed.call(this);
+
+    if (this.connection) this.connection.update();
+};
+
+AttachmentMorph.prototype.justDropped = function () {
+    var world = this.world();
+    this.destroy();
+    var morph = world.topMorphAt(this.position());
+    if (morph instanceof NodeLinkerMorph) {
+        this.connection.setInputAndOutput(this.linker.isInput ? this.linker : morph, this.linker.isInput ? morph : this.linker);
+        this.connection.update();
+    } else {
+        this.linker.severeConnection();
+    }
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -133,6 +193,9 @@ NodeGraphMorph.prototype.userMenu = function () {
 };
 
 NodeGraphMorph.prototype.wantsDropOf = function (aMorph) {
+    if (aMorph instanceof AttachmentMorph) {
+        return true; // it'll remove itself anyway.
+    }
     if (!(aMorph instanceof NodeMorph)) {
         return false;
     }
@@ -454,7 +517,7 @@ NodeLinkerMorph.prototype.init = function (aParamContainer) {
     NodeLinkerMorph.uber.init.call(this);
 
     // additonal properties:
-    this.otherLinker = null;
+    this.connection = null;
     this.container = aParamContainer;
     this.isDraggable = false;
 
@@ -467,6 +530,15 @@ NodeLinkerMorph.prototype.init = function (aParamContainer) {
 
     this.setExtent(new Point(15, 15));
 };
+
+Object.defineProperty(NodeLinkerMorph.prototype, "isInput", {
+    get: function () {
+        if (!this.container) {
+            return null;
+        }
+        return this.container.isInput;
+    }
+});
 
 /** @returns {NodeMorph|null} */
 NodeLinkerMorph.prototype.node = function () {
@@ -510,8 +582,19 @@ NodeLinkerMorph.prototype.rootForGrab = function () {
 };
 
 NodeLinkerMorph.prototype.mouseDownLeft = function () {
-
+    if (!this.connection) {
+        var attach = new AttachmentMorph(null, this);
+        this.connection = new ConnectionMorph(this.isInput ? this : attach, this.isInput ? attach : this);
+        attach.connection = this.connection;
+        attach.pickUp(this.world());
+        this.parentThatIsA(NodeGraphMorph).addBack(this.connection);
+    }
 };
+
+NodeLinkerMorph.prototype.severeConnection = function () {
+    this.connection.destroy();
+    this.connection = null;
+}
 
 ///////////////////////////////////////////////////////////////////
 // ParameterContainerMorph ////////////////////////////////////////
@@ -539,6 +622,7 @@ ParameterContainerMorph.prototype.init = function (param, isInputOutput) {
     this.paramInfo = param;
 
     this.linker = null; // optional, makes a value variable and requires the other node to know it's shit.
+    this.aligner = null;
 
     // overriding inherited properties:
     this.color = PINK;
@@ -562,10 +646,21 @@ ParameterContainerMorph.prototype.build = function () {
 }
 
 ParameterContainerMorph.prototype.construct = function () {
-    var linker = new NodeLinkerMorph(this);
+    var linker, paramTitle, align;
+
+    align = new AlignmentMorph("column", 4);
+    align.alignment = "left";
     
+    linker = new NodeLinkerMorph(this);
+    paramTitle = new TextMorph(this.paramInfo.name, 8, "monospace", false, true);
+
+    this.aligner = align;
+
+    this.aligner.add(paramTitle);
+
     this.linker = linker;
     this.add(this.linker);
+    this.add(this.aligner);
 };
 
 ParameterContainerMorph.prototype.fixLayout = function () {
@@ -573,8 +668,16 @@ ParameterContainerMorph.prototype.fixLayout = function () {
 
     var thisNode = this.node();
 
+    if (this.aligner) {
+        this.aligner.fixLayout();
+    }
+
     if (this.linker) {
-        this.linker.setCenter(new Point(thisNode.left() + (thisNode.border / 2), this.center().y));
+        if (this.isInput) {
+            this.linker.setCenter(new Point(thisNode.left() + (thisNode.border / 2), this.center().y));
+        } else {
+            this.linker.setCenter(new Point(thisNode.right() - (thisNode.border / 2), this.center().y));
+        }
     }
 };
 
@@ -813,7 +916,7 @@ ConnectionMorph.prototype.addListeners = function () {
     this.listeners.output = this.output.addEventListener("morphChanged", () => {
         this.update();
     });
-}
+};
 
 /** @param {CanvasRenderingContext2D} ctx */
 ConnectionMorph.prototype.render = function (ctx) {
@@ -828,7 +931,8 @@ ConnectionMorph.prototype.render = function (ctx) {
 
     ctx.lineWidth = 2.5;
 
-    var iCenter = this.input.center(), oCenter = this.output.center(),
+    // flipped because weirdness
+    var iCenter = this.output.center(), oCenter = this.input.center(),
         iX = iCenter.x - l, iY = iCenter.y - t,
         oX = oCenter.x - l, oY = oCenter.y - t,
         farthestLeft = Math.min(iX, oX), farthestRight = Math.max(iX, oX);
