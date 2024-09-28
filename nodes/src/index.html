@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Audio Node Graph</title>
+        <!--Graphical and Programmable Bullshit-->
+        <script src="libs/morphic.js"></script>
+        <script src="libs/symbols.js"></script>
+        <script src="libs/widgets.js"></script>
+        <script src="libs/xml.js"></script>
+        <!--Other Required Libraries-->
+        <script src="libs/seedrandom.min.js"></script>
+        <script src="libs/jszip.min.js"></script>
+        <script src="libs/FileSaver.min.js"></script>
+        <script src="libs/libflac.min.js"></script>
+        <script src="libs/util-lib.js"></script>
+        <!--Node Graph Library-->
+        <script src="src/node-engine.js"></script>
+        <script src="src/node-graph.js"></script>
+        <!--the Actual Editor-->
+        <script src="src/editor.js"></script>
+        <script src="src/store.js"></script>
+        <!--the standard library-->
+        <script src="src/std.js"></script>
+        <script>
+            var world;
+            window.onload = function () {
+                world = new WorldMorph(document.getElementById("world"));
+                world.isDevMode = true;
+                window.onbeforeunload = null;
+                setInterval(() => {
+                    world.doOneCycle();
+                }, 1);
+
+                var editor = new AudioEditorMorph();
+                editor.openIn(world);
+
+                /* // -- test bullshit start --
+                world.add(new NodeMorph({}));
+                world.childThatIsA(NodeMorph).setExtent(new Point(150, 180));
+                world.childThatIsA(NodeMorph).isDraggable = true; */
+
+                /* var testMorph = new ScrollFrameMorph();
+                testMorph.setContents(new NodeGraphMorph(testMorph));
+                world.add(testMorph); */
+
+                // world.add(new NodeParamLinkerMorph());
+
+                /* var mrph1 = new NodeLinkerMorph();
+                mrph1.typeColor = new Color(0, 0, 255);
+                var mrph2 = new NodeLinkerMorph();
+                mrph2.typeColor = new Color(0, 255, 0);
+                var conn = new ConnectionMorph(mrph1, mrph2);
+                
+                world.add(conn);
+                world.add(mrph1);
+                world.add(mrph2); */
+            }
+        </script>
+    </head>
+    <body style="margin: 0;">
+        <canvas id="world"></canvas>
+    </body>
+</html>
