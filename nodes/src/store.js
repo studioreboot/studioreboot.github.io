@@ -15,14 +15,8 @@
     is written, i don't think i'm going to particularly like writing it.
 */
 
-class ProjectSerializer {
+class Project {
     constructor () {
-        this.projectFile = JSZip();
-        this.generatedXML = null;
-    }
-
-    beginSerialization () {
-        this.generatedXML = new XML_Element("node-project");
-        this.generatedXML.attributes["creation-timestamp"] = Date.now();
+        
     }
 }

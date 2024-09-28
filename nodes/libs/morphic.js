@@ -12667,6 +12667,12 @@ WorldMorph.prototype.contextMenu = function () {
             'toggleDevMode',
             'disable developers\'\ncontext menus'
         );
+        menu.addLine();
+        menu.addItem(
+            "stats...",
+            "showStats",
+            "shows the status of the World"
+        );
     } else {
         menu.addItem("development mode...", 'toggleDevMode');
     }
@@ -12836,6 +12842,15 @@ WorldMorph.prototype.showAllHiddens = function () {
         }
     });
 };
+
+WorldMorph.prototype.showStats = function () {
+    this.inform(
+        'visible morphs in World:\n' +
+            this.allChildren().filter(v => v.isVisble).length + '\n' +
+        'total morphs in World:\n' +
+            this.allChildren().length
+    );
+}
 
 WorldMorph.prototype.about = function () {
     var versions = '', module;
