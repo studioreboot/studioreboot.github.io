@@ -12127,6 +12127,7 @@ WorldMorph.prototype.fullDrawOn = function (aContext, aRect) {
 WorldMorph.prototype.updateBroken = function () {
     var ctx = this.worldCanvas.getContext('2d');
     this.condenseDamages();
+    this.drawBroken(ctx);
     this.broken.forEach(rect => {
         if (rect.extent().gt(ZERO)) {
             this.fullDrawOn(ctx, rect);
@@ -12846,11 +12847,22 @@ WorldMorph.prototype.showAllHiddens = function () {
 WorldMorph.prototype.showStats = function () {
     this.inform(
         'visible morphs in World:\n' +
-            this.allChildren().filter(v => v.isVisble).length + '\n' +
+            this.allChildren().filter(v => v.isVisble == true).length + '\n' +
         'total morphs in World:\n' +
             this.allChildren().length
     );
-}
+};
+
+WorldMorph.prototype.drawBroken = function (ctx) {
+    ctx.save();
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 5;
+    for (let i = 0; i < this.broken.length; i++) {
+        const rect = this.broken[i];
+        ctx.strokeRect(rect.left(), rect.top(), rect.width(), rect.height());
+    }
+    ctx.restore();
+};
 
 WorldMorph.prototype.about = function () {
     var versions = '', module;
