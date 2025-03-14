@@ -6,6 +6,7 @@ TriggerMorph.prototype.setLabel = function (aMorph) {
 };
 
 var SnakeMorph;
+var SnakeTailMorph;
 var FoodMorph;
 var MultiplayerSnakeGameMorph;
 var SnakeAreaMorph;
@@ -14,7 +15,7 @@ function adjust (v, useHeight = false) {
     if (useHeight) {
         return (v / 599) * innerHeight;
     }
-    return (v / 1366) * innerWidth;
+    return (v / 1325) * innerWidth;
 };
 
 function irand (min, max) {
@@ -24,7 +25,7 @@ function irand (min, max) {
 MultiplayerSnakeGameMorph.CELL_SIZE = adjust(12);
 
 SnakeMorph.prototype = new Morph();
-SnakeMorph.prototype.constructor = SnakeMorph.prototype;
+SnakeMorph.prototype.constructor = SnakeMorph;
 SnakeMorph.uber = Morph.prototype;
 
 function SnakeMorph (doesMoveIndependently) {
@@ -39,6 +40,9 @@ SnakeMorph.prototype.init = function (doesMoveIndependently) {
     this.fps = 6;
     this.doesMoveIndependently = doesMoveIndependently || true;
     this.canMove = true;
+    this.color = SnakeMorph.CLR_HEAD // new Color(255, 0, 174);
+
+    this.head = new Point(1, 1);
 
     this.board = null;
 
@@ -55,15 +59,19 @@ SnakeMorph.prototype.move = function () {
     switch (this.direction) {
         case "up":
             this.setTop(this.top() - MultiplayerSnakeGameMorph.CELL_SIZE);
+            this.head.y--;
             break;
         case "down":
             this.setTop(this.top() + MultiplayerSnakeGameMorph.CELL_SIZE);
+            this.head.y++;
             break;
         case "left":
             this.setLeft(this.left() - MultiplayerSnakeGameMorph.CELL_SIZE);
+            this.head.x--;
             break;
         case "right":
             this.setLeft(this.left() + MultiplayerSnakeGameMorph.CELL_SIZE);
+            this.head.x++;
             break;
         default:
             break;
@@ -76,6 +84,8 @@ SnakeMorph.prototype.move = function () {
         const part = this.tail[i];
         part.direction = newDirections[i];
     }
+
+    this.fixTail();
 };
 
 SnakeMorph.prototype.addTail = function () {
@@ -84,18 +94,71 @@ SnakeMorph.prototype.addTail = function () {
 
 SnakeMorph.prototype.consume = function (foodObj) {
     this.addTail();
+    this.playerScore += foodObj.food.foodType * 5;
     foodObj.food.destroy();
-}
+
+    this.board.updateScore();
+};
 
 SnakeMorph.CLR_LIGHTGREEN = new Color(85, 255, 20);
 SnakeMorph.CLR_DARKGREEN = new Color(10, 194, 0);
 SnakeMorph.CLR_HEAD = new Color(204, 46, 0);
 
-/** @param {CanvasRenderingContext2D} ctx */
-SnakeMorph.prototype.render = function (ctx) {
-    ctx.fillStyle = SnakeMorph.CLR_HEAD.toString();
-    ctx.fillRect(0, 0, MultiplayerSnakeGameMorph.CELL_SIZE, MultiplayerSnakeGameMorph.CELL_SIZE);
-}
+SnakeMorph.HEAD_SIZE = new Point(MultiplayerSnakeGameMorph.CELL_SIZE, MultiplayerSnakeGameMorph.CELL_SIZE);
+
+SnakeMorph.prototype.fixTail = function () {
+    this.children.forEach(m => m.destroy());
+    this.children = [];
+    var lastPos = this.position();
+    for (let i = 0; i < this.tail.length; i++) {
+        const tailObj = this.tail[i];
+        let tailMorph = new SnakeTailMorph(this);
+        tailMorph.color = (i + 1) % 2 == 0 ? SnakeMorph.CLR_LIGHTGREEN : SnakeMorph.CLR_DARKGREEN;
+        switch (tailObj.direction) {
+            case "down":
+                tailMorph.setPosition(lastPos.subtract(new Point(0, MultiplayerSnakeGameMorph.CELL_SIZE)));
+                break;
+            case "up":
+                tailMorph.setPosition(lastPos.add(new Point(0, MultiplayerSnakeGameMorph.CELL_SIZE)));
+                break;
+            case "left":
+                tailMorph.setPosition(lastPos.add(new Point(MultiplayerSnakeGameMorph.CELL_SIZE, 0)));
+                break;
+            case "right":
+                tailMorph.setPosition(lastPos.subtract(new Point(MultiplayerSnakeGameMorph.CELL_SIZE, 0)));
+                break;
+            default:
+                break;
+        }
+        lastPos = tailMorph.position();
+        this.add(tailMorph);
+    }
+};
+
+SnakeMorph.prototype.developersMenu = function () {
+    var menu = SnakeMorph.uber.developersMenu.call(this);
+    menu.addLine();
+    menu.addItem(
+        "stop",
+        () => {
+            this.canMove = false;
+        }
+    )
+    return menu;
+};
+
+SnakeTailMorph.prototype = new Morph();
+SnakeTailMorph.prototype.constructor = SnakeTailMorph;
+SnakeTailMorph.uber = Morph.prototype;
+
+function SnakeTailMorph (mySnake) {
+    this.init(mySnake);
+};
+
+SnakeTailMorph.prototype.init = function () {
+    SnakeTailMorph.uber.init.call(this);
+    this.setExtent(SnakeMorph.HEAD_SIZE);
+};
 
 MultiplayerSnakeGameMorph.prototype = new FrameMorph();
 MultiplayerSnakeGameMorph.prototype.constructor = MultiplayerSnakeGameMorph;
@@ -138,7 +201,6 @@ MultiplayerSnakeGameMorph.prototype.processKeyUp = function (ev) {
         this.childThatIsA(SnakeMorph).direction = "right";
     }
     this.childThatIsA(SnakeMorph).move();
-    console.log(ev.key);
 };
 
 MultiplayerSnakeGameMorph.prototype.buildPanes = function () {
@@ -166,7 +228,7 @@ FoodMorph.prototype.init = function () {
 
     this.setExtent(new Point(MultiplayerSnakeGameMorph.CELL_SIZE, MultiplayerSnakeGameMorph.CELL_SIZE))
 
-    this.foodType = 1;
+    this.foodType = irand(1, 2);
     this.whereOnBoard = null;
 };
 
@@ -187,7 +249,24 @@ FoodMorph.prototype.render = function (ctx) {
 
             ctx.beginPath();
             ctx.moveTo(w / 2, h / 3);
-            ctx.lineTo(w / 2 - adjust(5), adjust(2.5));
+            ctx.lineTo(w / 2 - adjust(2), 0);
+            ctx.closePath();
+            ctx.stroke();
+            break;
+        case 2:
+            ctx.fillStyle = "#ff6600";
+
+            ctx.beginPath();
+            ctx.ellipse(w / 2, h / 2, w / 2.35, h / 2.35, 0, 0, Math.PI * 2, false);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.lineWidth = adjust(2.5);
+            ctx.strokeStyle = "#8c450b";
+
+            ctx.beginPath();
+            ctx.moveTo(w / 2, h / 3);
+            ctx.lineTo(w / 2 - adjust(2), 0);
             ctx.closePath();
             ctx.stroke();
             break;
@@ -211,7 +290,10 @@ SnakeAreaMorph.prototype.init = function () {
     SnakeAreaMorph.uber.init.call(this);
     this.setExtent(new Point(MultiplayerSnakeGameMorph.CELL_SIZE * 30, MultiplayerSnakeGameMorph.CELL_SIZE * 30));
 
+    this.playerScore = 0;
     this.snake = new SnakeMorph();
+    this.scoreValue = new StringMorph("", adjust(18), "monospace", true, false, true, null, null, WHITE);
+    this.add(this.scoreValue);
     this.snake.board = this;
     this.add(this.snake);
 
@@ -296,6 +378,8 @@ SnakeAreaMorph.prototype.fixLayout = function () {
     this.buttons.right.setPosition(this.topRight());
     this.buttons.down.setPosition(this.bottomLeft());
     this.buttons.up.setPosition(this.position().subtract(new Point(0, SnakeAreaMorph.BUTTON_HEIGHT)));
+
+    this.scoreValue.setPosition(this.position());
 };
 
 SnakeAreaMorph.prototype.setSnakeDirectionUp = function () {
@@ -314,24 +398,21 @@ SnakeAreaMorph.prototype.setSnakeDirectionRight = function () {
     this.childThatIsA(SnakeMorph).direction = "right";
 };
 
-SnakeAreaMorph.prototype.snakeMoved = function (whichDirection) {
-    switch (whichDirection) {
-        case "up":
-            this.headPos.y--;
-            break;
-        case "down":
-            this.headPos.y++;
-            break;
-        case "left":
-            this.headPos.x--;
-            break;
-        case "right":
-            this.headPos.x++;
-            break;
-        default: break;
+SnakeAreaMorph.prototype.snakeMoved = function () {
+    this.headPos = this.snake.position().subtract(this.position()).divideBy(SnakeMorph.HEAD_SIZE);
+    if (this.headPos.x < 0 || this.headPos.x > 30 || this.headPos.y < 0 || this.headPos.y > 30) {
+        this.snake.canMove = false;
     }
-    let fewd = this.foods.find(v => v.pt.eq(this.headPos));
+
+    let fewd = this.foods.find(v => v.pt.eq(this.snake.head));
     if (!isNil(fewd)) {
         this.snake.consume(fewd);
     }
+};
+
+SnakeAreaMorph.prototype.updateScore = function () {
+    this.scoreValue.text = this.playerScore.toString();
+    this.scoreValue.rerender();
+    this.scoreValue.changed();
+    this.scoreValue.fixLayout();
 };
