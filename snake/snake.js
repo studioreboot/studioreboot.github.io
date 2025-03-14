@@ -372,10 +372,6 @@ SnakeAreaMorph.prototype.spawnFood = function () {
     }
     this.add(this.snake);
     this.fullChanged();
-
-    if (this.world()) {
-        this.fixLayers();
-    }
 };
 
 SnakeAreaMorph.prototype.fixLayout = function () {
