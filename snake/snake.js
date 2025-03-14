@@ -37,7 +37,7 @@ SnakeMorph.prototype.init = function (doesMoveIndependently) {
 
     this.tail = [{ direction: "up", depth: 1 }]; // tail format { direction: "up/down/left/right", depth: int }
     this.direction = "down";
-    this.fps = 6;
+    this.fps = 4;
     this.doesMoveIndependently = doesMoveIndependently || true;
     this.canMove = true;
     this.color = SnakeMorph.CLR_HEAD // new Color(255, 0, 174);
@@ -94,7 +94,7 @@ SnakeMorph.prototype.addTail = function () {
 
 SnakeMorph.prototype.consume = function (foodObj) {
     this.addTail();
-    this.playerScore += foodObj.food.foodType * 5;
+    this.board.playerScore += foodObj.food.foodType * 5;
     foodObj.food.destroy();
 
     this.board.updateScore();
