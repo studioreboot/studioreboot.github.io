@@ -364,13 +364,18 @@ SnakeAreaMorph.prototype.spawnFood = function () {
         let food = new FoodMorph();
         let tX = irand(0, 29), tY = irand(0, 29);
 
-        food.setPosition(new Point(MultiplayerSnakeGameMorph.CELL_SIZE * tX, MultiplayerSnakeGameMorph.CELL_SIZE * tY));
+        food.setPosition(new Point(MultiplayerSnakeGameMorph.CELL_SIZE * tX, MultiplayerSnakeGameMorph.CELL_SIZE * tY).translateBy(this.position()));
 
         this.foods.push({ food, pt: new Point(tX + 1, tY + 1) });
 
-        this.add(food);
+        this.addBack(food);
     }
     this.add(this.snake);
+    this.fullChanged();
+
+    if (this.world()) {
+        this.fixLayers();
+    }
 };
 
 SnakeAreaMorph.prototype.fixLayout = function () {
