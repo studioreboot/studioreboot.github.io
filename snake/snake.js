@@ -97,6 +97,9 @@ SnakeMorph.prototype.consume = function (foodObj) {
     this.board.playerScore += foodObj.food.foodType * 5;
     foodObj.food.destroy();
 
+    this.board.foods.splice(this.board.foods.indexOf(foodObj), 1);
+
+    this.board.checkFoodAmount();
     this.board.updateScore();
 };
 
@@ -305,6 +308,12 @@ SnakeAreaMorph.prototype.buildPanes = function () {
     this.spawnFood();
     this.makeButtons();
 };
+
+SnakeAreaMorph.prototype.checkFoodAmount = function () {
+    if (this.foods.length < 10) {
+        this.spawnFood();
+    }
+}
 
 SnakeAreaMorph.prototype.makeButtons = function () {
     var upBtn, downBtn, leftBtn, rightBtn, defaultColor = BLACK.lighter(20);
