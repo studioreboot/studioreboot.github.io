@@ -651,6 +651,24 @@ MultiplayerSnakeGameMorph.prototype.playLose = function (whichSide) {
     }
 }
 
+MultiplayerSnakeGameMorph.prototype.playWin = function (whichSide) {
+    var ctx = this.audioContext, osc, pan;
+
+    osc = ctx.createBufferSource();
+    osc.buffer = this.winSoundBuffer;
+    
+    pan = ctx.createStereoPanner();
+    pan.pan.value = whichSide === "left" ? -1 : 1;
+    osc.connect(pan);
+    pan.connect(ctx.destination);
+
+    osc.start();
+
+    osc.onended = function () {
+        pan.disconnect();
+    }
+}
+
 MultiplayerSnakeGameMorph.prototype.stepWinSequence = function () {
     console.log(this.winStep);
     switch (this.winStep) {
@@ -673,6 +691,7 @@ MultiplayerSnakeGameMorph.prototype.stepWinSequence = function () {
                 scrn.popUpIn(this);
                 scrn.setExtent(new Point(this.width() / 2, this.height()));
                 scrn.screenType = ScreenMorph.OP_CONTROLLED;
+                this.playWin("left");
             }
             if (this.leftGameStatus.playerScore < this.rightGameStatus.playerScore) {                
                 txt = new TextMorph("Right Side Won!", adjust(36), "monospace");
@@ -688,8 +707,9 @@ MultiplayerSnakeGameMorph.prototype.stepWinSequence = function () {
                 scrn.setPosition(this.topCenter());
                 scrn.setExtent(new Point(this.width() / 2, this.height()));
                 scrn.screenType = ScreenMorph.OP_CONTROLLED;
+                this.playWin("right");
             };
-            this.winTimer = Date.now() + 5000;
+            this.winTimer = Date.now() + 5500;
             this.winStep = 3;
             break;
         case 3:
