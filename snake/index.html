@@ -12,7 +12,7 @@
             
             window.onload = function () {
                 world = new WorldMorph(document.querySelector("#world"));
-                world.isDevMode = true;
+                world.isDevMode = isInDev();
 
                 window.onbeforeunload = null;
 

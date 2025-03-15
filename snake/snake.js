@@ -5,6 +5,10 @@ TriggerMorph.prototype.setLabel = function (aMorph) {
     this.fixLayout();
 };
 
+function isInDev () {
+    return window.location.href.indexOf("studioreboot.github.io") !== -1;
+}
+
 function getUrlLocation (fileName) {
     return (window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/" + fileName);
 };
@@ -612,6 +616,12 @@ MultiplayerSnakeGameMorph.prototype.step = function () {
         default: break;
     }
 };
+
+MultiplayerSnakeGameMorph.prototype.userMenu = function () {
+    if (!isInDev()) {
+        return new MenuMorph();
+    }
+}
 
 MultiplayerSnakeGameMorph.prototype.playTone = function (at) {
     var ctx = this.audioContext, osc, pan;
