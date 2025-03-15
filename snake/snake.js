@@ -823,15 +823,15 @@ SingleplayerSnakeGameMorph.uber = SnakeGameMorph.prototype;
 
 function SingleplayerSnakeGameMorph () {
     this.init();
+};
+
+SingleplayerSnakeGameMorph.prototype.init = function () {
+    SingleplayerSnakeGameMorph.uber.init.call(this);
 
     this.color = BLACK;
     this.audioContext = new AudioContext();
 
     this.gameArea = null;
-};
-
-SingleplayerSnakeGameMorph.prototype.init = function () {
-    SingleplayerSnakeGameMorph.uber.init.call(this);
 };
 
 SingleplayerSnakeGameMorph.prototype.openIn = function (aWorld) {
