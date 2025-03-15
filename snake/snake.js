@@ -1128,13 +1128,13 @@ SnakeAreaMorph.prototype.mouseClickLeft = function () {
 }
 
 SnakeAreaMorph.prototype.processKeyUp = function (ev) {
-    if (ev.keyCode === 38) {
+    if (ev.keyCode === 38 || ev.key === "w") {
         this.childThatIsA(SnakeMorph).direction = "up";
-    } else if (ev.keyCode === 40) {
+    } else if (ev.keyCode === 40 || ev.key === "s") {
         this.childThatIsA(SnakeMorph).direction = "down";
-    } else if (ev.keyCode === 37) {
+    } else if (ev.keyCode === 37 || ev.key === "a") {
         this.childThatIsA(SnakeMorph).direction = "left";
-    } else if (ev.keyCode === 39) {
+    } else if (ev.keyCode === 39 || ev.key === "d") {
         this.childThatIsA(SnakeMorph).direction = "right";
     }
     this.childThatIsA(SnakeMorph).move();
