@@ -588,6 +588,11 @@ MultiplayerSnakeGameMorph.prototype.step = function () {
                 this.gameState = ST_FINISHED;
                 this.winStep = 0;
             }
+
+            if (this.leftArea.didDie && this.rightArea.didDie) {
+                this.gameState = ST_FINISHED;
+                this.winStep = 0;
+            }
             break;
         case ST_STOPPED:
             this.leftArea.snake.canMove = false;
