@@ -329,15 +329,15 @@ MultiplayerSnakeGameMorph.prototype.loadTracks = function () {
 
     console.log(xhr);
 
-    /* xhr = new XMLHttpRequest();
+    xhr = new XMLHttpRequest();
     xhr.responseType = "arraybuffer";
-    xhr.open("GET", getUrlLocation("gameover.mp3"), true);
+    xhr.open("GET", getUrlLocation("win.mp3"), true);
     xhr.onload = function () {
         self.audioContext.decodeAudioData(xhr.response, (data) => {
             self.winSoundBuffer = data;
         });
     }
-    xhr.send(null); */
+    xhr.send(null);
 
     if (!this.canPlayMusic) return;
 
@@ -548,6 +548,7 @@ MultiplayerSnakeGameMorph.prototype.buildPanes = function () {
         ctx.closePath();
         ctx.stroke();
     };
+    this.timerDial.mouseDownLeft = nop;
     this.add(this.timerDial);
 
     this.addBack(this.leftArea);
