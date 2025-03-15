@@ -33,6 +33,7 @@ var MultiplayerSnakeGameMorph;
 var SnakeGameStatus;
 var SingleplayerSnakeGameMorph;
 var SnakeAreaMorph;
+var SnakeGameMorph;
 
 function adjust (v, useHeight = false) {
     if (useHeight) {
@@ -44,6 +45,14 @@ function adjust (v, useHeight = false) {
 function irand (min, max) {
     return Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1) + Math.ceil(min));
 };
+
+SnakeGameMorph.prototype = new FrameMorph();
+SnakeGameMorph.prototype.constructor = SnakeGameMorph;
+SnakeGameMorph.uber = FrameMorph.prototype;
+
+function SnakeGameMorph () {
+    this.init();
+}
 
 MultiplayerSnakeGameMorph.CELL_SIZE = adjust(12);
 
@@ -283,9 +292,9 @@ SnakeTailMorph.prototype.init = function () {
     this.setExtent(SnakeMorph.HEAD_SIZE);
 };
 
-MultiplayerSnakeGameMorph.prototype = new FrameMorph();
+MultiplayerSnakeGameMorph.prototype = new SnakeGameMorph();
 MultiplayerSnakeGameMorph.prototype.constructor = MultiplayerSnakeGameMorph;
-MultiplayerSnakeGameMorph.uber = FrameMorph.prototype;
+MultiplayerSnakeGameMorph.uber = SnakeGameMorph.prototype;
 
 function MultiplayerSnakeGameMorph (canPlayMusic) {
     this.init(canPlayMusic);
@@ -808,15 +817,17 @@ MultiplayerSnakeGameMorph.prototype.developersMenu = function () {
     return menu;
 };
 
-SingleplayerSnakeGameMorph.prototype = new FrameMorph();
+SingleplayerSnakeGameMorph.prototype = new SnakeGameMorph();
 SingleplayerSnakeGameMorph.prototype.constructor = SingleplayerSnakeGameMorph;
-SingleplayerSnakeGameMorph.uber = FrameMorph.prototype;
+SingleplayerSnakeGameMorph.uber = SnakeGameMorph.prototype;
 
 function SingleplayerSnakeGameMorph () {
     this.init();
 
     this.color = BLACK;
     this.audioContext = new AudioContext();
+
+    this.gameArea = null;
 };
 
 SingleplayerSnakeGameMorph.prototype.init = function () {
@@ -834,6 +845,7 @@ SingleplayerSnakeGameMorph.prototype.openIn = function (aWorld) {
     this.setExtent(aWorld.extent());
     
     this.buildPanes();
+    this.fixLayout();
 };
 
 SingleplayerSnakeGameMorph.prototype.mouseClickLeft = function () {
@@ -854,16 +866,16 @@ SingleplayerSnakeGameMorph.prototype.processKeyUp = function (ev) {
 };
 
 SingleplayerSnakeGameMorph.prototype.buildPanes = function () {
-    let align = new AlignmentMorph("row");
-
-    let area1 = new SnakeAreaMorph();
+    let area1 = new SnakeAreaMorph(new SnakeGameStatus("middle"));
     area1.buildPanes();
     area1.fixLayout();
-    align.add(area1);
+    this.gameArea = area1;
+    this.add(area1);
 };
 
-SingleplayerSnakeGameMorph.prototype.reactToWorldResize = function () {
-    this.childThatIsA(SnakeAreaMorph).setCenter(this.center());
+SingleplayerSnakeGameMorph.prototype.reactToWorldResize = function (aRect) {
+    this.setExtent(aRect.extent());
+    this.fixLayout();
 };
 
 SingleplayerSnakeGameMorph.prototype.playTone = function (at) {
@@ -884,6 +896,11 @@ SingleplayerSnakeGameMorph.prototype.playTone = function (at) {
         osc.stop();
         pan.disconnect();
     }, 250);
+};
+
+SingleplayerSnakeGameMorph.prototype.fixLayout = function () {
+    if (!this.gameArea) return;
+    this.gameArea.setCenter(this.center());
 };
 
 FoodMorph.prototype = new Morph();
@@ -1135,7 +1152,7 @@ SnakeAreaMorph.prototype.snakeMoved = function () {
     let fewd = this.foods.find(v => v.pt.eq(this.snake.head));
     if (!isNil(fewd)) {
         this.snake.consume(fewd);
-        this.parentThatIsA(MultiplayerSnakeGameMorph).playTone(this.gameStatus.whichSide === "left" ? -1 : 1);
+        this.parentThatIsA(SnakeGameMorph).playTone(this.gameStatus.whichSide === "left" ? -1 : 1);
     }
 };
 
