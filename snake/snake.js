@@ -168,6 +168,8 @@ SnakeMorph.prototype.init = function (doesMoveIndependently) {
     this.canMove = true;
     this.color = SnakeMorph.CLR_HEAD // new Color(255, 0, 174);
 
+    this.add(new SnakeTailMorph(this));
+
     this.head = new Point(1, 1);
 
     this.board = null;
@@ -218,6 +220,7 @@ SnakeMorph.prototype.move = function () {
 
 SnakeMorph.prototype.addTail = function () {
     this.tail.push({ direction: this.tail[this.tail.length - 1], depth: this.tail[this.tail.length - 1].depth });
+    this.add(new SnakeTailMorph(this));
 };
 
 SnakeMorph.prototype.consume = function (foodObj) {
@@ -244,7 +247,7 @@ SnakeMorph.prototype.fixTail = function () {
     var lastPos = this.position();
     for (let i = 0; i < this.tail.length; i++) {
         const tailObj = this.tail[i];
-        let tailMorph = new SnakeTailMorph(this);
+        const tailMorph = this.children[i];
         tailMorph.color = (i + 1) % 2 == 0 ? SnakeMorph.CLR_LIGHTGREEN : SnakeMorph.CLR_DARKGREEN;
         switch (tailObj.direction) {
             case "down":
