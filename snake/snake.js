@@ -1137,7 +1137,6 @@ SnakeAreaMorph.prototype.processKeyUp = function (ev) {
     } else if (ev.keyCode === 39 || ev.key === "d") {
         this.childThatIsA(SnakeMorph).direction = "right";
     }
-    this.childThatIsA(SnakeMorph).move();
 };
 
 SnakeAreaMorph.prototype.snakeMoved = function () {
@@ -1185,9 +1184,33 @@ SnakeAreaMorph.prototype.resetThisBoard = function () {
 SnakeAreaMorph.prototype.showOutOfBoundsScreen = function () {
     if (!this.didDie) return;
     this.snake.canMove = false;
+
+    var defaultColor = BLACK.lighter(20);
     
     var screen = new ScreenMorph();
     screen.screenType = ScreenMorph.OP_CONTROLLED;
-    screen.setBody(new StringMorph("You lost!", adjust(36), "monospace", true, false, null, null, null, WHITE));
+
+    let align = new AlignmentMorph("column", adjust(24));
+    align.add(new StringMorph("You lost!", adjust(36), "monospace", true, false, null, null, null, WHITE));
+
+    if (this.parentThatIsA(SingleplayerSnakeGameMorph)) {
+        let trigger = new TriggerMorph(this, "refresh", "Refresh", adjust(24), "monospace");
+        trigger.setLabel(new SymbolMorph("turnAround", SnakeAreaMorph.BUTTON_HEIGHT, WHITE));
+        trigger.color = defaultColor;
+        trigger.highlightColor = defaultColor.lighter(15);
+        trigger.pressColor = defaultColor.darker(15);
+        trigger.bounds = (new SymbolMorph("turnAround", SnakeAreaMorph.BUTTON_HEIGHT, WHITE).bounds.expandBy(adjust(15)));
+        trigger.fixLayout();
+        align.add(trigger);
+    }
+
+    screen.setBody(align);
     screen.popUpIn(this);
+};
+
+SnakeAreaMorph.prototype.refresh = function () {
+    var lastPointScore = this.gameStatus.playerScore;
+    this.resetThisBoard();
+    this.gameStatus.playerScore = lastPointScore;
+    this.updateScore();
 };
