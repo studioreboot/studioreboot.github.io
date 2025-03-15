@@ -7,4 +7,8 @@ Once you tap this screen, you will be required to get the highest score
 within ONE minute. Once the timer in the middle of the screen reaches 0
 the person with the highest score wins.
 
+Your score is indicated by the the number in the middle of the gameboard.
+There are two, a partner and yourself will have to figure out who goes
+to which side.
+
 [tap the screen to play]
