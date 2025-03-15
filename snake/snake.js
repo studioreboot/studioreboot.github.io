@@ -17,7 +17,7 @@ const IMG_GRAPE = new Image();
 IMG_GRAPE.src = "grape.svg";
 
 const IMG_CARROT = new Image();
-IMG_CARROT.src = "grape.svg";
+IMG_CARROT.src = "carrot.svg";
 
 var SnakeMorph;
 
@@ -1123,6 +1123,8 @@ SnakeAreaMorph.prototype.resetThisBoard = function () {
     this.didDie = false;
     this.spawnFood();
     this.fixLayers();
+
+    this.updateScore();
 
     this.children.filter(v => v instanceof ScreenMorph).forEach(v => v.destroy());
 };
