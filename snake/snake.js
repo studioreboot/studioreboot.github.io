@@ -6,7 +6,7 @@ TriggerMorph.prototype.setLabel = function (aMorph) {
 };
 
 function isInDev () {
-    return window.location.href.indexOf("studioreboot.github.io") !== -1;
+    return window.location.href.indexOf("studioreboot.github.io") === -1;
 }
 
 function getUrlLocation (fileName) {
