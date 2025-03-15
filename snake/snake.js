@@ -329,15 +329,15 @@ MultiplayerSnakeGameMorph.prototype.loadTracks = function () {
 
     console.log(xhr);
 
-    xhr = new XMLHttpRequest();
-    xhr.responseType = "arraybuffer";
-    xhr.open("GET", getUrlLocation("win.mp3"), true);
-    xhr.onload = function () {
-        self.audioContext.decodeAudioData(xhr.response, (data) => {
+    let xhr2 = new XMLHttpRequest();
+    xhr2.responseType = "arraybuffer";
+    xhr2.open("GET", getUrlLocation("win.mp3"), true);
+    xhr2.onload = function () {
+        self.audioContext.decodeAudioData(xhr2.response, (data) => {
             self.winSoundBuffer = data;
         });
     }
-    xhr.send(null);
+    xhr2.send(null);
 
     if (!this.canPlayMusic) return;
 
