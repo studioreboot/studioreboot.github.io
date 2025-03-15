@@ -1,0 +1,10 @@
+This game requires two players in order for the game
+to function.
+
+This is a regular game of snake, adjusted to accommodate for two players.
+
+Once you tap this screen, you will be required to get the highest score
+within ONE minute. Once the timer in the middle of the screen reaches 0
+the person with the highest score wins.
+
+[tap the screen to play]

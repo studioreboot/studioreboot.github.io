@@ -1,3 +1,7 @@
+var AlignmentMorph;
+var SymbolMorph;
+var ClockMorph;
+
 // from: https://snap.berkeley.edu/snap/src/widgets.js
 
 // AlignmentMorph /////////////////////////////////////////////////////
@@ -2610,3 +2614,215 @@ SymbolMorph.prototype.renderSymbolInfinity = function (ctx, color) {
     ]);
 })();
 */
+
+ClockMorph.prototype = new Morph();
+ClockMorph.prototype.constructor = ClockMorph;
+ClockMorph.uber = Morph.prototype;
+
+function ClockMorph () {
+    this.init();
+}
+
+ClockMorph.prototype.init = function () {
+    ClockMorph.uber.init.call(this);
+
+    this.min = 0;
+    this.max = 360;
+    this.value = 0;
+    this.tick = 30;
+    this.fillColor = null;
+    this.stopped = false;
+    this.time = new Date();
+
+    this.lineWidth = 2;
+    this.handWidth = 5;
+
+    this.startMultiplier = this.time.getMinutes();
+
+    this.hour = 0;
+    this.minute = 0;
+    this.second = 0;
+
+    this.color = new Color(230, 230, 230);
+
+    this.setRadius(MorphicPreferences.menuFontSize * 4);
+};
+
+ClockMorph.prototype.render = function () {
+    var i, angle, x1, y1, x2, y2,
+        light = this.color.lighter().toString(),
+        range = this.max - this.min,
+        ticks = range / this.tick,
+        face = this.radius * 0.75,
+        inner = face * 0.85,
+        outer = face * 0.95;
+
+    ctx.lineJoin = ctx.lineCap = "round";
+
+    // draw a light border:
+    ctx.fillStyle = light;
+    ctx.beginPath();
+    ctx.arc(
+        this.radius,
+        this.radius,
+        face + Math.min(1, this.radius - face),
+        0,
+        2 * Math.PI,
+        false
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    // fill circle:
+    ctx.fillStyle = this.color.toString();
+    ctx.beginPath();
+    ctx.arc(
+        this.radius,
+        this.radius,
+        face,
+        0,
+        2 * Math.PI,
+        false
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    // fill value
+    angle = (this.value - this.min) * (Math.PI * 2) / range - Math.PI / 2;
+    ctx.fillStyle = (this.fillColor || this.color.darker()).toString();
+    ctx.beginPath();
+    ctx.arc(
+        this.radius,
+        this.radius,
+        face,
+        Math.PI / -2,
+        angle,
+        false
+    );
+    ctx.lineTo(this.radius, this.radius);
+    ctx.closePath();
+    ctx.fill();
+
+    // draw ticks:
+    var quarterHourTickColor = new Color(35, 35, 35);
+    var hourTickColor = quarterHourTickColor.lighter(20);
+    ctx.strokeStyle = hourTickColor.toString();
+    ctx.lineWidth = 1;
+    inner = face * 0.8;
+    outer = face * 0.9;
+    for (i = 0; i < ticks; i += 1) {
+        angle = (i - 3) * (Math.PI * 2) / ticks - Math.PI / 2;
+
+        ctx.lineWidth = this.lineWidth;
+        if ((i % 3) === 0) {
+            ctx.lineWidth = this.lineWidth * 2;
+            ctx.strokeStyle = quarterHourTickColor.toString();
+        } else {
+            ctx.strokeStyle = hourTickColor.toString();
+        }
+
+        ctx.beginPath();
+        x1 = this.radius + Math.cos(angle) * inner;
+        y1 = this.radius + Math.sin(angle) * inner;
+        x2 = this.radius + Math.cos(angle) * outer;
+        y2 = this.radius + Math.sin(angle) * outer;
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    }
+
+        // draw a filled center:
+    inner = face * 0.05;
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(
+        this.radius,
+        this.radius,
+        inner / 2,
+        0,
+        2 * Math.PI,
+        false
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    var time = this.currentTime,
+        seconds = (((time / 1000) % 60)),
+        minutes = (((time / 60000) % 60)),
+        hour = (((time / 3600000) % 12));
+
+    // draw the hour hand:
+    ctx.strokeStyle = "rgb(38,38,38)";
+    ctx.lineWidth = this.handWidth;
+    angle = (hour) * (Math.PI * 2) / 12 - Math.PI / 2;
+    outer = face * 0.5;
+    x1 = this.radius + Math.cos(angle) * inner;
+    y1 = this.radius + Math.sin(angle) * inner;
+    x2 = this.radius + Math.cos(angle) * outer;
+    y2 = this.radius + Math.sin(angle) * outer;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.closePath();
+    ctx.stroke();
+
+    // draw the minute hand:
+    ctx.strokeStyle = 'gray';
+    ctx.lineWidth = this.handWidth / 2;
+    angle = (minutes) * (Math.PI * 2) / 60 - Math.PI / 2;
+    outer = face * 0.9;
+    x1 = this.radius + Math.cos(angle) * inner;
+    y1 = this.radius + Math.sin(angle) * inner;
+    x2 = this.radius + Math.cos(angle) * outer;
+    y2 = this.radius + Math.sin(angle) * outer;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.closePath();
+    ctx.stroke();
+
+    // draw the second hand:
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = this.handWidth / 1.5;
+    angle = (seconds) * (Math.PI * 2) / 60 - Math.PI / 2;
+    outer = face * 0.8;
+    x1 = this.radius + Math.cos(angle) * inner;
+    y1 = this.radius + Math.sin(angle) * inner;
+    x2 = this.radius + Math.cos(angle) * outer;
+    y2 = this.radius + Math.sin(angle) * outer;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.closePath();
+    ctx.stroke();
+
+    // draw a filled center:
+    inner = face * 0.05;
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(
+        this.radius,
+        this.radius,
+        inner,
+        0,
+        2 * Math.PI,
+        false
+    );
+    ctx.closePath();
+    ctx.fill();
+};
+
+ClockMorph.prototype.step = function () {
+    if (this.stopped) return;
+    this.time = new Date();
+    this.changed();
+};
+
+ClockMorph.prototype.setRadius = function () {
+    this.radius = radius;
+    this.setExtent(new Point(this.radius * 2, this.radius * 2));
+};
+
+ClockMorph.prototype.setExtent = function (p) {
+    this.setExtent(new Point(Math.min(p.x, p.y), Math.min(p.x, p.y)));
+};

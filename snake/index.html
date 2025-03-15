@@ -16,7 +16,13 @@
 
                 window.onbeforeunload = null;
 
-                new MultiplayerSnakeGameMorph().openIn(world);
+                const searchParams = new URL(window.location.href).searchParams
+
+                if (searchParams.get("type") === "single") {
+                    new SingleplayerSnakeGameMorph().openIn(world);
+                } else {
+                    new MultiplayerSnakeGameMorph(searchParams.get("playMusic") === "true").openIn(world);
+                }
 
                 loop();
             }

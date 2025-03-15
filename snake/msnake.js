@@ -31,7 +31,7 @@ SnakeMorph.prototype.init = function () {
 
     this.tail = []; // tail format { direction: "up/down/left/right", depth: int }
     this.direction = "down";
-    this.fps = 0.5
+    this.fps = 0.5;
 
     this.headPos = new Point();
     this.board = null;
