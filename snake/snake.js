@@ -247,7 +247,10 @@ SnakeMorph.prototype.fixTail = function () {
     var lastPos = this.position();
     for (let i = 0; i < this.tail.length; i++) {
         const tailObj = this.tail[i];
-        const tailMorph = this.children[i];
+        let tailMorph = this.children[i];
+        if (isNil(tailMorph)) {
+            tailMorph = new SnakeTailMorph(this);
+        }
         tailMorph.color = (i + 1) % 2 == 0 ? SnakeMorph.CLR_LIGHTGREEN : SnakeMorph.CLR_DARKGREEN;
         switch (tailObj.direction) {
             case "down":
