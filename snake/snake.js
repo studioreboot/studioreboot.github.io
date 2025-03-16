@@ -1306,7 +1306,7 @@ SingleplayerSnakeGameMorph.prototype.playTone = function (at) {
 
     osc = ctx.createOscillator();
     osc.frequency.value = 800;
-    osc.type = "triangle";
+    osc.type = "sine";
     osc.connect(ctx.destination);
 
     osc.start();
