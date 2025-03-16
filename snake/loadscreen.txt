@@ -11,4 +11,7 @@ Your score is indicated by the the number in the middle of the gameboard.
 There are two, a partner and yourself will have to figure out who goes
 to which side.
 
+There IS music that is disabled by default.
+To enable it, add "?playMusic=true" to the end of the URL.
+
 [tap the screen to play]

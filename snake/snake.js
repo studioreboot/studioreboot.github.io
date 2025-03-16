@@ -1,9 +1,35 @@
+// TriggerMorph function addition:
+
 TriggerMorph.prototype.setLabel = function (aMorph) {
     if (this.label) this.label.destroy();
     this.label = aMorph;
     this.add(this.label);
     this.fixLayout();
 };
+
+// begin test morph
+
+var TestMorph;
+
+TestMorph.prototype = new Morph();
+TestMorph.prototype.constructor = TestMorph;
+TestMorph.uber = Morph.prototype;
+
+function TestMorph () {
+    this.init();
+
+    this.e = true;
+}
+
+TestMorph.prototype.step = function () {
+    this.e = !this.e;
+
+    this.setColor(this.e ? new Color(255, 0, 0) : new Color(0, 255, 0))
+};
+
+// end test morph
+
+// helper functions:
 
 function isInDev () {
     return window.location.href.indexOf("studioreboot.github.io") === -1;
@@ -13,19 +39,15 @@ function getUrlLocation (fileName) {
     return (window.location.href.substring(0, window.location.href.lastIndexOf("/")) + "/" + fileName);
 };
 
-const ST_ACTIVE = 1;
-const ST_STOPPED = 2;
-const ST_FINISHED = 3;
-
 const IMG_GRAPE = new Image();
 IMG_GRAPE.src = "grape.svg";
 
 const IMG_CARROT = new Image();
 IMG_CARROT.src = "carrot.svg";
 
-var SnakeMorph;
+// morph definitions
 
-/** @extends {Morph} */
+var SnakeMorph;
 var ScreenMorph;
 var SnakeTailMorph;
 var FoodMorph;
@@ -46,6 +68,12 @@ function irand (min, max) {
     return Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1) + Math.ceil(min));
 };
 
+MultiplayerSnakeGameMorph.CELL_SIZE = adjust(12);
+
+//////////////////////////////////////////////////////////////////////////
+// SnakeGameMorph ////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
 SnakeGameMorph.prototype = new FrameMorph();
 SnakeGameMorph.prototype.constructor = SnakeGameMorph;
 SnakeGameMorph.uber = FrameMorph.prototype;
@@ -54,7 +82,9 @@ function SnakeGameMorph () {
     this.init();
 }
 
-MultiplayerSnakeGameMorph.CELL_SIZE = adjust(12);
+//////////////////////////////////////////////////////////////////////////
+// SnakeGameStatus ///////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 SnakeGameStatus.prototype = {};
 SnakeGameStatus.prototype.constructor = SnakeGameStatus;
@@ -70,85 +100,9 @@ SnakeGameStatus.prototype.reset = function () {
     this.foodEaten = 0;
 };
 
-ScreenMorph.prototype = new Morph();
-ScreenMorph.prototype.constructor = ScreenMorph;
-ScreenMorph.uber = Morph.prototype;
-
-ScreenMorph.OP_CLICKABLE = 1;
-ScreenMorph.OP_CONTROLLED = 2;
-ScreenMorph.OP_NOTHING = 3;
-
-function ScreenMorph () {
-    this.init();
-};
-
-ScreenMorph.prototype.init = function () {
-    ScreenMorph.uber.init.call(this);
-
-    this.body = null;
-    this.screenType = ScreenMorph.OP_CLICKABLE;
-
-    this.color = new Color(0, 0, 0);
-    this.color.a = 0.7;
-
-    this.uponClosing = nop;
-};
-
-ScreenMorph.prototype.popUpIn = function (aMorph) {
-    this.forAllChildren(m => {
-        m.alpha = 0;
-    });
-    this.setPosition(aMorph.position());
-    this.setExtent(aMorph.extent());
-    this.fixLayout();
-    aMorph.add(this);
-
-    this.fadeTo(1, 1000, "linear", () => {
-        this.forAllChildren(m => { m.alpha = 1; m.changed(); });
-    });
-};
-
-ScreenMorph.prototype.setBody = function (aMorph) {
-    if (this.body) this.body.destroy();
-    this.body = aMorph;
-    this.add(this.body);
-};
-
-ScreenMorph.prototype.fixLayout = function () {
-    if (!this.body) return;
-    this.body.setCenter(this.center());
-    if (this.body instanceof StringMorph) {
-        this.body.fixLayout(true);
-    } else {
-        this.body.fixLayout();
-    }
-}
-
-ScreenMorph.prototype.mouseClickLeft = function () {
-    if (this.screenType != ScreenMorph.OP_CLICKABLE) return;
-    this.perish(1000);
-    this.uponClosing();
-};
-
-ScreenMorph.prototype.fadeIn = function () {
-    this.fadeTo(1, 1000, "linear", () => {
-        this.forAllChildren(m => { m.alpha = 1; m.changed(); });
-    });
-};
-
-ScreenMorph.prototype.fadeOut = function () {
-    if (this.screenType === ScreenMorph.OP_CONTROLLED) {
-        this.fadeTo(0, 1000, "linear", () => {
-            this.forAllChildren(m => { m.alpha = 0; m.changed(); });
-        });
-    }
-};
-
-ScreenMorph.prototype.perish = function () {
-    this.fadeTo(0, 1000, "linear", () => {
-        this.destroy();
-    });
-};
+//////////////////////////////////////////////////////////////////////////
+// SnakeMorph ////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 SnakeMorph.prototype = new Morph();
 SnakeMorph.prototype.constructor = SnakeMorph;
@@ -160,6 +114,8 @@ function SnakeMorph (doesMoveIndependently) {
 
 SnakeMorph.prototype.init = function (doesMoveIndependently) {
     SnakeMorph.uber.init.call(this);
+
+    console.log("MADE A SNAKE")
 
     this.tail = [{ direction: "up", depth: 1 }]; // tail format { direction: "up/down/left/right", depth: int }
     this.direction = "down";
@@ -285,6 +241,10 @@ SnakeMorph.prototype.developersMenu = function () {
     return menu;
 };
 
+//////////////////////////////////////////////////////////////////////////
+// SnakeTailMorph ////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
 SnakeTailMorph.prototype = new Morph();
 SnakeTailMorph.prototype.constructor = SnakeTailMorph;
 SnakeTailMorph.uber = Morph.prototype;
@@ -298,616 +258,9 @@ SnakeTailMorph.prototype.init = function () {
     this.setExtent(SnakeMorph.HEAD_SIZE);
 };
 
-MultiplayerSnakeGameMorph.prototype = new SnakeGameMorph();
-MultiplayerSnakeGameMorph.prototype.constructor = MultiplayerSnakeGameMorph;
-MultiplayerSnakeGameMorph.uber = SnakeGameMorph.prototype;
-
-function MultiplayerSnakeGameMorph (canPlayMusic) {
-    this.init(canPlayMusic);
-};
-
-MultiplayerSnakeGameMorph.prototype.init = function (canPlayMusic) {
-    MultiplayerSnakeGameMorph.uber.init.call(this);
-
-    this.color = BLACK;
-    this.audioContext = new AudioContext();
-
-    this.leftArea = null;
-    this.leftGameStatus = new SnakeGameStatus('left');
-    this.rightArea = null;
-    this.rightGameStatus = new SnakeGameStatus('right');
-    this.timerDial = null;
-
-    this.musicSwitcher = false;
-
-    this.canPlayMusic = canPlayMusic;
-    this.bgMusicTracks = {};
-    this.currentMusic = null;
-
-    this.winTimer = Date.now() + 1000;
-    this.winStep = 1;
-
-    this.winSoundBuffer = null;
-    this.loseSoundBuffer = null;
-
-    this.loadTracks();
-};
-
-MultiplayerSnakeGameMorph.prototype.loadTracks = function () {
-    var self = this;
-
-    let xhr = new XMLHttpRequest();
-    xhr.responseType = "arraybuffer";
-    xhr.open("GET", getUrlLocation("gameover.mp3"), true);
-    xhr.onload = function () {
-        self.audioContext.decodeAudioData(xhr.response, (data) => {
-            self.loseSoundBuffer = data;
-        });
-    }
-    xhr.send(null);
-
-    console.log(xhr);
-
-    let xhr2 = new XMLHttpRequest();
-    xhr2.responseType = "arraybuffer";
-    xhr2.open("GET", getUrlLocation("win.mp3"), true);
-    xhr2.onload = function () {
-        self.audioContext.decodeAudioData(xhr2.response, (data) => {
-            self.winSoundBuffer = data;
-        });
-    }
-    xhr2.send(null);
-
-    if (!this.canPlayMusic) return;
-
-    for (let i = 0; i < 2; i++) {
-        let xhr = new XMLHttpRequest();
-        xhr.responseType = "arraybuffer";
-        xhr.open("GET", getUrlLocation(`bg${i+1}.mp3`), true);
-        xhr.onload = function () {
-            self.audioContext.decodeAudioData(xhr.response, (data) => {
-                self.bgMusicTracks[i+1] = data;
-            });
-        }
-        xhr.send(null);
-    }
-};
-
-MultiplayerSnakeGameMorph.prototype.playMusic = function () {
-    var ctx = this.audioContext, src = ctx.createBufferSource(), gain = ctx.createGain();
-    
-    src.buffer = this.bgMusicTracks[this.canPlayMusic ? 1 : 2];
-    src.connect(gain);
-
-    gain.gain.value = 0.3;
-    gain.connect(ctx.destination);
-
-    this.currentMusic = src;
-    src.start();
-};
-
-MultiplayerSnakeGameMorph.prototype.openIn = function (aWorld) {
-    aWorld.add(this);
-
-    /* let snake = new SnakeMorph(true);
-    snake.board = this;
-    snake.headPos = new Point(1, 1);
-    this.add(snake); */
-
-    this.gameState = ST_STOPPED;
-    this.setExtent(aWorld.extent());
-    
-    this.showLoadScreen();
-};
-
-MultiplayerSnakeGameMorph.prototype.showLoadScreen = function () {
-    var xhr = new XMLHttpRequest(), self = this;
-    xhr.open("GET", getUrlLocation("loadscreen.txt"), true);
-    xhr.onload = function () {
-        let screen = new ScreenMorph();
-        screen.screenType = ScreenMorph.OP_CLICKABLE;
-
-        self.fps = 9e9;
-        
-        let align = new AlignmentMorph("column");
-        align.add((function(){
-            var t = new TextMorph("multi-player snake", adjust(48), "monospace", false, true);
-            t.color = WHITE;
-            return t;
-        })());
-        align.add((function(){
-            var m = new Morph();
-            m.setWidth(1);
-            m.alpha = 0;
-            m.color = new Color(0, 0, 0, 0);
-            m.setHeight(adjust(15));
-            return m;
-        })());
-        align.add((function(){
-            var t = new TextMorph(xhr.responseText, adjust(20), "monospace", false, false, "center");
-            t.color = WHITE;
-            return t;
-        })());
-
-        screen.setBody(align);
-        screen.popUpIn(self);
-
-        screen.uponClosing = () => { 
-            self.buildPanes();
-            self.fps = 0; 
-        }
-    }
-    xhr.send();
-};
-
-MultiplayerSnakeGameMorph.prototype.buildPanes = function () {
-    let area = new SnakeAreaMorph(this.leftGameStatus);
-    area.buildPanes();
-    area.fixLayout();
-    this.leftArea = area;
-
-    let area2 = new SnakeAreaMorph(this.rightGameStatus);
-    area2.buildPanes();
-    area2.fixLayout();
-    this.rightArea = area2;
-
-    let dial = new DialMorph(0, 60000, 10, 5000);
-    this.timerDial = dial;
-    this.timerDial.render = function (ctx) {
-        var i, angle, x1, y1, x2, y2,
-            light = this.color.lighter().toString(),
-            range = this.max - this.min,
-            ticks = range / this.tick,
-            face = this.radius * 0.75,
-            inner = face * 0.85,
-            outer = face * 0.95;
-    
-        // draw a light border:
-        ctx.fillStyle = light;
-        ctx.beginPath();
-        ctx.arc(
-            this.radius,
-            this.radius,
-            face + Math.min(1, this.radius - face),
-            0,
-            2 * Math.PI,
-            false
-        );
-        ctx.closePath();
-        ctx.fill();
-    
-        // fill circle:
-        ctx.fillStyle = this.color.toString();
-        ctx.beginPath();
-        ctx.arc(
-            this.radius,
-            this.radius,
-            face,
-            0,
-            2 * Math.PI,
-            false
-        );
-        ctx.closePath();
-        ctx.fill();
-    
-        // fill value
-        angle = (this.value - this.min) * (Math.PI * 2) / range - Math.PI / 2;
-        ctx.fillStyle = (this.fillColor || this.color.darker()).toString();
-        ctx.beginPath();
-        ctx.arc(
-            this.radius,
-            this.radius,
-            face,
-            Math.PI / -2,
-            angle,
-            false
-        );
-        ctx.lineTo(this.radius, this.radius);
-        ctx.closePath();
-        ctx.fill();
-    
-        // draw ticks:
-        ctx.strokeStyle = new Color(35, 35, 35).toString();
-        ctx.lineWidth = 1;
-        for (i = 0; i < ticks; i += 1) {
-            angle = (i - 3) * (Math.PI * 2) / ticks - Math.PI / 2;
-            ctx.beginPath();
-            x1 = this.radius + Math.cos(angle) * inner;
-            y1 = this.radius + Math.sin(angle) * inner;
-            x2 = this.radius + Math.cos(angle) * outer;
-            y2 = this.radius + Math.sin(angle) * outer;
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-        }
-    
-        // draw a filled center:
-        inner = face * 0.05;
-        ctx.fillStyle = 'black';
-        ctx.beginPath();
-        ctx.arc(
-            this.radius,
-            this.radius,
-            inner,
-            0,
-            2 * Math.PI,
-            false
-        );
-        ctx.closePath();
-        ctx.fill();
-    
-        // draw the inner hand:
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 1;
-        angle = (this.value - this.min) * (Math.PI * 2) / range - Math.PI / 2;
-        outer = face * 0.8;
-        x1 = this.radius + Math.cos(angle) * inner;
-        y1 = this.radius + Math.sin(angle) * inner;
-        x2 = this.radius + Math.cos(angle) * outer;
-        y2 = this.radius + Math.sin(angle) * outer;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-    
-        // draw a read-out circle:
-        inner = inner * 2;
-        x2 = this.radius + Math.cos(angle) * (outer + inner);
-        y2 = this.radius + Math.sin(angle) * (outer + inner);
-        ctx.fillStyle = 'black';
-        ctx.beginPath();
-        ctx.arc(
-            x2,
-            y2,
-            inner,
-            0,
-            2 * Math.PI,
-            false
-        );
-        ctx.closePath();
-        ctx.stroke();
-    };
-    this.timerDial.mouseDownLeft = nop;
-    this.add(this.timerDial);
-
-    this.addBack(this.leftArea);
-    this.addBack(this.rightArea);
-
-    this.gameEndDeadline = Date.now() + 60000;
-    this.gameState = ST_ACTIVE;
-
-    this.fixLayout();
-};
-
-MultiplayerSnakeGameMorph.prototype.fixLayout = function () {
-    if (!this.leftArea) return;
-
-    this.leftArea.setCenter(this.center().subtract(new Point((this.width() / 2) / 2, 0)));
-    this.rightArea.setCenter(this.rightCenter().subtract(new Point((this.width() / 2) / 2, 0)));
-
-    this.timerDial.setRadius(adjust(45));
-    this.timerDial.setCenter(this.center());
-};
-
-MultiplayerSnakeGameMorph.prototype.reactToWorldResize = function (aRect) {
-    this.setExtent(aRect.extent());
-    this.fixLayout();
-};
-
-MultiplayerSnakeGameMorph.prototype.step = function () {
-    if (!this.leftArea) return;
-    switch (this.gameState) {
-        case ST_ACTIVE:
-            var now = Date.now();
-
-            this.timerDial.value = Math.max(this.gameEndDeadline - now, 1);
-            this.timerDial.changed();
-
-            if (now >= this.gameEndDeadline) {
-                this.gameState = ST_FINISHED;
-                this.winStep = 0;
-            }
-
-            if (this.leftArea.didDie && this.rightArea.didDie) {
-                this.gameState = ST_FINISHED;
-                this.winStep = 0;
-            }
-            break;
-        case ST_STOPPED:
-            this.leftArea.snake.canMove = false;
-            this.rightArea.snake.canMove = false;
-            break;
-        case ST_FINISHED:
-            if (this.winStep === 0) {
-                this.leftArea.snake.canMove = false;
-                this.rightArea.snake.canMove = false;
-                this.winStep = 1;
-            } else {
-                if (Date.now() > this.winTimer) {
-                    this.stepWinSequence();
-                }
-            }
-            break;
-        default: break;
-    }
-};
-
-MultiplayerSnakeGameMorph.prototype.userMenu = function () {
-    if (!isInDev()) {
-        return new MenuMorph();
-    }
-}
-
-MultiplayerSnakeGameMorph.prototype.playTone = function (at) {
-    var ctx = this.audioContext, osc, pan;
-
-    osc = ctx.createOscillator();
-    osc.frequency.value = 800;
-    osc.type = "sine";
-    
-    pan = ctx.createStereoPanner();
-    pan.pan.value = at;
-    osc.connect(pan);
-    pan.connect(ctx.destination);
-
-    osc.start();
-
-    setTimeout(() => {
-        osc.stop();
-        pan.disconnect();
-    }, 250);
-};
-
-MultiplayerSnakeGameMorph.prototype.playLose = function (whichSide) {
-    var ctx = this.audioContext, osc, pan;
-
-    osc = ctx.createBufferSource();
-    osc.buffer = this.loseSoundBuffer;
-    
-    pan = ctx.createStereoPanner();
-    pan.pan.value = whichSide === "left" ? -1 : 1;
-    osc.connect(pan);
-    pan.connect(ctx.destination);
-
-    osc.start();
-
-    osc.onended = function () {
-        pan.disconnect();
-    }
-}
-
-MultiplayerSnakeGameMorph.prototype.playWin = function (whichSide) {
-    var ctx = this.audioContext, osc, pan;
-
-    osc = ctx.createBufferSource();
-    osc.buffer = this.winSoundBuffer;
-    
-    pan = ctx.createStereoPanner();
-    pan.pan.value = whichSide === "left" ? -1 : 1;
-    osc.connect(pan);
-    pan.connect(ctx.destination);
-
-    osc.start();
-
-    osc.onended = function () {
-        pan.disconnect();
-    }
-}
-
-MultiplayerSnakeGameMorph.prototype.stepWinSequence = function () {
-    console.log(this.winStep);
-    switch (this.winStep) {
-        case 1:
-            this.winTimer = Date.now() + 500;
-            this.winStep = 2;
-            break;
-        case 2:
-            var scrn = new ScreenMorph(), align = new AlignmentMorph("column"), txt;
-            if (this.leftGameStatus.playerScore > this.rightGameStatus.playerScore) {                
-                txt = new TextMorph("Left Side Won!", adjust(36), "monospace");
-                txt.color = new Color(39, 84, 245);
-                align.add(txt);
-
-                txt = new TextMorph(`Total Score: ${this.leftGameStatus.playerScore}\n# of Foods Eaten: ${this.leftGameStatus.foodEaten}`, adjust(24), "monospace", false, false, "center");
-                txt.color = WHITE;
-                align.add(txt);
-
-                scrn.setBody(align);
-                scrn.popUpIn(this);
-                scrn.setExtent(new Point(this.width() / 2, this.height()));
-                scrn.screenType = ScreenMorph.OP_CONTROLLED;
-                this.playWin("left");
-            }
-            if (this.leftGameStatus.playerScore < this.rightGameStatus.playerScore) {                
-                txt = new TextMorph("Right Side Won!", adjust(36), "monospace");
-                txt.color = new Color(219, 42, 7);
-                align.add(txt);
-
-                txt = new TextMorph(`Total Score: ${this.rightGameStatus.playerScore}\n# of Foods Eaten: ${this.rightGameStatus.foodEaten}`, adjust(24), "monospace", false, false, "center");
-                txt.color = WHITE;
-                align.add(txt);
-
-                scrn.setBody(align);
-                scrn.popUpIn(this);
-                scrn.setPosition(this.topCenter());
-                scrn.setExtent(new Point(this.width() / 2, this.height()));
-                scrn.screenType = ScreenMorph.OP_CONTROLLED;
-                this.playWin("right");
-            };
-            this.winTimer = Date.now() + 5500;
-            this.winStep = 3;
-            break;
-        case 3:
-            var scrn = new ScreenMorph(), align = new AlignmentMorph("column"), txt;
-            if (this.leftGameStatus.playerScore > this.rightGameStatus.playerScore) {                
-                txt = new TextMorph("Right Side Lost!", adjust(36), "monospace");
-                txt.color = new Color(184, 0, 0);
-                align.add(txt);
-
-                txt = new TextMorph(`Total Score: ${this.rightGameStatus.playerScore}\n# of Foods Eaten: ${this.rightGameStatus.foodEaten}`, adjust(24), "monospace", false, false, "center");
-                txt.color = WHITE;
-                align.add(txt);
-
-                scrn.setBody(align);
-                scrn.popUpIn(this);
-                scrn.setPosition(this.topCenter());
-                scrn.setExtent(new Point(this.width() / 2, this.height()));
-                scrn.screenType = ScreenMorph.OP_NOTHING;
-                this.playLose("right");
-            }
-            if (this.leftGameStatus.playerScore < this.rightGameStatus.playerScore) {
-                txt = new TextMorph("Left Side Lost!", adjust(36), "monospace");
-                txt.color = new Color(184, 0, 0);
-                align.add(txt);
-
-                txt = new TextMorph(`Total Score: ${this.leftGameStatus.playerScore}\n# of Foods Eaten: ${this.leftGameStatus.foodEaten}`, adjust(24), "monospace", false, false, "center");
-                txt.color = WHITE;
-                align.add(txt);
-
-                scrn.setBody(align);
-                scrn.popUpIn(this);
-                scrn.setExtent(new Point(this.width() / 2, this.height()));
-                scrn.screenType = ScreenMorph.OP_NOTHING;
-                this.playLose("left");
-            };
-            this.winTimer = Date.now() + 8500;
-            this.winStep++;
-            break;
-        case 4:
-            this.children.filter(v => v instanceof ScreenMorph).forEach(v => v.perish(1000));
-            var scrn = new ScreenMorph(), txt;
-            
-            txt = new TextMorph("Tap the screen to play again.", adjust(36), "monospace");
-            txt.color = WHITE;
-            scrn.setBody(txt);
-            scrn.popUpIn(this);
-            scrn.uponClosing = () => {
-                this.winTimer = Date.now() + 50;
-            };
-
-            this.winTimer = Infinity;
-            this.winStep++;
-            break;
-        case 5:
-            this.leftArea.resetThisBoard();
-            this.rightArea.resetThisBoard();
-            this.gameEndDeadline = Date.now() + 60000;
-            this.gameState = ST_ACTIVE;
-            break;
-        default:
-            break;
-    }
-};
-
-MultiplayerSnakeGameMorph.prototype.developersMenu = function () {
-    var menu = MultiplayerSnakeGameMorph.uber.developersMenu.call(this);
-    menu.addLine();
-    menu.addItem(
-        "test win screen (left)",
-        () => {
-            this.winStep = 0;
-            this.winTimer = Date.now() + 1000;
-            this.leftGameStatus.playerScore = 1000;
-            this.gameState = ST_FINISHED;
-        }
-    );
-    menu.addItem(
-        "test win screen (right)",
-        () => {
-            this.winStep = 0;
-            this.winTimer = Date.now() + 1000;
-            this.rightGameStatus.playerScore = 1000;
-            this.gameState = ST_FINISHED;
-        }
-    );
-    return menu;
-};
-
-SingleplayerSnakeGameMorph.prototype = new SnakeGameMorph();
-SingleplayerSnakeGameMorph.prototype.constructor = SingleplayerSnakeGameMorph;
-SingleplayerSnakeGameMorph.uber = SnakeGameMorph.prototype;
-
-function SingleplayerSnakeGameMorph () {
-    this.init();
-};
-
-SingleplayerSnakeGameMorph.prototype.init = function () {
-    SingleplayerSnakeGameMorph.uber.init.call(this);
-
-    this.color = BLACK;
-    this.audioContext = new AudioContext();
-
-    this.gameArea = null;
-};
-
-SingleplayerSnakeGameMorph.prototype.openIn = function (aWorld) {
-    aWorld.add(this);
-
-    /* let snake = new SnakeMorph(true);
-    snake.board = this;
-    snake.headPos = new Point(1, 1);
-    this.add(snake); */
-
-    this.setExtent(aWorld.extent());
-    
-    this.buildPanes();
-    this.fixLayout();
-};
-
-SingleplayerSnakeGameMorph.prototype.mouseClickLeft = function () {
-    this.audioContext.resume();
-};
-
-SingleplayerSnakeGameMorph.prototype.processKeyUp = function (ev) {
-    if (ev.key === "ArrowUp") {
-        this.childThatIsA(SnakeMorph).direction = "up";
-    } else if (ev.key === "ArrowDown") {
-        this.childThatIsA(SnakeMorph).direction = "down";
-    } else if (ev.key === "ArrowLeft") {
-        this.childThatIsA(SnakeMorph).direction = "left";
-    } else {
-        this.childThatIsA(SnakeMorph).direction = "right";
-    }
-    this.childThatIsA(SnakeMorph).move();
-};
-
-SingleplayerSnakeGameMorph.prototype.buildPanes = function () {
-    let area1 = new SnakeAreaMorph(new SnakeGameStatus("middle"));
-    area1.buildPanes();
-    area1.fixLayout();
-    this.gameArea = area1;
-    this.add(area1);
-};
-
-SingleplayerSnakeGameMorph.prototype.reactToWorldResize = function (aRect) {
-    this.setExtent(aRect.extent());
-    this.fixLayout();
-};
-
-SingleplayerSnakeGameMorph.prototype.playTone = function (at) {
-    var ctx = this.audioContext, osc, pan;
-
-    osc = ctx.createOscillator();
-    osc.frequency.value = 800;
-    osc.type = "triangle";
-    
-    pan = ctx.createStereoPanner();
-    pan.pan.value = at;
-    osc.connect(pan);
-    pan.connect(ctx.destination);
-
-    osc.start();
-
-    setTimeout(() => {
-        osc.stop();
-        pan.disconnect();
-    }, 250);
-};
-
-SingleplayerSnakeGameMorph.prototype.fixLayout = function () {
-    if (!this.gameArea) return;
-    this.gameArea.setCenter(this.center());
-};
+//////////////////////////////////////////////////////////////////////////
+// FoodMorph /////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 FoodMorph.prototype = new Morph();
 FoodMorph.prototype.constructor = FoodMorph;
@@ -974,7 +327,11 @@ FoodMorph.prototype.render = function (ctx) {
             FoodMorph.uber.render.call(this, ctx);
             break;
     }
-}
+};
+
+//////////////////////////////////////////////////////////////////////////
+// SnakeAreaMorph ////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 SnakeAreaMorph.prototype = new Morph();
 SnakeAreaMorph.prototype.constructor = SnakeAreaMorph;
@@ -992,6 +349,8 @@ SnakeAreaMorph.prototype.init = function (aGameStatus) {
 
     this.snake = new SnakeMorph();
     this.scoreValue = new StringMorph("0", adjust(18), "monospace", true, false, true, null, null, WHITE);
+    this.scoreValue.shadowBlur = 6;
+    this.scoreValue.addShadow(ZERO);
     this.snake.board = this;
 
     this.area = new FrameMorph();
@@ -1166,6 +525,9 @@ SnakeAreaMorph.prototype.updateScore = function () {
     this.scoreValue.rerender();
     this.scoreValue.changed();
     this.scoreValue.fixLayout();
+
+    this.scoreValue.removeShadow();
+    this.scoreValue.addShadow(ZERO, 0.8);
 };
 
 SnakeAreaMorph.prototype.resetThisBoard = function () {
@@ -1219,4 +581,741 @@ SnakeAreaMorph.prototype.refresh = function () {
     this.resetThisBoard();
     this.gameStatus.playerScore = lastPointScore;
     this.updateScore();
+};
+
+// Game states:
+
+const ST_ACTIVE = 1;
+const ST_STOPPED = 2;
+const ST_FINISHED = 3;
+
+//////////////////////////////////////////////////////////////////////////
+// MultiplayerSnakeGameMorph /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+MultiplayerSnakeGameMorph.prototype = new SnakeGameMorph();
+MultiplayerSnakeGameMorph.prototype.constructor = MultiplayerSnakeGameMorph;
+MultiplayerSnakeGameMorph.uber = SnakeGameMorph.prototype;
+
+function MultiplayerSnakeGameMorph (canPlayMusic) {
+    this.init(canPlayMusic);
+};
+
+MultiplayerSnakeGameMorph.prototype.init = function (canPlayMusic) {
+    MultiplayerSnakeGameMorph.uber.init.call(this);
+
+    this.color = BLACK;
+    this.audioContext = new AudioContext();
+
+    this.leftArea = null;
+    this.leftGameStatus = new SnakeGameStatus('left');
+    this.rightArea = null;
+    this.rightGameStatus = new SnakeGameStatus('right');
+    this.timerDial = null;
+    this.timerBox = null;
+
+    this.musicSwitcher = false;
+
+    this.canPlayMusic = canPlayMusic;
+    this.bgMusicTracks = {};
+    this.currentMusic = null;
+
+    this.winTimer = Date.now() + 1000;
+    this.winStep = 1;
+
+    this.winSoundBuffer = null;
+    this.jigSoundBuffer = null;
+    this.loseSoundBuffer = null;
+
+    this.loadTracks();
+};
+
+MultiplayerSnakeGameMorph.prototype.loadTracks = function () {
+    var self = this;
+
+    let xhr = new XMLHttpRequest();
+    xhr.responseType = "arraybuffer";
+    xhr.open("GET", getUrlLocation("gameover.mp3"), true);
+    xhr.onload = function () {
+        self.audioContext.decodeAudioData(xhr.response, (data) => {
+            self.loseSoundBuffer = data;
+        });
+    }
+    xhr.send(null);
+
+    let xhr2 = new XMLHttpRequest();
+    xhr2.responseType = "arraybuffer";
+    xhr2.open("GET", getUrlLocation("win.mp3"), true);
+    xhr2.onload = function () {
+        self.audioContext.decodeAudioData(xhr2.response, (data) => {
+            self.winSoundBuffer = data;
+        });
+    }
+    xhr2.send(null);
+
+    let xhr3 = new XMLHttpRequest();
+    xhr3.responseType = "arraybuffer";
+    xhr3.open("GET", getUrlLocation("jigmusic.mp3"), true);
+    xhr3.onload = function () {
+        self.audioContext.decodeAudioData(xhr3.response, (data) => {
+            self.jigSoundBuffer = data;
+        });
+    }
+    xhr3.send(null);
+
+    if (!this.canPlayMusic) return;
+
+    for (let i = 0; i < 2; i++) {
+        let xhr = new XMLHttpRequest();
+        xhr.responseType = "arraybuffer";
+        xhr.open("GET", getUrlLocation(`bg${i+1}.mp3`), true);
+        xhr.onload = function () {
+            self.audioContext.decodeAudioData(xhr.response, (data) => {
+                self.bgMusicTracks[i+1] = data;
+            });
+        }
+        xhr.send(null);
+    }
+};
+
+MultiplayerSnakeGameMorph.prototype.playMusic = function () {
+    if (!this.canPlayMusic || this.currentMusic) return;
+
+    var ctx = this.audioContext, src = ctx.createBufferSource(), gain = ctx.createGain();
+    
+    src.buffer = this.bgMusicTracks[this.musicSwitcher ? 1 : 2];
+    src.connect(gain);
+
+    gain.gain.value = 0.5;
+    gain.connect(ctx.destination);
+
+    this.currentMusic = { src, gain };
+    src.start();
+
+    this.musicSwitcher = !this.musicSwitcher;
+};
+
+MultiplayerSnakeGameMorph.prototype.openIn = function (aWorld) {
+    aWorld.add(this);
+
+    /* let snake = new SnakeMorph(true);
+    snake.board = this;
+    snake.headPos = new Point(1, 1);
+    this.add(snake); */
+
+    this.gameState = ST_STOPPED;
+    this.setExtent(aWorld.extent());
+    
+    this.showLoadScreen();
+};
+
+MultiplayerSnakeGameMorph.prototype.showLoadScreen = function () {
+    var xhr = new XMLHttpRequest(), self = this;
+    xhr.open("GET", getUrlLocation("loadscreen.txt"), true);
+    xhr.onload = function () {
+        let screen = new ScreenMorph();
+        screen.screenType = ScreenMorph.OP_NOTHING;
+
+        self.fps = 9e9;
+        
+        let align = new AlignmentMorph("column");
+        align.add((function(){
+            var t = new TextMorph("multi-player snake", adjust(48), "monospace", false, true);
+            t.color = WHITE;
+            return t;
+        })());
+        align.add((function(){
+            var m = new Morph();
+            m.setWidth(1);
+            m.alpha = 0;
+            m.color = new Color(0, 0, 0, 0);
+            m.setHeight(adjust(15));
+            return m;
+        })());
+        align.add((function(){
+            var t = new TextMorph(xhr.responseText, adjust(20), "monospace", false, false, "center");
+            t.color = WHITE;
+            return t;
+        })());
+
+        screen.setBody(align);
+        screen.popUpIn(self);
+        
+        setTimeout(() => {
+            screen.screenType = ScreenMorph.OP_CLICKABLE;
+            screen.uponClosing = () => { 
+                self.buildPanes();
+                self.fps = 0;
+                screen.uponClosing = nop;
+            }
+        }, 2500);
+    }
+    xhr.send();
+};
+
+function timeDialRender (ctx) {
+    var i, angle, x1, y1, x2, y2,
+        light = this.color.lighter().toString(),
+        range = this.max - this.min,
+        ticks = range / this.tick,
+        face = this.radius * 0.75,
+        inner = face * 0.85,
+        outer = face * 0.95;
+
+    // draw a light border:
+    ctx.fillStyle = light;
+    ctx.beginPath();
+    ctx.arc(
+        this.radius,
+        this.radius,
+        face + Math.min(1, this.radius - face),
+        0,
+        2 * Math.PI,
+        false
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    // fill circle:
+    ctx.fillStyle = this.color.toString();
+    ctx.beginPath();
+    ctx.arc(
+        this.radius,
+        this.radius,
+        face,
+        0,
+        2 * Math.PI,
+        false
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    // fill value
+    angle = (this.value - this.min) * (Math.PI * 2) / range - Math.PI / 2;
+    ctx.fillStyle = (this.fillColor || this.color.darker()).toString();
+    ctx.beginPath();
+    ctx.arc(
+        this.radius,
+        this.radius,
+        face,
+        Math.PI / -2,
+        angle,
+        false
+    );
+    ctx.lineTo(this.radius, this.radius);
+    ctx.closePath();
+    ctx.fill();
+
+    // draw ticks:
+    ctx.strokeStyle = new Color(35, 35, 35).toString();
+    ctx.lineWidth = 1;
+    for (i = 0; i < ticks; i += 1) {
+        angle = (i - 3) * (Math.PI * 2) / ticks - Math.PI / 2;
+        ctx.beginPath();
+        x1 = this.radius + Math.cos(angle) * inner;
+        y1 = this.radius + Math.sin(angle) * inner;
+        x2 = this.radius + Math.cos(angle) * outer;
+        y2 = this.radius + Math.sin(angle) * outer;
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    }
+
+    // draw a filled center:
+    inner = face * 0.05;
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(
+        this.radius,
+        this.radius,
+        inner,
+        0,
+        2 * Math.PI,
+        false
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    // draw the inner hand:
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 1;
+    angle = (this.value - this.min) * (Math.PI * 2) / range - Math.PI / 2;
+    outer = face * 0.8;
+    x1 = this.radius + Math.cos(angle) * inner;
+    y1 = this.radius + Math.sin(angle) * inner;
+    x2 = this.radius + Math.cos(angle) * outer;
+    y2 = this.radius + Math.sin(angle) * outer;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    // draw a read-out circle:
+    inner = inner * 2;
+    x2 = this.radius + Math.cos(angle) * (outer + inner);
+    y2 = this.radius + Math.sin(angle) * (outer + inner);
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(
+        x2,
+        y2,
+        inner,
+        0,
+        2 * Math.PI,
+        false
+    );
+    ctx.closePath();
+    ctx.stroke();
+};
+
+MultiplayerSnakeGameMorph.prototype.buildPanes = function () {
+    this.playMusic();
+
+    let area = new SnakeAreaMorph(this.leftGameStatus);
+    area.buildPanes();
+    area.fixLayout();
+    this.leftArea = area;
+
+    let area2 = new SnakeAreaMorph(this.rightGameStatus);
+    area2.buildPanes();
+    area2.fixLayout();
+    this.rightArea = area2;
+
+    this.makeTimeDial();
+
+    this.addBack(this.leftArea);
+    this.addBack(this.rightArea);
+
+    this.gameEndDeadline = Date.now() + 60000;
+    this.gameState = ST_ACTIVE;
+
+    // very clunky fix
+    this.fixLayout();
+    setTimeout(() => {
+        this.fixLayout();
+        this.changed();
+        setTimeout(() => {
+            this.fixLayout();
+            this.changed();
+            setTimeout(() => {
+                this.fixLayout();
+                this.changed();
+            }, 500);
+        }, 500);
+    }, 1500);
+};
+
+MultiplayerSnakeGameMorph.prototype.makeTimeDial = function () {
+    var dial, box, align, title, time;
+
+    box = new BoxMorph(adjust(8), adjust(5));
+    align = new AlignmentMorph("column", adjust(10));
+    box.add(align);
+    
+    dial = new DialMorph(0, 60000, 10, 5000);
+    dial.render = timeDialRender
+    dial.mouseDownLeft = nop;
+    
+    this.timerDial = dial;
+    box.add(this.timerDial);
+    
+    title = new StringMorph("Time Left:", adjust(18), "monospace", true, null);
+    title.color = WHITE;
+
+    time = new StringMorph("60s", adjust(18), "monospace", true, null);
+    time.color = WHITE;
+
+    align.add(title);
+    align.add(dial);
+    align.add(time);
+
+    align.fixLayout();
+
+    box.fixLayout = function () {
+        align.setCenter(this.center());
+
+        this.bounds.setWidth(align.width() + adjust(15));
+        this.bounds.setHeight(align.height() + adjust(10));
+
+        align.setCenter(this.center());
+    }
+
+    this.timerBox = box;
+    this.timerBox.timeText = time;
+    this.addBack(this.timerBox);
+};
+
+MultiplayerSnakeGameMorph.prototype.fixLayout = function () {
+    if (!this.leftArea) return;
+
+    this.leftArea.setCenter(this.center().subtract(new Point((this.width() / 2) / 2, 0)));
+    this.rightArea.setCenter(this.rightCenter().subtract(new Point((this.width() / 2) / 2, 0)));
+
+    this.timerDial.setRadius(adjust(45));
+
+    this.timerBox.childThatIsA(AlignmentMorph).fixLayout();
+    this.timerBox.fixLayout();
+    this.timerBox.setCenter(this.center());
+    this.timerBox.setCenter(this.center());
+};
+
+MultiplayerSnakeGameMorph.prototype.reactToWorldResize = function (aRect) {
+    this.setExtent(aRect.extent());
+    this.fixLayout();
+};
+
+MultiplayerSnakeGameMorph.prototype.step = function () {
+    if (!this.leftArea) return;
+    switch (this.gameState) {
+        case ST_ACTIVE:
+            var now = Date.now();
+            var leftover = this.gameEndDeadline - now
+
+            this.timerDial.value = Math.max(leftover, 1);
+            this.timerDial.changed();
+
+            if (now >= this.gameEndDeadline) {
+                this.gameState = ST_FINISHED;
+                this.winStep = 0;
+            }
+
+            if (leftover % 1000 < 45) {
+                var timeText = this.timerBox.timeText;
+                timeText.text = Math.floor(Math.max(leftover / 1000, 0)).toString() + "s";
+                timeText.rerender();
+                timeText.fixLayout();
+                timeText.rerender();
+            }
+
+            if (this.leftArea.didDie && this.rightArea.didDie) {
+                this.gameState = ST_FINISHED;
+                this.winStep = 0;
+            }
+            break;
+        case ST_STOPPED:
+            this.leftArea.snake.canMove = false;
+            this.rightArea.snake.canMove = false;
+            break;
+        case ST_FINISHED:
+            if (this.winStep === 0) {
+                this.leftArea.snake.canMove = false;
+                this.rightArea.snake.canMove = false;
+                this.winStep = 1;
+            } else {
+                if (Date.now() > this.winTimer) {
+                    this.stepWinSequence();
+                }
+            }
+            break;
+        default: break;
+    }
+};
+
+MultiplayerSnakeGameMorph.prototype.userMenu = function () {
+    if (!isInDev()) {
+        return new MenuMorph();
+    }
+};
+
+MultiplayerSnakeGameMorph.prototype.playTone = function (at) {
+    var ctx = this.audioContext, osc, pan;
+
+    osc = ctx.createOscillator();
+    osc.frequency.value = 800;
+    osc.type = "sine";
+    
+    pan = ctx.createStereoPanner();
+    pan.pan.value = at;
+    osc.connect(pan);
+    pan.connect(ctx.destination);
+
+    osc.start();
+
+    setTimeout(() => {
+        osc.stop();
+        pan.disconnect();
+    }, 250);
+};
+
+MultiplayerSnakeGameMorph.prototype.playLose = function (whichSide) {
+    var ctx = this.audioContext, osc, pan, gain;
+
+    osc = ctx.createBufferSource();
+    osc.buffer = this.loseSoundBuffer;
+    
+    pan = ctx.createStereoPanner();
+    pan.pan.value = whichSide === "left" ? -1 : 1;
+    osc.connect(pan);
+
+    gain = ctx.createGain();
+    gain.gain.value = 0.5;
+    pan.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+
+    osc.onended = function () {
+        gain.disconnect();
+    }
+};
+
+MultiplayerSnakeGameMorph.prototype.playWin = function (whichSide) {
+    var ctx = this.audioContext, osc, pan, gain;
+
+    osc = ctx.createBufferSource();
+    osc.buffer = this.winSoundBuffer;
+    
+    pan = ctx.createStereoPanner();
+    pan.pan.value = whichSide === "left" ? -1 : 1;
+    osc.connect(pan);
+
+    gain = ctx.createGain();
+    gain.gain.value = 0.5;
+    pan.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+
+    osc.onended = function () {
+        gain.disconnect();
+    }
+};
+
+MultiplayerSnakeGameMorph.prototype.playJigMusic = function (whichSide) {
+    var ctx = this.audioContext, osc, pan, gain;
+
+    osc = ctx.createBufferSource();
+    osc.buffer = this.jigSoundBuffer;
+    
+    pan = ctx.createStereoPanner();
+    pan.pan.value = whichSide === "left" ? -1 : 1;
+    osc.connect(pan);
+
+    gain = ctx.createGain();
+    gain.gain.value = 0.5;
+    pan.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+
+    osc.onended = function () {
+        gain.disconnect();
+    }
+};
+
+MultiplayerSnakeGameMorph.prototype.stepWinSequence = function () {
+    console.log(this.winStep);
+    this.leftArea.snake.canMove = false;
+    this.rightArea.snake.canMove = false;
+    switch (this.winStep) {
+        case 1:
+            this.winTimer = Date.now() + 500;
+            this.winStep = 2;
+
+            this.currentMusic.gain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 5);
+            setTimeout(() => {
+                this.currentMusic.gain.disconnect();
+                this.currentMusic = null;
+            }, 5000);
+            break;
+        case 2:
+            var scrn = new ScreenMorph(), align = new AlignmentMorph("column"), txt;
+
+            var whichSideWon = this.leftGameStatus.playerScore > this.rightGameStatus.playerScore ? "left" : "right"
+
+            txt = new TextMorph(`${whichSideWon.substring(0, 1).toUpperCase() + whichSideWon.substring(1, whichSideWon.length)} Side Won!`, adjust(36), "monospace");
+            txt.color = whichSideWon === "left" ? new Color(39, 84, 245) : new Color(219, 42, 7);
+            align.add(txt);
+
+            txt = new TextMorph(`Total Score: ${this[whichSideWon + "GameStatus"].playerScore}\n# of Foods Eaten: ${this[whichSideWon + "GameStatus"].foodEaten}`, adjust(24), "monospace", false, false, "center");
+            txt.color = WHITE;
+            align.add(txt);
+
+            scrn.setBody(align);
+            scrn.popUpIn(this);
+            scrn.setExtent(new Point(this.width() / 2, this.height()));
+            if (whichSideWon === "right") {
+                scrn.setPosition(this.topCenter());
+            }
+            scrn.screenType = ScreenMorph.OP_CONTROLLED;
+            this.playWin(whichSideWon);
+
+            if (this.canPlayMusic) {
+                setTimeout(() => {
+                    let jigTxt = new TextMorph("do a little jig!", adjust(24), "monospace", null, true, "center");
+                    jigTxt.color = WHITE;
+                    jigTxt.setCenter(txt.bottomCenter().add(new Point(0, adjust(48))));
+                    scrn.add(jigTxt);
+                    jigTxt.changed();
+    
+                    this.playJigMusic(whichSideWon)
+                }, 5500);
+    
+                this.winTimer = Date.now() + 28500;
+            } else {
+                this.winTimer = Date.now() + 5500;
+            }
+            this.winStep = 3;
+            break;
+        case 3:
+            var scrn = new ScreenMorph(), align = new AlignmentMorph("column"), txt;
+
+            var whichSideLost = this.leftGameStatus.playerScore < this.rightGameStatus.playerScore ? "left" : "right"
+
+            txt = new TextMorph(`${whichSideLost.substring(0, 1).toUpperCase() + whichSideLost.substring(1, whichSideLost.length)} Side Lost!`, adjust(36), "monospace");
+            txt.color = new Color(184, 0, 0);
+            align.add(txt);
+
+            txt = new TextMorph(`Total Score: ${this[whichSideLost + "GameStatus"].playerScore}\n# of Foods Eaten: ${this[whichSideLost + "GameStatus"].foodEaten}`, adjust(24), "monospace", false, false, "center");
+            txt.color = WHITE;
+            align.add(txt);
+
+            scrn.setBody(align);
+            scrn.popUpIn(this);
+            scrn.setExtent(new Point(this.width() / 2, this.height()));
+            if (whichSideLost === "right") {
+                scrn.setPosition(this.topCenter());
+            }
+            scrn.screenType = ScreenMorph.OP_CONTROLLED;
+            this.playLose(whichSideWon);
+
+            this.winTimer = Date.now() + 8500;
+            this.winStep++;
+            break;
+        case 4:
+            this.children.filter(v => v instanceof ScreenMorph).forEach(v => v.perish(1000));
+            var scrn = new ScreenMorph(), txt;
+            
+            txt = new TextMorph("Tap the screen to play again.", adjust(36), "monospace");
+            txt.color = WHITE;
+            scrn.setBody(txt);
+            scrn.popUpIn(this);
+            scrn.uponClosing = () => {
+                this.winTimer = Date.now() + 50;
+            };
+
+            this.winTimer = Infinity;
+            this.winStep++;
+            break;
+        case 5:
+            this.leftArea.resetThisBoard();
+            this.rightArea.resetThisBoard();
+            this.gameEndDeadline = Date.now() + 60000;
+            this.gameState = ST_ACTIVE;
+
+            this.playMusic();
+            break;
+        default:
+            break;
+    }
+};
+
+MultiplayerSnakeGameMorph.prototype.developersMenu = function () {
+    var menu = MultiplayerSnakeGameMorph.uber.developersMenu.call(this);
+    menu.addLine();
+    menu.addItem(
+        "test win screen (left)",
+        () => {
+            this.winStep = 0;
+            this.winTimer = Date.now() + 1000;
+            this.leftGameStatus.playerScore = 1000;
+            this.gameState = ST_FINISHED;
+        }
+    );
+    menu.addItem(
+        "test win screen (right)",
+        () => {
+            this.winStep = 0;
+            this.winTimer = Date.now() + 1000;
+            this.rightGameStatus.playerScore = 1000;
+            this.gameState = ST_FINISHED;
+        }
+    );
+    return menu;
+};
+
+//////////////////////////////////////////////////////////////////////////
+// SingleplayerSnakeGameMorph /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+SingleplayerSnakeGameMorph.prototype = new SnakeGameMorph();
+SingleplayerSnakeGameMorph.prototype.constructor = SingleplayerSnakeGameMorph;
+SingleplayerSnakeGameMorph.uber = SnakeGameMorph.prototype;
+
+function SingleplayerSnakeGameMorph () {
+    this.init();
+};
+
+SingleplayerSnakeGameMorph.prototype.init = function () {
+    SingleplayerSnakeGameMorph.uber.init.call(this);
+
+    this.color = BLACK;
+    this.audioContext = new AudioContext();
+
+    this.gameArea = null;
+};
+
+SingleplayerSnakeGameMorph.prototype.openIn = function (aWorld) {
+    aWorld.add(this);
+
+    /* let snake = new SnakeMorph(true);
+    snake.board = this;
+    snake.headPos = new Point(1, 1);
+    this.add(snake); */
+
+    this.setExtent(aWorld.extent());
+    
+    this.buildPanes();
+    this.fixLayout();
+};
+
+SingleplayerSnakeGameMorph.prototype.mouseClickLeft = function () {
+    this.audioContext.resume();
+};
+
+SingleplayerSnakeGameMorph.prototype.processKeyUp = function (ev) {
+    if (ev.key === "ArrowUp") {
+        this.childThatIsA(SnakeMorph).direction = "up";
+    } else if (ev.key === "ArrowDown") {
+        this.childThatIsA(SnakeMorph).direction = "down";
+    } else if (ev.key === "ArrowLeft") {
+        this.childThatIsA(SnakeMorph).direction = "left";
+    } else {
+        this.childThatIsA(SnakeMorph).direction = "right";
+    }
+    this.childThatIsA(SnakeMorph).move();
+};
+
+SingleplayerSnakeGameMorph.prototype.buildPanes = function () {
+    let area1 = new SnakeAreaMorph(new SnakeGameStatus("middle"));
+    area1.buildPanes();
+    area1.fixLayout();
+    this.gameArea = area1;
+    this.add(area1);
+};
+
+SingleplayerSnakeGameMorph.prototype.reactToWorldResize = function (aRect) {
+    this.setExtent(aRect.extent());
+    this.fixLayout();
+};
+
+SingleplayerSnakeGameMorph.prototype.playTone = function (at) {
+    var ctx = this.audioContext, osc;
+
+    osc = ctx.createOscillator();
+    osc.frequency.value = 800;
+    osc.type = "triangle";
+    osc.connect(ctx.destination);
+
+    osc.start();
+
+    setTimeout(() => {
+        osc.stop();
+        osc.disconnect();
+    }, 250);
+};
+
+SingleplayerSnakeGameMorph.prototype.fixLayout = function () {
+    if (!this.gameArea) return;
+    this.gameArea.setCenter(this.center());
 };

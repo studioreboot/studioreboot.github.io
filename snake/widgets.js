@@ -1,6 +1,7 @@
 var AlignmentMorph;
 var SymbolMorph;
 var ClockMorph;
+var ScreenMorph;
 
 // from: https://snap.berkeley.edu/snap/src/widgets.js
 
@@ -83,53 +84,6 @@ AlignmentMorph.prototype.fixLayout = function () {
 
 // from: https://snap.berkeley.edu/snap/src/symbols.js
 
-/*
-
-    symbols.js
-
-    graphical GUI-symbols for for morphic.js and Snap!
-
-    written by Jens MÃ¶nig
-    jens@moenig.org
-
-    Copyright (C) 2024 by Jens MÃ¶nig
-
-    This file is part of Snap!.
-
-    Snap! is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as
-    published by the Free Software Foundation, either version 3 of
-    the License, or (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-
-    You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-    prerequisites:
-    --------------
-    needs morphic.js
-
-
-    credits:
-    --------
-    additional symbols have been contributed by members of the Snap!
-    open-source community, especially by Bernat Romagosa
-
-*/
-
-/*global modules, Morph, Point, radians, ZERO, BLACK*/
-
-// Global stuff ////////////////////////////////////////////////////////
-
-modules.symbols = '2024-November-24';
-
-var SymbolMorph;
-
 // SymbolMorph //////////////////////////////////////////////////////////
 
 /*
@@ -140,7 +94,7 @@ var SymbolMorph;
     Symbols can also display costumes, if one is specified in lieu
     of a name property, although this feature is currently not being
     used because of asynchronous image loading issues.
- */
+*/
 
 // SymbolMorph inherits from Morph:
 
@@ -2615,6 +2569,10 @@ SymbolMorph.prototype.renderSymbolInfinity = function (ctx, color) {
 })();
 */
 
+//////////////////////////////////////////////////////////////////////////
+// ClockMorph ////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
 ClockMorph.prototype = new Morph();
 ClockMorph.prototype.constructor = ClockMorph;
 ClockMorph.uber = Morph.prototype;
@@ -2825,4 +2783,88 @@ ClockMorph.prototype.setRadius = function () {
 
 ClockMorph.prototype.setExtent = function (p) {
     this.setExtent(new Point(Math.min(p.x, p.y), Math.min(p.x, p.y)));
+};
+
+//////////////////////////////////////////////////////////////////////////
+// ScreenMorph ///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+ScreenMorph.prototype = new Morph();
+ScreenMorph.prototype.constructor = ScreenMorph;
+ScreenMorph.uber = Morph.prototype;
+
+ScreenMorph.OP_CLICKABLE = 1;
+ScreenMorph.OP_CONTROLLED = 2;
+ScreenMorph.OP_NOTHING = 3;
+
+function ScreenMorph () {
+    this.init();
+};
+
+ScreenMorph.prototype.init = function () {
+    ScreenMorph.uber.init.call(this);
+
+    this.body = null;
+    this.screenType = ScreenMorph.OP_CLICKABLE;
+
+    this.color = new Color(0, 0, 0);
+    this.color.a = 0.7;
+
+    this.uponClosing = nop;
+};
+
+ScreenMorph.prototype.popUpIn = function (aMorph) {
+    this.forAllChildren(m => {
+        m.alpha = 0;
+    });
+    this.setPosition(aMorph.position());
+    this.setExtent(aMorph.extent());
+    this.fixLayout();
+    aMorph.add(this);
+
+    this.fadeTo(1, 1000, "linear", () => {
+        this.forAllChildren(m => { m.alpha = 1; m.changed(); });
+    });
+};
+
+ScreenMorph.prototype.setBody = function (aMorph) {
+    if (this.body) this.body.destroy();
+    this.body = aMorph;
+    this.add(this.body);
+};
+
+ScreenMorph.prototype.fixLayout = function () {
+    if (!this.body) return;
+    this.body.setCenter(this.center());
+    if (this.body instanceof StringMorph) {
+        this.body.fixLayout(true);
+    } else {
+        this.body.fixLayout();
+    }
+}
+
+ScreenMorph.prototype.mouseClickLeft = function () {
+    if (this.screenType != ScreenMorph.OP_CLICKABLE) return;
+    this.perish(1000);
+    this.uponClosing();
+};
+
+ScreenMorph.prototype.fadeIn = function () {
+    this.fadeTo(1, 1000, "linear", () => {
+        this.forAllChildren(m => { m.alpha = 1; m.changed(); });
+    });
+};
+
+ScreenMorph.prototype.fadeOut = function () {
+    if (this.screenType === ScreenMorph.OP_CONTROLLED) {
+        this.fadeTo(0, 1000, "linear", () => {
+            this.forAllChildren(m => { m.alpha = 0; m.changed(); });
+        });
+    }
+};
+
+ScreenMorph.prototype.perish = function () {
+    this.fadeTo(0, 1000, "linear", () => {
+        this.destroy();
+    });
 };
