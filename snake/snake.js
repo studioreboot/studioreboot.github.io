@@ -1112,11 +1112,13 @@ MultiplayerSnakeGameMorph.prototype.stepWinSequence = function () {
             this.winTimer = Date.now() + 500;
             this.winStep = 2;
 
-            this.currentMusic.gain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 5);
-            setTimeout(() => {
-                this.currentMusic.gain.disconnect();
-                this.currentMusic = null;
-            }, 5000);
+            if (this.canPlayMusic) {
+                this.currentMusic.gain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 5);
+                setTimeout(() => {
+                    this.currentMusic.gain.disconnect();
+                    this.currentMusic = null;
+                }, 5000);
+            }
             break;
         case 2:
             var scrn = new ScreenMorph(), align = new AlignmentMorph("column"), txt;
