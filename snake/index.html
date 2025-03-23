@@ -7,6 +7,7 @@
         <script src="morphic.js"></script>
         <script src="widgets.js"></script>
         <script src="snake.js"></script>
+        <script src="save.js"></script>
         <script>
             var world;
             
@@ -21,7 +22,7 @@
                 if (searchParams.get("type") === "single") {
                     new SingleplayerSnakeGameMorph().openIn(world);
                 } else {
-                    new MultiplayerSnakeGameMorph(searchParams.get("playMusic") === "true").openIn(world);
+                    new MultiplayerSnakeGameMorph(searchParams.get("playMusic") === "true", searchParams.get("special") === "true").openIn(world);
                 }
 
                 //world.add(new TestMorph())
