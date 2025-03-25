@@ -559,7 +559,7 @@ SnakeAreaMorph.prototype.showOutOfBoundsScreen = function () {
     screen.screenType = ScreenMorph.OP_CONTROLLED;
 
     let align = new AlignmentMorph("column", adjust(24));
-    align.add(new StringMorph("Out of bounds!", adjust(36), "monospace", true, false, null, null, null, WHITE));
+    align.add(new StringMorph("Out of Bounds!", adjust(36), "monospace", true, false, null, null, null, WHITE));
 
     if (this.parentThatIsA(SingleplayerSnakeGameMorph)) {
         let trigger = new TriggerMorph(this, "refresh", "Refresh", adjust(24), "monospace");
@@ -597,11 +597,11 @@ MultiplayerSnakeGameMorph.prototype = new SnakeGameMorph();
 MultiplayerSnakeGameMorph.prototype.constructor = MultiplayerSnakeGameMorph;
 MultiplayerSnakeGameMorph.uber = SnakeGameMorph.prototype;
 
-function MultiplayerSnakeGameMorph (canPlayMusic, specialMode) {
-    this.init(canPlayMusic, specialMode);
+function MultiplayerSnakeGameMorph (canPlayMusic) {
+    this.init(canPlayMusic);
 };
 
-MultiplayerSnakeGameMorph.prototype.init = function (canPlayMusic, specialMode) {
+MultiplayerSnakeGameMorph.prototype.init = function (canPlayMusic) {
     MultiplayerSnakeGameMorph.uber.init.call(this);
 
     this.color = BLACK;
@@ -613,8 +613,6 @@ MultiplayerSnakeGameMorph.prototype.init = function (canPlayMusic, specialMode) 
     this.rightGameStatus = new SnakeGameStatus('right');
     this.timerDial = null;
     this.timerBox = null;
-
-    this.specialMode = specialMode || false;
 
     this.musicSwitcher = false;
 
@@ -629,9 +627,6 @@ MultiplayerSnakeGameMorph.prototype.init = function (canPlayMusic, specialMode) 
     this.jigSoundBuffer = null;
     this.loseSoundBuffer = null;
 
-    this.bennyGoodmanLoop = null;
-    this.bennyGoodmanEnd = null;
-
     this.loadTracks();
 };
 
@@ -642,7 +637,7 @@ MultiplayerSnakeGameMorph.prototype.loadTracks = function () {
     xhr.responseType = "arraybuffer";
     xhr.open("GET", getUrlLocation("gameover.mp3"), true);
     xhr.onload = function () {
-        self.audioContext.decodeAudioData(this.response, (data) => {
+        self.audioContext.decodeAudioData(xhr.response, (data) => {
             self.loseSoundBuffer = data;
         });
     }
@@ -652,7 +647,7 @@ MultiplayerSnakeGameMorph.prototype.loadTracks = function () {
     xhr2.responseType = "arraybuffer";
     xhr2.open("GET", getUrlLocation("win.mp3"), true);
     xhr2.onload = function () {
-        self.audioContext.decodeAudioData(this.response, (data) => {
+        self.audioContext.decodeAudioData(xhr2.response, (data) => {
             self.winSoundBuffer = data;
         });
     }
@@ -662,31 +657,11 @@ MultiplayerSnakeGameMorph.prototype.loadTracks = function () {
     xhr3.responseType = "arraybuffer";
     xhr3.open("GET", getUrlLocation("jigmusic.mp3"), true);
     xhr3.onload = function () {
-        self.audioContext.decodeAudioData(this.response, (data) => {
+        self.audioContext.decodeAudioData(xhr3.response, (data) => {
             self.jigSoundBuffer = data;
         });
     }
     xhr3.send(null);
-
-    xhr = new XMLHttpRequest();
-    xhr.responseType = "arraybuffer";
-    xhr.open("GET", getUrlLocation("sssloop.mp3"), true);
-    xhr.onload = function () {
-        self.audioContext.decodeAudioData(this.response, (data) => {
-            self.bennyGoodmanLoop = data;
-        });
-    }
-    xhr.send(null);
-
-    xhr = new XMLHttpRequest();
-    xhr.responseType = "arraybuffer";
-    xhr.open("GET", getUrlLocation("sssend.mp3"), true);
-    xhr.onload = function () {
-        self.audioContext.decodeAudioData(this.response, (data) => {
-            self.bennyGoodmanEnd = data;
-        });
-    }
-    xhr.send(null);
 
     if (!this.canPlayMusic) return;
 
@@ -695,7 +670,7 @@ MultiplayerSnakeGameMorph.prototype.loadTracks = function () {
         xhr.responseType = "arraybuffer";
         xhr.open("GET", getUrlLocation(`bg${i+1}.mp3`), true);
         xhr.onload = function () {
-            self.audioContext.decodeAudioData(this.response, (data) => {
+            self.audioContext.decodeAudioData(xhr.response, (data) => {
                 self.bgMusicTracks[i+1] = data;
             });
         }
@@ -720,22 +695,6 @@ MultiplayerSnakeGameMorph.prototype.playMusic = function () {
     this.musicSwitcher = !this.musicSwitcher;
 };
 
-MultiplayerSnakeGameMorph.prototype.playBenny = function (what) {
-    if (!this.specialMode) return;
-
-    var ctx = this.audioContext, src = ctx.createBufferSource(), gain = ctx.createGain();
-    
-    src.buffer = what === "loop" ? this.bennyGoodmanLoop : this.bennyGoodmanEnd;
-    src.loop = true;
-    src.connect(gain);
-
-    gain.gain.value = 0.8;
-    gain.connect(ctx.destination);
-
-    this.currentMusic = { src, gain };
-    src.start(0);
-};
-
 MultiplayerSnakeGameMorph.prototype.openIn = function (aWorld) {
     aWorld.add(this);
 
@@ -747,15 +706,6 @@ MultiplayerSnakeGameMorph.prototype.openIn = function (aWorld) {
     this.gameState = ST_STOPPED;
     this.setExtent(aWorld.extent());
     
-    if (this.specialMode) {
-        setTimeout(() => {
-            this.mouseClickLeft = function () {
-                this.playBenny("loop");
-                this.showLoadScreen();
-            }
-        }, 1500);
-        return null;
-    };
     this.showLoadScreen();
 };
 
@@ -796,9 +746,6 @@ MultiplayerSnakeGameMorph.prototype.showLoadScreen = function () {
             screen.uponClosing = () => { 
                 self.buildPanes();
                 self.fps = 0;
-
-                self.currentMusic.src.onended = () => { self.currentMusic.gain.disconnect(); self.currentMusic = null; self.playBenny("end") };
-                self.currentMusic.src.loop = false;
                 screen.uponClosing = nop;
             }
         }, 2500);
@@ -1165,7 +1112,7 @@ MultiplayerSnakeGameMorph.prototype.stepWinSequence = function () {
             this.winTimer = Date.now() + 500;
             this.winStep = 2;
 
-            if (this.canPlayMusic || this.specialMode) {
+            if (this.canPlayMusic) {
                 this.currentMusic.gain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 5);
                 setTimeout(() => {
                     this.currentMusic.gain.disconnect();
@@ -1259,10 +1206,6 @@ MultiplayerSnakeGameMorph.prototype.stepWinSequence = function () {
             this.gameState = ST_ACTIVE;
 
             this.playMusic();
-
-            if (this.specialMode) {
-                this.playBenny("end");
-            }
             break;
         default:
             break;
@@ -1310,27 +1253,8 @@ SingleplayerSnakeGameMorph.prototype.init = function () {
 
     this.color = BLACK;
     this.audioContext = new AudioContext();
-    this.loadLastGame = false;
-
-    this.saveTimer = 0;
 
     this.gameArea = null;
-
-    save.load();
-
-    if (save.getKey("firstRun") === "0") {
-        this.loadLastGame = true;
-    }
-};
-
-SingleplayerSnakeGameMorph.prototype.step = function () {
-    this.saveTimer++;
-    if (this.saveTimer >= 5000) {
-        save.setKeyTo("lastScore", this.gameArea.gameStatus.playerScore.toString());
-        save.setKeyTo("tailData", JSON.stringify(this.gameArea.snake.tail))
-        save.save();
-        this.saveTimer = 0;
-    }
 };
 
 SingleplayerSnakeGameMorph.prototype.openIn = function (aWorld) {
@@ -1345,21 +1269,6 @@ SingleplayerSnakeGameMorph.prototype.openIn = function (aWorld) {
     
     this.buildPanes();
     this.fixLayout();
-
-    if (this.loadLastGame) {
-        this.doLoadLastGame();
-    }
-};
-
-SingleplayerSnakeGameMorph.prototype.doLoadLastGame = function () {
-    this.gameArea.gameStatus.playerScore = +save.getKey("lastScore");
-    this.gameArea.updateScore();
-
-    var tailData = JSON.parse(save.getKey("tailData"));
-    this.gameArea.snake = tailData;
-    for (let i = 0; i < tailData.length; i++) {
-        this.gameArea.snake.add(new SnakeTailMorph(this.gameArea.snake));        
-    }
 };
 
 SingleplayerSnakeGameMorph.prototype.mouseClickLeft = function () {
@@ -1396,8 +1305,8 @@ SingleplayerSnakeGameMorph.prototype.playTone = function (at) {
     var ctx = this.audioContext, osc;
 
     osc = ctx.createOscillator();
-    osc.frequency.value = 600;
-    osc.type = "triangle";
+    osc.frequency.value = 800;
+    osc.type = "sine";
     osc.connect(ctx.destination);
 
     osc.start();
