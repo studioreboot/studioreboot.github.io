@@ -1,5 +1,6 @@
 This game requires two players in order for the game
-to function.
+to function. To play the game, you must use the buttons on the side of the
+gameboard to move the snake. Your goal is to get as much food as possible.
 
 This is a regular game of snake, adjusted to accommodate for two players.
 
@@ -10,8 +11,5 @@ the person with the highest score wins.
 Your score is indicated by the the number in the middle of the gameboard.
 There are two, a partner and yourself will have to figure out who goes
 to which side.
-
-There IS music that is disabled by default.
-To enable it, add "?playMusic=true" to the end of the URL.
 
 [tap the screen to play]
