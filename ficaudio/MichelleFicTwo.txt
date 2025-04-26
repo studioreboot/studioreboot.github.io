@@ -1,0 +1,330 @@
+; A variable, "choice", will return the ID of the choice last selected
+; by the User.
+
+DECL script "ending"
+DECL script "didYapAboutPaulo"
+
+VAR SET %ending music name% TO "the song is ended"
+VAR SET %didYapAboutPaulo% TO "no"
+
+; The end game loop, of which is used to show the ending
+; and the credits.
+
+SUB "end game loop"
+    CLEARCHAT
+    PUSHMSG LEFT "story & scripting:"
+    PUSHMSG RIGHT "Kathy (@itzkathy9)"
+    PUSHMSG LEFT "editing consultants:"
+    PUSHMSG RIGHT "Scorch"
+	PUSHMSG RIGHT "Fluffy tail anomaly"
+    PUSHMSG LEFT "characters:"
+    PUSHMSG RIGHT "Michelle - transgirl mike"
+    PUSHMSG RIGHT "Lucy - michelle's girlfriend"
+    PUSHMSG LEFT "based off:"
+    PUSHMSG RIGHT "Bittersweet Candy Bowl\n(https://www.bittersweetcandybowl.com/)"
+    PUSHMSG RIGHT "by @Taeshi"
+    DRAWMESSAGES
+    WAIT 2
+    JUMP "end game loop"
+END
+
+SUB "end game"
+    SETTITLE "the ending"
+    CLEARCHAT
+    BROADCAST "drop everything"
+    PUSHMSG LEFT "you got the"
+    PUSHMSG RIGHT %ending%
+    PUSHMSG LEFT "ending"
+    BROADCAST "play ending"
+    CHOOSE
+	
+	; TODO: found out shit.
+	
+    PUSHMSG LEFT "congrats."
+    PUSHMSG RIGHT "congrats."
+    CHOOSE
+    WAIT 0.5
+    JUMP "end game loop"
+END
+
+; trigger warnings and shit.
+SUB "trigger warnings"
+    SETTITLE "! IMPORTANT STUFF !"
+    PUSHMSG LEFT "BEFORE WE START."
+    DRAWMESSAGES
+    WAIT 2
+    PUSHMSG LEFT "some trigger warnings:"
+    DRAWMESSAGES
+    WAIT 1.5
+    PUSHMSG RIGHT "mentions of breasts (nonsexual)"
+    PUSHMSG RIGHT "gender dysphoria"
+    PUSHMSG RIGHT "mentions of sa (groping, harrassment)"
+    PUSHMSG RIGHT "transphobia"
+    DRAWMESSAGES
+	WAIT 3
+    PUSHMSG LEFT "if you are not okay with those,\nyou may close the window." AND CHOOSE
+    PUSHMSG LEFT "if you are, you may read." AND CHOOSE
+	
+	BROADCAST "wipe screen" AND WAIT
+	WAIT 0.25
+END
+
+; FUTURE STORYLINE SHIT:
+; i dunno if i wanna do this, but future me, if you're reading this. maybe for the
+; next storyline after michelle yaps about security shit,
+; maybe yap about prom shit that happened three or so hours ago. (did we do that in this fic? i dunno, might've been the other one.)
+
+; the idea is to make paulo a creep for a bit (he's drunk af. :3)
+; to michelle during shit (i.e. see the trigger warnings above.)
+
+SUB "no sleep lets goo"
+	; play the damn music. :3
+    BROADCAST "play bg1"
+	
+    VAR SET %stop bg music% TO "0"
+    PUSHMSG LEFT "yeah..." AND CHOOSE
+    PUSHMSG LEFT "if it makes you feel any better michelle." AND CHOOSE
+    PUSHMSG LEFT "last week when you were wearing that dress.." AND CHOOSE
+    PUSHMSG LEFT "..." AND CHOOSE
+    WAIT 0.7
+    PUSHMSG LEFT "you were really cute.." AND CHOOSE
+    PUSHCHOICE "#>~<# awwww." %SEED%
+    CHOOSE
+    PUSHMSG LEFT "you are really cute!! :)" AND CHOOSE
+    PUSHMSG LEFT "when i see you, i don't see Mike. i see Michelle." AND CHOOSE
+    PUSHMSG RIGHT "i-"
+    PUSHMSG LEFT "i think you underestimate how beautiful\nyou really are sometimes."
+    CHOOSE
+    PUSHMSG LEFT "i sometimes forget what he did last year." AND CHOOSE
+    WAIT 1
+    PUSHMSG LEFT "...sorry."
+    PUSHCHOICE "no no! it's fine. :3" %SEED%
+    CHOOSE
+    PUSHMSG RIGHT "i still think about, y'know,\nwhat past me did." AND CHOOSE
+    PUSHMSG RIGHT "i'm kinda still iffy about that..."
+	VAR SET %ctc% TO "no"
+	DRAWMESSAGES
+	WAIT 1
+	VAR SET %ctc% TO "yes"
+	PUSHCHOICE "you know lulu, i feel...\nreally myself when i'm around you." %SEED%
+	CHOOSE
+	PUSHMSG LEFT "why? there's no reason you should."
+	DRAWMESSAGES
+	WAIT 1
+	PUSHCHOICE "i dunno, i just feel... accepted around youu! #>~<#" %SEED%
+	CHOOSE
+	PUSHMSG RIGHT "i'm not exactly sure how to describe it. (@~@)"
+	PUSHMSG LEFT "you serious?" AND CHOOSE
+	PUSHCHOICE "yeahhhh. i dunno, when we cuddle. you.. #>m<#" %SEED%
+	CHOOSE
+	PUSHMSG LEFT "?" AND CHOOSE
+	PUSHCHOICE "you make me feel protected- >~<" %SEED%
+	CHOOSE
+	PUSHMSG LEFT "ohhhh, so ur gay."
+	DRAWMESSAGES
+	WAIT 1.5
+	PUSHCHOICE "shutup" %SEED%
+	CHOOSE
+	PUSHMSG LEFT "hehehehehehe." AND CHOOSE
+	PUSHCHOICE "and like... when we're alone, especially when you..." %SEED%
+	CHOOSE
+	PUSHMSG LEFT "especially when i what?"
+	DRAWMESSAGES
+	WAIT 1.6
+	PUSHCHOICE "especially when you let me... um... rest my head there.." %SEED%
+	CHOOSE
+	PUSHMSG RIGHT "##>~w~<##" 
+
+	; i can hear john going "BOOBS! BOOBS! SMUSH ME WITH THOSE HONKERS!"
+	; :haha:
+
+	PUSHMSG LEFT "oooh, between my boobs, i gotchu girl. yea, I figured based on how hard you purr." AND CHOOSE
+	PUSHMSG LEFT "specialy when I pet you! hehehehe." AND CHOOSE
+	PUSHCHOICE "@////@ cmon, its not that bad" %SEED%
+	CHOOSE
+	PUSHMSG LEFT "oh yes it is! feels like someone left a little motor running between the girls XP" AND CHOOSE
+	PUSHMSG RIGHT "stapppp."
+	PUSHMSG RIGHT "ur making me feel embarrassedddd." AND CHOOSE
+	PUSHMSG LEFT "what is life? without a little bit of\nfeeling self-conscious.hehehehe." AND CHOOSE
+	PUSHMSG RIGHT "wellllll... either way, i... like that i can do that." AND CHOOSE
+	PUSHMSG RIGHT "sorry if i made it weirddd." AND CHOOSE
+	PUSHMSG LEFT "shush jerkface. if it make me feel weird, i wouldn't let you do it. ;)" AND CHOOSE
+	
+	VAR SET %ctc% TO "fuck no"
+	DRAWMESSAGES
+	WAIT 2
+	VAR SET %ctc% TO "yes"
+	
+	PUSHCHOICE "hey lucy, did you hear what paulo did to me?" 16
+	PUSHCHOICE "what did you do during prom?" 62
+	CHOOSE
+	IFVAR %choice% == CONST 16 THEN
+		PUSHMSG LEFT "no..."
+		DRAWMESSAGES
+		WAIT 1
+		PUSHMSG LEFT "what did he do.\ni heard some weird guy was harrassing a girl."
+		DRAWMESSAGES
+		WAIT 1
+		PUSHCHOICE "lucy." %SEED%
+		CHOOSE
+		PUSHCHOICE "that was me." %SEED%
+		CHOOSE
+		PUSHMSG RIGHT "the weird guy was paulo."
+		PUSHMSG LEFT "what the fuck? what did he do?" AND CHOOSE
+		PUSHCHOICE "paulo went up to me, started catcalling me." %SEED%
+		CHOOSE
+		PUSHCHOICE "he got closer, and closer.\nand he started getting up close and personal-" %SEED%
+		CHOOSE
+		PUSHMSG LEFT "oh my-"
+		PUSHCHOICE "and he started saying what he'd do with his... thing... inbetween my boobs-\n" %SEED%
+		CHOOSE
+		PUSHCHOICE "he pulled me close, i couldn't move, he started literally fondling with-\nagh, i don't wanna talk about it." %SEED%
+		CHOOSE
+		PUSHMSG RIGHT "im sorry for bringing this up to you,\ni was feeling horrible after prom, that's why i rushed out." AND CHOOSE
+		PUSHMSG RIGHT "i hoped you'd rush out and like... i dunno, it was stupid anyway." AND CHOOSE
+		PUSHMSG LEFT "hey, michelle, it's alright." AND CHOOSE
+		PUSHMSG LEFT "however, for PAULO,\nthat BITCH is gonna apologize in the morning-" AND CHOOSE
+		PUSHMSG LEFT "michelle, please come over alright? later."
+		PUSHMSG LEFT "you deserve cuddles. (this is totally not me wanting to cuddle you rn.)" AND CHOOSE
+		PUSHCHOICE "now who's the gai one. :p" %SEED%
+		CHOOSE
+		PUSHMSG LEFT "shutup jerkface. XP" AND CHOOSE
+		PUSHCHOICE "lmfao-" %SEED%
+		CHOOSE
+		PUSHMSG RIGHT "abt paulo tho, he was like severely drunk.\ni really didn't expect him to grope me." AND CHOOSE
+		PUSHMSG RIGHT "had a bad feeling abt him anyway, maybe he does that to other girls?" AND CHOOSE
+		PUSHMSG LEFT "i thought he was just a little bit of a womanizer,\nbut not to THIS extend." AND CHOOSE
+		PUSHCHOICE "i thought he was too. ;(" %SEED%
+		CHOOSE
+		PUSHMSG RIGHT "anyway, how did you're prom go?" %SEED%
+		VAR SET %didYapAboutPaulo% TO "yes"
+		PUSHMSG LEFT "ah, well-" AND CHOOSE
+	END
+	;JUMP "lucy prom yippie"
+END
+
+SUB "script start"
+    CALL "trigger warnings"
+	
+    SETTITLE "\"you mean a great deal to me, y'know?\""
+    CLEARCHAT
+    PUSHMSG RIGHT "heyyy wucy. #^^#" AND CHOOSE
+    VAR SET %ctc% TO "no"
+    DRAWMESSAGES
+    WAIT 1
+    PUSHMSG NARRATOR "A few moments passed before Lucy"
+    PUSHMSG NARRATOR "responded."
+    DRAWMESSAGES
+    WAIT 1.25
+    VAR SET %ctc% TO "yes"
+    PUSHMSG LEFT "hi michelle.\nwhat are you doing up at this hour."
+    PUSHCHOICE "i'm feeling incredibly dysphoric right now. :(" %SEED%
+    CHOOSE
+    PUSHMSG LEFT "aw, you wanna come over?" AND CHOOSE
+    PUSHCHOICE "i cannot." %SEED%
+    CHOOSE
+    PUSHMSG LEFT "yeah, the time." AND CHOOSE
+    PUSHMSG LEFT "you know... we could talk on the phone for a few hours."
+    PUSHMSG LEFT ">:)"
+    CHOOSE
+    PUSHCHOICE "you sure?" 1
+    PUSHCHOICE "im feeling really tired rn. #>~<#" 2
+    CHOOSE
+    IFVAR %choice% == CONST 1 THEN
+        BROADCAST "play bg1"
+        JUMP "no sleep lets goo"
+    ELSE
+		; i swear if this compiler fucking freaks out over tabs im gonna lose it-
+        PUSHMSG RIGHT "i'll talk to you tomorrow." AND CHOOSE
+        PUSHMSG LEFT "yeah, did you want cuddles before we go to school?" AND CHOOSE
+		
+        PUSHCHOICE "yes." 420
+		PUSHCHOICE "maybee???" 625
+		CHOOSE
+		
+		IFVAR %choice% == CONST 420 THEN
+			PUSHMSG LEFT "i'll be waiting Michelle. :3" AND CHOOSE
+		ELSE
+			PUSHMSG LEFT "that's-" AND CHOOSE
+			PUSHMSG LEFT "michelle i want to get sleep tonight-" AND CHOOSE
+			PUSHCHOICE "dont worryy" %SEED%
+			CHOOSE
+		END
+		
+		PUSHMSG RIGHT "i'll probably sneak out tonight and go to your house." AND CHOOSE
+		IFVAR %choice% == CONST 625 THEN
+			PUSHMSG RIGHT "but don't wait for me, i might not show up.\nalright?" AND CHOOSE
+			PUSHMSG LEFT "oh- alright." AND CHOOSE
+		ELSE
+			PUSHMSG LEFT "i'll see you in a few hours?" AND CHOOSE
+			PUSHCHOICE "yea probs. :)" %SEED%
+			CHOOSE
+			PUSHMSG LEFT "alright-"
+		END
+		
+		PUSHMSG RIGHT ":3 bye lulu-" AND CHOOSE
+		PUSHMSG LEFT "byee" AND CHOOSE
+        
+        VAR SET %ending% TO "sneaking out."
+
+        JUMP "end game"
+    END
+END
+
+SUB "game start"
+	SETTITLE "\"you mean a great deal to me, y'know?\""
+    VAR SET %ctc% TO "no"
+
+	; TODO:
+	; fucking rewrite all of this, this sucks. :cringe:
+
+    PUSHMSG NARRATOR "It is the 7th of November, 2009."
+    PUSHMSG NARRATOR "The time is 11:36 at night."
+    CHOOSE
+    PUSHMSG NARRATOR "A few months back, Lucy and Mike got back together."
+    CHOOSE
+    PUSHMSG NARRATOR "(much to the dismay of Paulo and the others.)" AND CHOOSE
+    CLEARCHAT
+    PUSHMSG NARRATOR "However, Mike became distant." AND CHOOSE
+    PUSHMSG NARRATOR "It started off as one day off."
+    CHOOSE
+    PUSHMSG NARRATOR "then one day became two."
+    DRAWMESSAGES
+    WAIT 2
+    PUSHMSG NARRATOR "then two days became three."
+    DRAWMESSAGES
+    WAIT 4
+    PUSHMSG NARRATOR "then four, then five, then ten..."
+    CHOOSE
+    PUSHMSG NARRATOR "Then, one dreary afternoon, Lucy found"
+    PUSHMSG NARRATOR "Mike in the library, crying."
+    CHOOSE
+    PUSHMSG NARRATOR "And they talked." AND CHOOSE
+    PUSHMSG NARRATOR "That day, Mike revealed a secret that he didn't"
+    PUSHMSG NARRATOR "want anybody but Lucy to know."
+    CHOOSE
+    WAIT 4
+    PUSHMSG NARRATOR "Mike was trans. It took awhile for Lucy to"
+    PUSHMSG NARRATOR "understand her, but eventually she came around."
+    CHOOSE
+    PUSHMSG NARRATOR "And finally..."
+    PUSHMSG NARRATOR "Michelle and Lucy were a thing."
+    CHOOSE
+    PUSHMSG NARRATOR "You are Michelle in this story.."
+    DRAWMESSAGES
+
+    WAIT 3.5
+
+    CLEARCHAT
+	
+    VAR SET %ctc% TO "yes"
+	BROADCAST "wipe screen" AND WAIT
+	WAIT 0.25
+    JUMP "script start"
+END
+
+IFVAR %skipStart% == BOOL FALSE THEN
+    CALL "game start"
+ELSE
+    CALL "script start"
+END
