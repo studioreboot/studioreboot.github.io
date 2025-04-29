@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Editor</title>
+    <script src="morphic.js"></script>
+    <script src="sound.js"></script>
+    <script src="editor.js"></script>
+    <script src="compiler.js"></script>
+    <script src="FileSaver.js"></script>
+    <script>
+        var world, editor, reg;
+        window.onload = function () {
+
+            world = new WorldMorph(document.getElementById("world"));
+            world.isDevMode = true;
+            window.onbeforeunload = null;
+            editor = new EditorMorph();
+            editor.openIn(world);
+            setInterval(() => {
+                world.doOneCycle();
+            }, 1);
+            if ("serviceWorker" in navigator) {
+                navigator.serviceWorker.register("sw.js").then(t => {
+                    reg = t
+                });
+            }
+        }
+    </script>
+</head>
+
+<body style="margin: 0; overflow: hidden;">
+    <canvas id="world"></canvas>
+</body>
+
+</html>

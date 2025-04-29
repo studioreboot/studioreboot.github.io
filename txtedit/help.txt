@@ -1,0 +1,28 @@
+**COMMAND HELP:**
+
+:help — Shows this screen.
+:insert — Throws the editor into INSERT mode.
+:loaddb [name] — Loads a file from your browser with the specified name.
+:savedb [name] — Saves the currently opened file in the editor into
+your browser with the specified name.
+:save [name] — Saves the currently opened file to your downloads folder
+with the specified name.
+:load [name] — Opens a file selection menu for you to select a file
+to be loaded into the editor.
+:quit — Exits the editor.
+:runjs — Runs the currently opened file as JavaScript.
+
+**NOTE:**
+If any malicious stuff happens after running the command above,
+the owner of the text editor is not responsible for that,
+the creator OF that file is.
+
+:find [something] — Goes through the entire file in the editor (large
+files might pause the page for a bit.) and tries to search for
+the keyword(s) given.
+:goto [line] — Moves the editor to the line given.
+:clear — Clears the editor
+:url [theURL] — Fetches the given URL and opens it in the editor.
+
+(This program was written with an older version of morphic, 
+dated late 2022.)
