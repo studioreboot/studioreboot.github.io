@@ -607,12 +607,12 @@ class EditorMorph extends FrameMorph {
 						this.reactToWorldResize(this.world.bounds);
 					}
 					break;
-				case "testjs":
+				/*case "testjs": // due to this being old code, relying off of old APIs, this no longer works, therefore it has been removed.
 					window.open(
 						"https://testing.studioreboot.repl.co/?bjs=" + 
 						encodeURIComponent(btoa(this.lines.join("\n")))
 					);
-					break;
+					break;*/
 				case "clearsaved":
 					var saved = this.savedDB;
 					for (let i = 0; i < saved; i++) {
@@ -622,7 +622,7 @@ class EditorMorph extends FrameMorph {
 				case "copy":
 					navigator.clipboard.writeText(this.lines.join("\n"));
 					break;
-				case "savecloud":
+				/*case "savecloud": // due to this being old code, relying off of old APIs, this no longer works, therefore it has been removed.
 					var xhr = new XMLHttpRequest();
 					xhr.open(
                         "POST", 
@@ -654,7 +654,7 @@ class EditorMorph extends FrameMorph {
                         self.fullChanged();
                     }
 					xhr.send(null);
-                    break;
+                    break;*/
 				case "zoom":
 					this.fontSize = +args[0];
 					this.updateFntSize();
