@@ -665,7 +665,7 @@ MultiplayerSnakeGameMorph.prototype.loadTracks = function () {
 
     if (!this.canPlayMusic) return;
 
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 3; i++) {
         let xhr = new XMLHttpRequest();
         xhr.responseType = "arraybuffer";
         xhr.open("GET", getUrlLocation(`bg${i+1}.mp3`), true);
@@ -1321,3 +1321,4 @@ SingleplayerSnakeGameMorph.prototype.fixLayout = function () {
     if (!this.gameArea) return;
     this.gameArea.setCenter(this.center());
 };
+
