@@ -301,7 +301,7 @@ class PeriodTimerApp extends FrameMorph {
         tonight.setMinutes(59);
 
         this.deadlines = [
-            msAt(7, 30),
+            /* msAt(7, 30),
             msAt(7, 50),
             msAt(8, 25),
             msAt(8, 50),
@@ -317,6 +317,10 @@ class PeriodTimerApp extends FrameMorph {
             msAt(12, 28),
             msAt(13, 0),
             msAt(13, 40),
+            msAt(14, 29), */
+            msAt(9, 23),
+            msAt(10, 54),
+            msAt(12, 58),
             msAt(14, 29),
             tonight.getTime()
         ];
@@ -336,7 +340,7 @@ class PeriodTimerApp extends FrameMorph {
         this.convolverNode = null;
 
         this.periods = [
-            "Arrival",
+            /* "Arrival",
             "Period 1",
             "Trojan TV",
             "Period 2",
@@ -353,7 +357,11 @@ class PeriodTimerApp extends FrameMorph {
             "Period 8",
             "Transfer Time 6",
             "Period 9",
-            "Dismissal"
+            "Dismissal" */
+            "Block 1",
+            "Block 2",
+            "Block 3",
+            "Block 4"
         ];
 
         this.didCheckEvent = false;
