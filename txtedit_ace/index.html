@@ -4,10 +4,22 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>kat's text editor</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="editor.css">
+
+        <script src="FileSaver.min.js"></script>
         <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+        <script src="readstream.js"></script>
     </head>
     <body style="margin: 0; overflow: hidden;">
-        <div id="editor">some text</div>
+        <div id="text-editor">
+            <div id="edit-window">// some random text here
+console.log("hello world");</div>
+            <div id="console"></div>
+        </div>
         <script src="editor.js"></script>
+        <script src="commands.js"></script>
     </body>
 </html>

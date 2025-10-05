@@ -1,3 +1,33 @@
 body {
     margin: 0;
 }
+
+#txt-edit * {
+    margin: 0;
+    top: 0;
+    left: 0;
+    
+    font-family: "Roboto Mono", monospace;
+    background-color: #282c34;
+
+    width: 100%;
+    height: 100%;
+
+}
+
+#console {
+    position: absolute;
+    background-color: rgb(34, 37, 44);
+}
+
+.command-line {
+    resize: none;
+    border: none;
+    background-color: transparent;
+    color: white;
+    outline: none;
+    scroll-behavior: unset;
+    scrollbar-width: 0px;
+    overflow: hidden;
+    overflow-wrap: unset;
+}
