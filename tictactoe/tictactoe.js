@@ -623,6 +623,7 @@ TTTWinScreen.prototype.animatedShow = function (endFunc) {
         this.alpha = 1;
         this.changed();
         setTimeout(() => {
+            this.allow
             if (this.screen !== SCRN_INSTR) {
                 this.fadeTo(0, 1000, "sine-out", () => {
                     this.alpha = 0;
@@ -636,16 +637,12 @@ TTTWinScreen.prototype.animatedShow = function (endFunc) {
 };
 
 TTTWinScreen.prototype.mouseClickLeft = function () {
-    if (this.screen === SCRN_INSTR) {
-        this.fadeTo(0, 1000, "sine-out", () => {
+    this.fadeTo(0, 1000, "sine-out", () => {
             this.alpha = 0;
             this.changed();
-            if (this.beforeDestroy) {
-                this.beforeDestroy();
-            }
+            this.beforeDestroy();
             this.destroy();
         });
-    }
 };
 
 ////////////////////////////////////////////////////////////
@@ -1026,4 +1023,5 @@ TTTButtonMorph.prototype.render = function (ctx) {
         Morph.prototype.render.call(this, ctx);
     }
     TTTButtonMorph.uber.render.call(this, ctx);
+
 };
